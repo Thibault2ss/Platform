@@ -13,8 +13,15 @@ def index(request):
     }
     return render(request, 'parts/index.html', context)
 
-def download(request, id):
+def download_amf(request, id):
     filename = "/home/user01/SpareParts_Database/files/AMF/" + id + ".amf"
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+
+def download_config(request, id):
+    filename = "/home/user01/SpareParts_Database/files/CONFIG/" + id + ".ini"
     response = HttpResponse(file(filename), content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
