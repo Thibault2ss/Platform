@@ -11,3 +11,8 @@ def index(request):
         'latest_part_list': latest_part_list,
     }
     return render(request, 'parts/index.html', context)
+
+def download(request):
+    response = HttpResponse(content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s' % "/home/user01/SpareParts_Database/files/AMF/1.amf"
+    return response
