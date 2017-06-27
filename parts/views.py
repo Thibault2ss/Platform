@@ -16,5 +16,5 @@ def index(request):
 def download(request):
     response = HttpResponse(content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str("1.amf")
-    response['X-Sendfile'] = smart_str("/home/user01/SpareParts_Database/files/AMF/1.amf")
+    response['X-Sendfile'] = "/home/user01/SpareParts_Database/files/AMF/1.amf"
     return response
