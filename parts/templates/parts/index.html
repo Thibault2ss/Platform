@@ -52,7 +52,7 @@
                   <td data-title="config">{{ part.config }}</td>
                   <td data-title="Date">{{ part.creation_date|date:"m/d/Y H:i:s" }}</td>
                   <td data-title="Status">{{ part.done }}</td>
-                  <td data-title="Download"><a href="parts/download" download>AMF</a></td>
+                  <td data-title="Download"><a href="{% url 'parts:download' part.amf %}" download>AMF</a></td>
               </tr>
               {% endfor %}
               
