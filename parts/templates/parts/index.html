@@ -56,7 +56,7 @@
                   <td data-title="Status">{{ part.done }}</td>
                   <td data-title="Download"><a href="{% url 'parts:download_amf' part.amf %}" download>AMF</a>, <a href="{% url 'parts:download_config' part.config %}" download>CONFIG</a></td>
                   <td data-title="Slice"><a href="{% url 'parts:slice_and_download' part.id %}" download>Slice and Download</a></td>
-                  <td data-title="Print"><a href="">Slice and Print</a></td>
+                  <td data-title="Print"><a href="{% url 'parts:slice_and_print' part.id %}">Slice and Print</a></td>
               </tr>
               {% endfor %}
               
