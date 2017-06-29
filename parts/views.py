@@ -57,7 +57,7 @@ def slice_and_print(request, id):
     except:
         print "An error occured while slicing..."
     filename = gcode_file
-    payload = {'token', '123456789'}
+    payload = {'token': '123456789'}
     with open(filename) as f:
         requests.post('http://192.168.0.213:5000/print', data=payload, files={'gcode_file':f})
     if os.path.isfile(gcode_file): 
