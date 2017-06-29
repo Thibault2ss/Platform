@@ -5,6 +5,7 @@ from django.shortcuts import render
 from .models import SP3D_Part
 import os
 import subprocess
+import requests
 # Create your views here.
 
 def index(request):
@@ -47,4 +48,19 @@ def slice_and_download(request,id):
     return response
     
 def slice_and_print(request, id):
+    part = SP3D_Part.objects.get(id=id)
+    amf_file = "/home/user01/SpareParts_Database/files/AMF/" + part.amf + ".amf"
+    ini_file = "/home/user01/SpareParts_Database/files/CONFIG/" + part.config + ".ini"
+    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/" + part.amf + ".gcode"
+    try:
+        print subprocess.check_output(['perl','/home/user01/Slic3r/slic3r_dev/slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
+    except:
+        print "An error occured while slicing..."
+    filename = gcode_file
+    payload = {'token', '123456789'}
+    with open(filename) as f:
+        requests.post('http://192.168.0.213:5000/print', data=payload, files={'gcode_file':f})
+    if os.path.isfile(gcode_file): 
+        os.remove(gcode_file)
+    
     return None
