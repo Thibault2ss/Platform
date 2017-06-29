@@ -4,6 +4,7 @@ from django.template import loader
 from django.shortcuts import render
 from .models import SP3D_Part
 import os
+import subprocess
 # Create your views here.
 
 def index(request):
@@ -29,10 +30,20 @@ def download_config(request, id):
 
 def slice_and_download(request,id):
     part = SP3D_Part.objects.get(id=id)
-    filename = "/home/user01/SpareParts_Database/files/AMF/" + part.amf + ".amf"
+    amf_file = "/home/user01/SpareParts_Database/files/AMF/" + part.amf + ".amf"
+    ini_file = "/home/user01/SpareParts_Database/files/CONFIG/" + part.config + ".ini"
+    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/" + part.amf + ".gcode"
+    try:
+        print subprocess.check_output(['perl','/home/user01/Slic3r/slic3r_dev/slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
+    except:
+        print "An error occured while slicing..."
+    filename = gcode_file
     response = HttpResponse(file(filename), content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
+    if os.path.isfile(gcode_file): 
+        os.remove(gcode_file)
+        
     return response
     
 def slice_and_print(request, id):
