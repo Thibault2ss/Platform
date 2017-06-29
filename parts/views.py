@@ -62,5 +62,7 @@ def slice_and_print(request, id):
         requests.post('http://192.168.0.213:5000/print', data=payload, files={'gcode_file':f})
     if os.path.isfile(gcode_file): 
         os.remove(gcode_file)
-    
-    return None
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
