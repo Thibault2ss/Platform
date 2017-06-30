@@ -33,7 +33,7 @@ def slice_and_download(request,id):
     part = SP3D_Part.objects.get(id=id)
     amf_file = "/home/user01/SpareParts_Database/files/AMF/" + part.amf + ".amf"
     ini_file = "/home/user01/SpareParts_Database/files/CONFIG/" + part.config + ".ini"
-    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/" + part.amf + ".gcode"
+    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/" + part.oem_number + ".gcode"
     try:
         print subprocess.check_output(['perl','/home/user01/Slic3r/slic3r_dev/slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
     except:
