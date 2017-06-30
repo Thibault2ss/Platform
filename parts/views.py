@@ -2,18 +2,25 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.shortcuts import render
-from .models import SP3D_Part
+from .models import SP3D_Part, SP3D_Print
 import os
 import subprocess
 import requests
 # Create your views here.
 
 def index(request):
-    latest_part_list = SP3D_Part.objects.order_by('id')
+    latest_part_list = SP3D_Part.objects.order_by('-creation_date')
     context = {
         'latest_part_list': latest_part_list,
     }
     return render(request, 'parts/index.html', context)
+    
+def prints(request):
+    latest_print_list = SP3D_Print.objects.order_by('id')
+    context = {
+        'latest_print_list': latest_print_list,
+    }
+    return render(request, 'parts/prints.html', context)
 
 def download_amf(request, id):
     filename = "/home/user01/SpareParts_Database/files/AMF/" + id + ".amf"
