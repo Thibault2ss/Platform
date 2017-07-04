@@ -26,7 +26,7 @@ def navbar(request):
 
 
 def prints(request):
-    latest_print_list = SP3D_Print.objects.order_by('id')
+    latest_print_list = SP3D_Print.objects.order_by('-creation_date')
     context = {
         'latest_print_list': latest_print_list,
     }
