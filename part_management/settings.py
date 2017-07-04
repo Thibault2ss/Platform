@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'part_management.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', 
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Django',
         'USER': 'user01',
         'PASSWORD': 'SpareParts3D#',
@@ -118,8 +118,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT='http://192.168.0.20:8000/static/parts/'

@@ -3,29 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <title>SpareParts3D - Catalogue</title>
-  <script src="https://s.codepen.io/assets/libs/modernizr.js" type="text/javascript"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> 
+  <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.9.1/jquery.tablesorter.min.js"></script>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-
-  
+  <!-- Bootstrap css and js -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   {% load staticfiles %}
-
   <link rel="stylesheet" type="text/css" href="{% static 'parts/style.css' %}" />
   <script>
-        $(function(){
-          $("#table").tablesorter();
-        });
-    </script>
-  
-</head>
+  $(function(){
+    var $table=$("#table").tablesorter(
+      // {
+      //   widgets: ["zebra", "filter"],
+      //   widgetOptions : {
+      //   // filter_anyMatch replaced! Instead use the filter_external option
+      //   // Set to use a jQuery selector (or jQuery object) pointing to the
+      //   // external filter (column specific or any match)
+      //   filter_external : '#search',
+      //   // add a default type search to the first name column
+      //   filter_defaultFilter: { 1 : '~{query}' },
+      //   // include column filters
+      //   filter_columnFilters: true,
+      //   filter_placeholder: { search : 'Search...' },
+      //   filter_saveFilters : true,
+      //   filter_reset: '.reset'
+      // }}
+);
+  });
 
+  </script>
+  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+</head>
 <body>
+  {% include "navbar.html" %}
+  {% block navbar %}
+  {% endblock navbar %}
   <div id="catalogue">
   <h1>Parts Catalogue</h1>
-  <h2>SpareParts3D</h2>
-  
+
   <!-- Responsive table starts here -->
   <!-- For correct display on small screens you must add 'data-title' to each 'td' in your table -->
   <div class="table-responsive-vertical shadow-z-1">
@@ -41,6 +57,8 @@
           <th>Status</th>
           <th>Download</th>
           <th>Slice</th>
+          <th>Print(old)</th>
+          <th>Print</th>
           <th>Print</th>
         </tr>
       </thead>
@@ -52,21 +70,23 @@
                   <td data-title="Name">{{ part.oem_number }}</td>
                   <td data-title="amf">{{ part.amf }}</td>
                   <td data-title="config">{{ part.config }}</td>
-                  <td data-title="Date">{{ part.creation_date|date:"m/d/Y H:i:s" }}</td>
+                  <td data-title="Date">{{ part.creation_date|date:"d/m/Y H:i:s" }}</td>
                   <td data-title="Status">{{ part.done }}</td>
                   <td data-title="Download"><a href="{% url 'parts:download_amf' part.amf %}" download>AMF</a>, <a href="{% url 'parts:download_config' part.config %}" download>CONFIG</a></td>
                   <td data-title="Slice"><a href="{% url 'parts:slice_and_download' part.id %}" download>Slice and Download</a></td>
-                  <td data-title="Print"><a href="{% url 'parts:slice_and_print' part.id %}">Slice and Print</a></td>
+                  <td data-title="Print"><a href="{% url 'parts:slice_and_print' id_part=part.id id_printer=1 %}">Slice and Print</a></td>
+                  <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=2 %}">C2</a></td>
+                  <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=3 %}">Wanao</a></td>
               </tr>
               {% endfor %}
-              
+
           {% else %}
               <p>No polls are available.</p>
           {% endif %}
       </tbody>
     </table>
   </div>
-  
+
 </div>
 
 <!--     <script src="js/index.js"></script> -->
