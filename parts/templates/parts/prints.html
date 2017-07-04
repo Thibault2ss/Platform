@@ -38,7 +38,7 @@
           <th>Printer name</th>
           <th>Part ID</th>
           <th>amf</th>
-          <th>Log id</th>
+          <th>Print Log</th>
           <th>Print Again</th>
         </tr>
       </thead>
@@ -49,10 +49,10 @@
                       <td data-title="ID">{{ print.id }}</td>
                       <td data-title="creation_date">{{ print.creation_date|date:"m/d/Y H:i:s" }}</td>
                       <td data-title="id_printer">{{ print.id_printer }}</td>
+                      <td data-title="printer_name"></td>
                       <td data-title="id_part">{{ print.id_part }}</td>
-                      <td data-title="oem_number"></td>
                       <td data-title="amf"></td>
-                      <td data-title="log_id">log id</td>
+                      <td data-title="Print Log">log id</td>
                       <td data-title="Print Again"><a href="#">Print Again</a></td>
                   </tr>
               {% endfor %}

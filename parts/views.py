@@ -46,11 +46,18 @@ def download_config(request, id_config):
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
+def download_gcode(request, id_gcode):
+    filename = "/home/user01/SpareParts_Database/files/GCODE/" + id_gcode + ".gcode"
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+
 def slice_and_download(request,id):
     part = SP3D_Part.objects.get(id=id)
     amf_file = "/home/user01/SpareParts_Database/files/AMF/" + part.amf + ".amf"
     ini_file = "/home/user01/SpareParts_Database/files/CONFIG/" + part.config + ".ini"
-    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/" + part.oem_number + ".gcode"
+    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/" + part.amf+ ".gcode"
     try:
         print subprocess.check_output(['perl','/home/user01/Slic3r/slic3r_dev/slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
     except:
@@ -59,8 +66,9 @@ def slice_and_download(request,id):
     response = HttpResponse(file(filename), content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
-    if os.path.isfile(gcode_file):
-        os.remove(gcode_file)
+    # if we want to remove gcode created in database after:
+    # if os.path.isfile(gcode_file):
+    #     os.remove(gcode_file)
 
     return response
 
@@ -69,7 +77,7 @@ def print_from_gcode(request, id_part, id_printer):
     printer= SP3D_Printer.objects.get(id=id_printer)
 
     # add print to database log
-    add_print_to_db=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
+    new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
 
     amf_file = "/home/user01/SpareParts_Database/files/AMF/" + part.amf + ".amf"
     ini_file = "/home/user01/SpareParts_Database/files/CONFIG/" + part.config + ".ini"
@@ -80,7 +88,7 @@ def print_from_gcode(request, id_part, id_printer):
     except:
         print "An error occured while slicing..."
     filename = gcode_file
-    payload = {'token': TOKEN_FLASK}
+    payload = {'token': TOKEN_FLASK,'id_print':new_print.id}
     with open(filename) as f:
         requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
     response = HttpResponse(file(filename), content_type='text/plain')
@@ -93,7 +101,7 @@ def slice_and_print(request, id_part, id_printer):
     printer= SP3D_Printer.objects.get(id=id_printer)
 
     # add print to database log
-    add_print_to_db=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
+    new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
 
     amf_file = "/home/user01/SpareParts_Database/files/AMF/" + part.amf + ".amf"
     ini_file = "/home/user01/SpareParts_Database/files/CONFIG/" + part.config + ".ini"
@@ -103,7 +111,7 @@ def slice_and_print(request, id_part, id_printer):
     except:
         print "An error occured while slicing..."
     filename = gcode_file
-    payload = {'token': TOKEN_FLASK}
+    payload = {'token': TOKEN_FLASK,'id_print':new_print.id}
     with open(filename) as f:
         requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
     response = HttpResponse(file(filename), content_type='text/plain')
