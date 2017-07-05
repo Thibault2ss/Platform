@@ -11,7 +11,7 @@ class SP3D_Part(models.Model):
     oem_number = models.CharField(max_length=200, default = '')
     amf = models.CharField(max_length=200, default = '')
     config = models.CharField(max_length=200, default = '')
-    gcode = models.CharField(max_length=200, default = '')
+    gcode = models.IntegerField(default=0)
     done = models.IntegerField(default=0)
 
     def __str__(self):
