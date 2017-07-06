@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   {% load staticfiles %}
-  <link rel="stylesheet" type="text/css" href="{% static 'parts/style.css' %}" />
+  <link href="{% static 'font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
   <script>
   $(function(){
     var $table=$("#table").tablesorter(
@@ -36,9 +37,7 @@
   <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
 </head>
 <body>
-  {% include "navbar.html" %}
-  {% block navbar %}
-  {% endblock navbar %}
+  {% include "utils/navbar.html" %}
   <div id="catalogue">
   <h1>Parts Catalogue</h1>
 
@@ -60,6 +59,7 @@
           <th>Print(old)</th>
           <th>Print</th>
           <th>Print</th>
+          <th>Printers</th>
         </tr>
       </thead>
       <tbody>
@@ -72,11 +72,17 @@
                   <td data-title="config">{{ part.config }}</td>
                   <td data-title="Date">{{ part.creation_date|date:"d/m/Y H:i:s" }}</td>
                   <td data-title="Status">{{ part.done }}</td>
-                  <td data-title="Download"><a href="{% url 'parts:download_amf' part.amf %}" download>AMF</a>, <a href="{% url 'parts:download_config' part.config %}" download>CONFIG</a>, {% if part.gcode %}<a href="{% url 'parts:download_gcode' part.gcode %}" download>GCODE</a>{% endif %}</td>
+                  <td data-title="Download"><a href="{% url 'parts:download_amf' part.amf %}" download>AMF</a>,
+                                            <a href="{% url 'parts:download_config' part.config %}" download>CONFIG</a>,
+                                            {% if part.gcode %}
+                                            <a href="{% url 'parts:download_gcode' part.gcode %}" download>GCODE</a>
+                                            {% endif %}</td>
                   <td data-title="Slice"><a href="{% url 'parts:slice_and_download' part.id %}" download>Slice and Download</a></td>
                   <td data-title="Print"><a href="{% url 'parts:slice_and_print' id_part=part.id id_printer=1 %}">Slice and Print</a></td>
                   <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=2 %}">C2</a></td>
                   <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=3 %}">Wanao</a></td>
+                  <td data-title="Print">{% include "utils/printer_dropdown.html" %}</td>
+
               </tr>
               {% endfor %}
 

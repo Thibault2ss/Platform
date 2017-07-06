@@ -5,7 +5,7 @@ from . import views
 app_name = 'parts'
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-    url(r'^navbar/$', views.navbar, name='navbar'),
+    url(r'^part-detail/$', views.part_detail, name='part_detail'),
     url(r'^catalogue/$', views.index, name='catalogue'),
     url(r'^prints/$', views.prints, name='prints'),
     url(r'^(?P<id>[0-9]+)/download_amf/$', views.download_amf, name='download_amf'),
