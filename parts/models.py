@@ -9,8 +9,8 @@ class SP3D_Part(models.Model):
 
     creation_date = models.DateTimeField('date published')
     oem_number = models.CharField(max_length=200, default = '')
-    amf = models.CharField(max_length=200, default = '')
-    config = models.CharField(max_length=200, default = '')
+    amf = models.IntegerField(default=0)
+    config = models.IntegerField(default=0)
     gcode = models.IntegerField(default=0)
     done = models.IntegerField(default=0)
 
