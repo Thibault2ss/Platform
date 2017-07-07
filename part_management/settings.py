@@ -123,3 +123,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 # STATIC_ROOT='http://192.168.0.20:8000/static/parts/'
+
+SOCKETIO_HOST = '0.0.0.0'
+SOCKETIO_PORT = 9000
