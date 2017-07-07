@@ -101,7 +101,7 @@
   $(document).ready(function(){
       var socket = io.connect('http://192.168.0.133:5000/test');
       socket.on('my response', function(msg) {
-          alert('Received: ' + msg.data);
+          console.log('Received: ' + msg.data);
       });
   });
 </script>
