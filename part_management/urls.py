@@ -19,5 +19,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^parts/', include('parts.urls')),
     url(r'^admin/', admin.site.urls),
+]
+urlpatterns += [
     url("", include('django_socketio.urls')),
 ]
