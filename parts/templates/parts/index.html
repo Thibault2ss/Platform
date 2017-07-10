@@ -12,29 +12,7 @@
   {% load staticfiles %}
   <link href="{% static 'font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
   <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-  <script>
-  $(function(){
-    var $table=$("#table").tablesorter(
-      // {
-      //   widgets: ["zebra", "filter"],
-      //   widgetOptions : {
-      //   // filter_anyMatch replaced! Instead use the filter_external option
-      //   // Set to use a jQuery selector (or jQuery object) pointing to the
-      //   // external filter (column specific or any match)
-      //   filter_external : '#search',
-      //   // add a default type search to the first name column
-      //   filter_defaultFilter: { 1 : '~{query}' },
-      //   // include column filters
-      //   filter_columnFilters: true,
-      //   filter_placeholder: { search : 'Search...' },
-      //   filter_saveFilters : true,
-      //   filter_reset: '.reset'
-      // }}
-);
-  });
 
-  </script>
   <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
 </head>
 <body>
@@ -79,7 +57,7 @@
                                             <a href="{% url 'parts:download_gcode' part.gcode %}" download>GCODE</a>
                                             {% endif %}</td>
                   <td data-title="Slice"><a href="{% url 'parts:slice_and_download' part.id %}" download>Slice and Download</a></td>
-                  <td data-title="Print"><a href="{% url 'parts:slice_and_print' id_part=part.id id_printer=1 %}">Slice and Print</a></td>
+                  <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=1 %}">Replicator</a></td>
                   <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=2 %}">C2</a></td>
                   <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=3 %}">Wanao</a></td>
                   <td data-title="Print">{% include "utils/printer_dropdown.html" %}</td>
@@ -95,15 +73,38 @@
   </div>
 
 </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <script>
+    $(function(){
+      var $table=$("#table").tablesorter(
+        // {
+        //   widgets: ["zebra", "filter"],
+        //   widgetOptions : {
+        //   // filter_anyMatch replaced! Instead use the filter_external option
+        //   // Set to use a jQuery selector (or jQuery object) pointing to the
+        //   // external filter (column specific or any match)
+        //   filter_external : '#search',
+        //   // add a default type search to the first name column
+        //   filter_defaultFilter: { 1 : '~{query}' },
+        //   // include column filters
+        //   filter_columnFilters: true,
+        //   filter_placeholder: { search : 'Search...' },
+        //   filter_saveFilters : true,
+        //   filter_reset: '.reset'
+        // }}
+    );
+    });
 
-<!--     <script src="js/index.js"></script> -->
-<script>
+    </script>
+
+    <script src="/static/js/printer_state.js"></script>
+<!-- <script>
   $(document).ready(function(){
       var socket = io.connect('http://192.168.0.133:5000/test');
       socket.on('my response', function(msg) {
           console.log('Received: ' + msg.data);
       });
   });
-</script>
+</script> -->
 </body>
 </html>

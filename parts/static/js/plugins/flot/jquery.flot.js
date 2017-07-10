@@ -93,7 +93,7 @@ Licensed under the MIT license.
 
 		// Determine the screen's ratio of physical to device-independent
 		// pixels.  This is the ratio between the canvas width that the browser
-		// advertises and the number of pixels actually present in that space.
+		//  and the number of pixels actually present in that space.
 
 		// The iPhone 4, for example, has a device-independent width of 320px,
 		// but its screen is actually 640px wide.  It therefore has a pixel
@@ -142,7 +142,7 @@ Licensed under the MIT license.
 		// Resize the canvas, increasing its density based on the display's
 		// pixel ratio; basically giving it more pixels without increasing the
 		// size of its element, to take advantage of the fact that retina
-		// displays have that many more pixels in the same advertised space.
+		// displays have that many more pixels in the same  space.
 
 		// Resizing should reset the state (excanvas seems to be buggy though)
 
@@ -2010,7 +2010,7 @@ Licensed under the MIT license.
                             ctx.lineTo(xrange.to + subPixel, yrange.to);
                         } else {
                             ctx.moveTo(xrange.from, yrange.to + subPixel);
-                            ctx.lineTo(xrange.to, yrange.to + subPixel);                            
+                            ctx.lineTo(xrange.to, yrange.to + subPixel);
                         }
                         ctx.stroke();
                     } else {
@@ -2525,9 +2525,9 @@ Licensed under the MIT license.
                 radius = series.points.radius,
                 symbol = series.points.symbol;
 
-            // If the user sets the line width to 0, we change it to a very 
+            // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
-            // Doing the conditional here allows the shadow setting to still be 
+            // Doing the conditional here allows the shadow setting to still be
             // optional even with a lineWidth of 0.
 
             if( lw == 0 )

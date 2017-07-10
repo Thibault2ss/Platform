@@ -1,32 +1,36 @@
 {% block printer_dropdown %}
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-print"></i> <b class="caret"></b></a>
+    <div class="dropdown printer_dropdown">
+
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-print"></i> <b class="caret"></b></a>
         <ul class="dropdown-menu alert-dropdown">
             <li>
-                <a href="#">C1 <span class="label label-default">Alert Badge</span></a>
+                <a href="#" id="{{ part.id }}" class="c1-link">C1 <span class="label c1-label label-default">Disconnected</span></a>
             </li>
             <li>
-                <a href="#">C2 <span class="label label-primary">Alert Badge</span></a>
+                <a href="#" id="{{ part.id }}" class="c2-link">C2 <span class="label c2-label label-default">Disconnected</span></a>
             </li>
             <li>
-                <a href="#">C3 <span class="label label-success">Alert Badge</span></a>
+                <a href="#" id="{{ part.id }}" class="c3-link">C3 <span class="label c3-label label-default">Disconnected</span></a>
             </li>
             <li>
-                <a href="#">C4 <span class="label label-info">Alert Badge</span></a>
+                <a href="#" id="{{ part.id }}" class="c4-link">C4 <span class="label c4-label label-default">Disconnected</span></a>
             </li>
             <li>
-                <a href="#">C5 <span class="label label-warning">Alert Badge</span></a>
+                <a href="#" id="{{ part.id }}" class="c5-link">C5 <span class="label c5-label label-default">Disconnected</span></a>
             </li>
             <li>
-                <a href="#">C6 <span class="label label-danger">Alert Badge</span></a>
+                <a href="#" id="{{ part.id }}" class="c6-link">C6 <span class="label c6-label label-default">Disconnected</span></a>
             </li>
             <li>
-                <a href="#">Wanaho <span class="label label-default">Alert Badge</span></a>
+                <a href="#" id="{{ part.id }}" class="wanaho-link">Wanaho <span class="label wanaho-label label-default">Disconnected</span></a>
+            </li>
+			<li>
+                <a href="#" id="{{ part.id }}" class="replicator-link">Replicator <span class="label replicator-label label-default">Disconnected</span></a>
             </li>
             <li class="divider"></li>
             <li>
                 <a href="#">View All Printers</a>
             </li>
         </ul>
-    </li>
+    </div>
 {% endblock printer_dropdown %}

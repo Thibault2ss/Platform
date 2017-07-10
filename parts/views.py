@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.shortcuts import render
 from .models import SP3D_Part, SP3D_Print, SP3D_Printer
+from threading import Thread
 
 import os
 import subprocess
 import requests
 import MySQLdb
 import time
+import threading
 
 # Create your views here.
 TOKEN_FLASK='123456789'
@@ -71,8 +73,39 @@ def slice_and_download(request,id):
     # if we want to remove gcode created in database after:
     # if os.path.isfile(gcode_file):
     #     os.remove(gcode_file)
-
     return response
+def send_to_printer(local_ip, payload, f):
+    requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
+
+def ajax_print(request):
+    id_part=request.GET.get('part_id', None)
+    id_printer=request.GET.get('printer_id',None)
+    part = SP3D_Part.objects.get(id=id_part)
+    printer= SP3D_Printer.objects.get(id=id_printer)
+
+    # add print to database log
+    new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
+
+    amf_file = DATABASE_DIRECTORY + "AMF/%s.amf"% part.amf
+    ini_file = DATABASE_DIRECTORY + "CONFIG/%s.ini" %part.config
+    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/%s.gcode"%part.amf
+    local_ip=printer.local_ip
+    try:
+        print subprocess.check_output(['perl',SLIC3R_DIRECTORY + 'slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
+    except:
+        print "An error occured while slicing..."
+    filename = gcode_file
+    payload = {'token': TOKEN_FLASK,'id_print':new_print.id}
+    with open(filename) as f:
+        requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
+        # TRYING TO use threading not to wait before sending response
+        # t = Thread(target=send_to_printer, kwargs={'local_ip':local_ip, 'payload':payload, 'f':f})
+        # t.setDaemon(False)
+        # t.start()
+    data = {
+        'gcode_sent': "Gcode was sent to printer, dude"
+    }
+    return JsonResponse(data)
 
 def print_from_gcode(request, id_part, id_printer):
     part = SP3D_Part.objects.get(id=id_part)
@@ -81,9 +114,9 @@ def print_from_gcode(request, id_part, id_printer):
     # add print to database log
     new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
 
-    amf_file = DATABASE_DIRECTORY + "AMF/" + part.amf + ".amf"
-    ini_file = DATABASE_DIRECTORY + "CONFIG/" + part.config + ".ini"
-    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/" + part.amf + ".gcode"
+    amf_file = DATABASE_DIRECTORY + "AMF/%s.amf"% part.amf
+    ini_file = DATABASE_DIRECTORY + "CONFIG/%s.ini" %part.config
+    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/%s.gcode"%part.amf
     local_ip=printer.local_ip
     try:
         print subprocess.check_output(['perl',SLIC3R_DIRECTORY + 'slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
