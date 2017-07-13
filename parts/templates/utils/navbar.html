@@ -2,81 +2,167 @@
 {% block navbar %}
   <nav class="navbar navbar-fixed-top navbar-default " >
     <a class="navbar-brand" href="#">
-    <img src="/static/icons/sp3d.png"  height="35" alt="">
+    <img src="/static/parts/icons/sp3d.png"  height="35" alt="">
     </a>
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="#"></a>
-    </div>
-
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li><a href="/parts">Parts</a></li>
-        <li><a href="prints">Print Log</a></li>
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">One more separated link</a></li>
-          </ul>
-        </li>
-      </ul>
-      <form id="search" class="navbar-form navbar-left">
-        <div class="form-group">
-          <input id ="search-field" type="text" class="form-control" placeholder="Search">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"></a>
         </div>
-        <button type="submit" class="btn btn-default">Submit</button>
-      </form>
-      <script>
-            $("#search").submit(function(){
-              // var totalColumns=$table[0].config.columns;   THIS LINE IS BUGGING
-              // var filter=[];
-              var searchstring=$("#search-field").val();
 
-              // text to add to filter
-              // filter[ col === 'all' ? totalColumns : col ] = $t.attr('data-query');
-              alert("searchfield.  " + searchstring +  " hahah");
-              // $table.trigger('search', [ [searchstring, searchstring, searchstring, searchstring, searchstring, searchstring, searchstring, searchstring,searchstring] ]);
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="/parts">Parts</a></li>
+            <li><a href="prints">Print Log</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+          <form id="search" class="navbar-form navbar-left">
+            <div class="form-group">
+              <input id ="search-field" type="text" class="form-control" placeholder="Search">
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
+          <script>
+                // $("#search").submit(function(){
+                //   // var totalColumns=$table[0].config.columns;   THIS LINE IS BUGGING
+                //   // var filter=[];
+                //   var searchstring=$("#search-field").val();
+                //
+                //   // text to add to filter
+                //   // filter[ col === 'all' ? totalColumns : col ] = $t.attr('data-query');
+                //   alert("searchfield.  " + searchstring +  " hahah");
+                //   // $table.trigger('search', [ [searchstring, searchstring, searchstring, searchstring, searchstring, searchstring, searchstring, searchstring,searchstring] ]);
+                //
+                //   // return false;
+                //   // alert("searchfield.  " + searchstring +  " hahah");
+                // });
+          </script>
 
-              // return false;
-              // alert("searchfield.  " + searchstring +  " hahah");
-            });
-      </script>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">Link</a></li>
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> User <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li>
-                    <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+          <ul class="nav navbar-nav navbar-right top-nav">
+                <li><a href="{{part.id}}/local">GO LOCAL</a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope"></i> <b class="caret"></b></a>
+                  <ul class="dropdown-menu message-dropdown">
+                      <li class="message-preview">
+                          <a href="#">
+                              <div class="media">
+                                  <span class="pull-left">
+                                      <img class="media-object" src="http://placehold.it/50x50" alt="">
+                                  </span>
+                                  <div class="media-body">
+                                      <h5 class="media-heading"><strong>John Smith</strong>
+                                      </h5>
+                                      <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
+                                      <p>Lorem ipsum dolor sit amet, consectetur...</p>
+                                  </div>
+                              </div>
+                          </a>
+                      </li>
+                      <li class="message-preview">
+                          <a href="#">
+                              <div class="media">
+                                  <span class="pull-left">
+                                      <img class="media-object" src="http://placehold.it/50x50" alt="">
+                                  </span>
+                                  <div class="media-body">
+                                      <h5 class="media-heading"><strong>John Smith</strong>
+                                      </h5>
+                                      <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
+                                      <p>Lorem ipsum dolor sit amet, consectetur...</p>
+                                  </div>
+                              </div>
+                          </a>
+                      </li>
+                      <li class="message-preview">
+                          <a href="#">
+                              <div class="media">
+                                  <span class="pull-left">
+                                      <img class="media-object" src="http://placehold.it/50x50" alt="">
+                                  </span>
+                                  <div class="media-body">
+                                      <h5 class="media-heading"><strong>John Smith</strong>
+                                      </h5>
+                                      <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
+                                      <p>Lorem ipsum dolor sit amet, consectetur...</p>
+                                  </div>
+                              </div>
+                          </a>
+                      </li>
+                      <li class="message-footer">
+                          <a href="#">Read All New Messages</a>
+                      </li>
+                  </ul>
                 </li>
-                <li>
-                    <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
+                  <ul class="dropdown-menu alert-dropdown">
+                      <li>
+                          <a href="#">Alert Name <span class="label label-default">Alert Badge</span></a>
+                      </li>
+                      <li>
+                          <a href="#">Alert Name <span class="label label-primary">Alert Badge</span></a>
+                      </li>
+                      <li>
+                          <a href="#">Alert Name <span class="label label-success">Alert Badge</span></a>
+                      </li>
+                      <li>
+                          <a href="#">Alert Name <span class="label label-info">Alert Badge</span></a>
+                      </li>
+                      <li>
+                          <a href="#">Alert Name <span class="label label-warning">Alert Badge</span></a>
+                      </li>
+                      <li>
+                          <a href="#">Alert Name <span class="label label-danger">Alert Badge</span></a>
+                      </li>
+                      <li class="divider"></li>
+                      <li>
+                          <a href="#">View All</a>
+                      </li>
+                  </ul>
                 </li>
-                <li>
-                    <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
+
+            {% if user.is_authenticated %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> {{user.username}} <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="/logout"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="divider"></li>
-                <li>
-                    <a href="#"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
-                </li>
-            </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+            {%else%}
+                <li><a href="/login">Log in</a></li>
+            {% endif%}
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
   </nav>
 {% endblock navbar %}

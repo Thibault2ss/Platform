@@ -6,10 +6,16 @@ app_name = 'parts'
 urlpatterns = [
 
     url(r'^$', views.index, name='index'),
-    url(r'^part-detail/$', views.part_detail, name='part_detail'),
+    url(r'^part-detail/(?P<id_part>[0-9]+)$', views.part_detail, name='part_detail'),
+    url(r'^part-detail/(?P<id_part>[0-9]+)/local$', views.go_local, name='go_local'),
     url(r'^catalogue/$', views.index, name='catalogue'),
+    url(r'^add-part/$', views.add_part, name='add_part'),
     url(r'^prints/$', views.prints, name='prints'),
     url(r'^ajax/print/$', views.ajax_print, name='ajax_print'),
+    url(r'^part-detail/(?P<id_part>[0-9]+)/upload-image/$', views.upload_image, name='upload_image'),
+    url(r'^part-detail/(?P<id_part>[0-9]+)/upload-cad/$', views.upload_cad, name='upload_cad'),
+    url(r'^part-detail/(?P<id_part>[0-9]+)/upload-amf/$', views.upload_amf, name='upload_amf'),
+    url(r'^part-detail/(?P<id_part>[0-9]+)/upload-config/$', views.upload_config, name='upload_config'),
     url(r'^(?P<id>[0-9]+)/download_amf/$', views.download_amf, name='download_amf'),
     url(r'^(?P<id_config>[0-9]+)/download_config/$', views.download_config, name='download_config'),
     url(r'^(?P<id_gcode>[0-9]+)/download_gcode/$', views.download_gcode, name='download_gcode'),

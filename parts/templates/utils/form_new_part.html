@@ -1,0 +1,41 @@
+<form action="add-part/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
+
+  <div class="form-group">
+    <label for="part-number">Part Number</label>
+    <input type="text" class="form-control" name="part-number" id="part-number" aria-describedby="" placeholder="Enter part number">
+    <small id="emailHelp" class="form-text text-muted">choose non-existent part number</small>
+  </div>
+  <div class="form-group">
+    <label for="oem">OEM</label>
+    <select class="form-control" name="oem" id="oem">
+      <option>SP3D</option>
+      <option>Electrolux</option>
+      <option> BLA</option>
+      <option>BLA</option>
+      <option>BLA</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="permissions">Permissions to edit</label>
+    <select multiple class="form-control" name="permissions" id="permissions">
+    {%if users%}
+    {%for user in users%}
+      <option value={{user.id}}>{{user.first_name}} {{user.last_name}}</option>
+    {%endfor%}
+    {%endif%}
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="notes">Notes</label>
+    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+  </div>
+  <div class="form-group">
+    <label for="cad">CAD</label>
+    <input type="file" class="form-control-file" id="cad" name="cad" aria-describedby="fileHelp">
+    <label class="form-check-label text-light">
+      <input type="checkbox" name="cad-oem-checkbox" class="form-check-input">
+      this CAD is the reference OEM CAD
+    </label>
+  </div>
+  <button type="submit" class="btn btn-primary pull-right">Submit</button>
+</form>
