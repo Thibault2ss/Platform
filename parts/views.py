@@ -198,67 +198,36 @@ def part_detail(request,id_part):
 @login_required
 def go_local(request,id_part):
     part = SP3D_Part.objects.get(id=id_part)
-    part=[part.__dict__]
+    part=part.__dict__
     amf_list = SP3D_AMF.objects.filter(id_part=id_part)
     cad_list = SP3D_CAD.objects.filter(id_part=id_part)
     config_list = SP3D_CONFIG.objects.filter(id_part=id_part)
     # transform these django objects into readable dictionnaries to send in a POST request
-    amf=[]
-    cad=[]
-    config=[]
+    data={}
     for item in amf_list:
         item=item.__dict__
-        amf.append(item)
+        data['amf-%s'%item['id']] = [item]
     for item in cad_list:
         item=item.__dict__
-        cad.append(item)
+        data['cad-%s'%item['id']] = [item]
     for item in config_list:
         item=item.__dict__
-        config.append(item)
+        data['config-%s'%item['id']] = [item]
+    print "DATA"
+    print data
 
     # load all the files in these arrays:
     files=[]
-    for item in amf:
-        path=item["root_path"]+item["file_path"]
-        files.append(('amf-%s'%item["id"],(item["name"],open(path,'rb'))))
-
-    for item in cad:
-        path=item["root_path"]+item["file_path"]
-        files.append(('cad-%s'%item["id"],(item["name"],open(path,'rb'))))
-
-    for item in config:
-        path=item["root_path"]+item["file_path"]
-        files.append(('config-%s'%item["id"],(item["name"],open(path,'rb'))))
-
-    print "FILES"
-    print files
+    for key in data:
+         path=data[key][0]['root_path']+data[key][0]['file_path']
+         files.append((key,(data[key][0]['name'],open(path,'rb'))))
 
     ip=get_client_ip(request)
-
-    # files={
-    #     'cad':[
-    #             {
-    #             'file':open('/home/user01/SpareParts_Database/root/catalogue/oem-test/part-id-292/CONFIG/401.ini','rb'),
-    #             'data':"test1",
-    #             },
-    #             {
-    #             'file': open('/home/user01/SpareParts_Database/root/catalogue/oem-test/part-id-292/CONFIG/401.ini','rb'),
-    #             'data':"test",
-    #             }
-    #         ],
-    #     'config':[],
-    #     'upload_file': open('/home/user01/SpareParts_Database/root/catalogue/oem-test/part-id-292/CONFIG/401.ini','rb'),
-    # }
-    data = {
-        'part':part,
-        'amf':amf,
-        'cad':cad,
-        'config':config,
-        'token':TOKEN_FLASK,
-        # 'part': part,
-        # 'image_list':image_list,
-    }
-    response=requests.post('http://' + ip + ':5000/create-working-dir',data=data,files = files, verify=True)
+    # only now, should we add the part and the token to the data
+    data['token']="TOKEN_FLASK"
+    data['part']=[part]
+    
+    response=requests.post('http://' + ip + ':5000/create-working-dir',data=data, files=files, verify=True)
 
     return HttpResponseRedirect("http://localhost:5000/parts/part-detail/%s"%id_part)
 
