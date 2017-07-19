@@ -2,10 +2,10 @@
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.core import serializers
 from django.template import loader, RequestContext
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-from .models import SP3D_Part, SP3D_Print, SP3D_Printer, SP3D_Image, SP3D_CAD, SP3D_AMF, SP3D_CONFIG
+from .models import SP3D_Part, SP3D_Print, SP3D_Printer, SP3D_Image, SP3D_CAD, SP3D_AMF, SP3D_CONFIG, SP3D_Oem
 from django.contrib.auth.models import User
 from .forms import UploadFileForm
 from threading import Thread
@@ -25,15 +25,24 @@ TOKEN_FLASK='123456789'
 DATABASE_DIRECTORY = '/home/user01/SpareParts_Database/files/'
 DATABASE_DIRECTORY_TRANSITION = '/home/user01/SpareParts_Database/root/'
 SLIC3R_DIRECTORY= '/home/user01/Slic3r/slic3r_dev/'
+LOCAL_APP = "http://localhost:5000"
 
 @login_required
-def index(request):
+def index(request, error=""):
+    print "TESTTTTT: %s"%error
     latest_part_list = SP3D_Part.objects.order_by('-creation_date')
     users = User.objects.all()
+    oems=SP3D_Oem.objects.all()
+    oem_list = SP3D_Oem.objects.all()
     context = {
         'latest_part_list': latest_part_list,
         'users':users,
+        'oems':oems,
+        'error':error,
+        'oem_list':oem_list,
     }
+    print "COOKIES"
+    print request.COOKIES
     return render(request, 'parts/index.html', context)
     # return render_to_response('parts/index.html', context, RequestContext(request))
 
@@ -183,6 +192,7 @@ def part_detail(request,id_part):
     cad_list=SP3D_CAD.objects.filter(id_part=id_part)
     amf_list=SP3D_AMF.objects.filter(id_part=id_part)
     config_list=SP3D_CONFIG.objects.filter(id_part=id_part)
+    oem_list = SP3D_Oem.objects.all()
     users = User.objects.all()
     context = {
         'part': part,
@@ -191,45 +201,97 @@ def part_detail(request,id_part):
         'amf_list':amf_list,
         'users':users,
         'config_list':config_list,
+        'oem_list':oem_list,
 
     }
     return render(request, 'parts/part-detail.html', context)
 
+def model_to_dict(model):
+    model=model.__dict__
+    if '_state' in model:
+        # del model['_state']
+        model['_state']=str(model['_state'])
+    if 'creation_date'in model:
+        model['creation_date']=str(model['creation_date'])
+        # del model['creation_date']
+    return model
+
+
 @login_required
-def go_local(request,id_part):
+def checkout_part(request,id_part):
     part = SP3D_Part.objects.get(id=id_part)
-    part=part.__dict__
+    part=model_to_dict(part)
+
     amf_list = SP3D_AMF.objects.filter(id_part=id_part)
     cad_list = SP3D_CAD.objects.filter(id_part=id_part)
     config_list = SP3D_CONFIG.objects.filter(id_part=id_part)
     # transform these django objects into readable dictionnaries to send in a POST request
     data={}
     for item in amf_list:
-        item=item.__dict__
-        data['amf-%s'%item['id']] = [item]
+        item=model_to_dict(item)
+        data["amf-%s"%item["id"]] = [item]
+        print "done0"
     for item in cad_list:
-        item=item.__dict__
-        data['cad-%s'%item['id']] = [item]
+        item=model_to_dict(item)
+        data["cad-%s"%item["id"]] = [item]
+        print "done1"
     for item in config_list:
-        item=item.__dict__
-        data['config-%s'%item['id']] = [item]
-    print "DATA"
-    print data
+        item=model_to_dict(item)
+        data["config-%s"%item["id"]] = [item]
+        print "done2"
 
     # load all the files in these arrays:
     files=[]
     for key in data:
-         path=data[key][0]['root_path']+data[key][0]['file_path']
-         files.append((key,(data[key][0]['name'],open(path,'rb'))))
+         path=data[key][0]["root_path"]+data[key][0]["file_path"]
+         files.append((key,(data[key][0]["name"],open(path,'rb'))))
 
     ip=get_client_ip(request)
     # only now, should we add the part and the token to the data
-    data['token']="TOKEN_FLASK"
-    data['part']=[part]
-    
+
+    data.update({'part':"%s"%part,'token':TOKEN_FLASK, 'userid':request.user.id, 'username':request.user.username})
+
+    print "DATA"
+    print data
     response=requests.post('http://' + ip + ':5000/create-working-dir',data=data, files=files, verify=True)
 
-    return HttpResponseRedirect("http://localhost:5000/parts/part-detail/%s"%id_part)
+    return HttpResponseRedirect(LOCAL_APP + "/parts/part-detail/%s"%id_part)
+
+
+@csrf_exempt
+def push(request,id_part):
+    if request.method == 'POST':
+        token=request.POST.get("token")
+        print "TOKEN %s"%token
+
+        userid = request.POST.get('userid')
+        username = request.POST.get('username')
+        print "USERID %s"%userid
+        print "USERNAME %s"%username
+        files=request.FILES
+        print "FILES RECEIVED ARE: %s"%files
+
+        try:
+            for key in files:
+                if key.startswith("cad"):
+                    error=upload_cad(files[key], id_part, int(userid))
+                    print "BEACON1: went to upload_cad with file %s"%files[key]
+                    if error:raise ValueError(error)
+                elif key.startswith("amf"):
+                    error=upload_amf(files[key], id_part, int(userid))
+                    if error:raise ValueError(error)
+                elif key.startswith("config"):
+                    error=upload_config(files[key], id_part, int(userid))
+                    if error:raise ValueError(error)
+        except ValueError as err:
+            print (err)
+            return HttpResponse(status=500)
+        except:
+            return HttpResponse(status=500)
+
+    return HttpResponse()
+
+
 
 @login_required
 def upload_image(request,id_part):
@@ -240,9 +302,13 @@ def upload_image(request,id_part):
             userid = None
             if request.user.is_authenticated():
                 userid = request.user.id
+            part=SP3D_Part.objects.get(id=id_part)
+            oem=SP3D_Oem.objects.get(id=part.id_oem)
             f=request.FILES['image']
-            print f.name
-            subpath="catalogue/" + "oem-test/" + "part-id-%s/"%id_part + "IMAGES/"
+            print "IMAGE: %s"%f
+            print "filename: " + f.name
+            print "file type: %s"%type(f)
+            subpath="catalogue/oem-%s/part-id-%s/IMAGES/"%(oem.code,id_part)
             path = DATABASE_DIRECTORY_TRANSITION + subpath
 
             # Check that folder IMAGE exists
@@ -281,163 +347,117 @@ def upload_image(request,id_part):
     return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
 
 @login_required
-def upload_cad(request,id_part):
-    print "Redrection Upload CAD ok"
+def upload_cad_direct(request,id_part):
+    print "Redirection Upload CAD ok"
     if request.method == 'POST':
         try:
             # get user name
             userid = None
             if request.user.is_authenticated():
                 userid = request.user.id
-
-            f=request.FILES['cad']
-            print f.name
-            subpath="catalogue/" + "oem-test/" + "part-id-%s/"%id_part + "CAD/"
-            path = DATABASE_DIRECTORY_TRANSITION + subpath
-
-            # Check that folder CAD exists
-            if not os.path.exists(path):
-                os.makedirs(path)
-
-            newfile=path+f.name
-            filename, file_extension = os.path.splitext(newfile)
-            #Check that file extension is .SLDASM or or .SLDDRW or .SLDPRT
-            if not (file_extension.lower()==".sldasm" or file_extension.lower()==".slddrw" or file_extension.lower()==".sldprt"):
-                raise ValueError('Wrong file extension, we need a .SLDASM or .SLDDRW or .SLDPRT')
-            # Check that file with same name doesn't exist and iterate on name if it does
-            if os.path.exists(newfile):
-                i=1
-                while os.path.exists("%s-%s%s"%(filename,i,file_extension)):
-                    i+=1
-                newfile="%s-%s%s"%(filename,i,file_extension)
-
-            # write in new file
-            with open(newfile, 'wb+') as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
-            print "New CAD uploaded at location " + newfile
-
-            # create related record in database
-            creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
-            name=ntpath.basename(newfile)
-            root_path=DATABASE_DIRECTORY_TRANSITION
-            file_path=subpath+name
-            new_cad=SP3D_CAD.objects.create(creation_date=creation_date,name=name,root_path=root_path,file_path=file_path, id_part=id_part,id_creator=userid)
-            print "CAD record added to sql database with id %s" % new_cad.id
+            # process upload
+            error=upload_cad(request.FILES['cad'], id_part, userid)
+            if error: raise ValueError(error)
         except ValueError as err :
             print (err)
-        else:
-            print "CAD Uploading Failed"
+        except:
+            print "CAD Uploading Failed1"
     return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
 
 @login_required
-def upload_amf(request,id_part):
-    print "Redrection Upload AMF ok"
+def upload_amf_direct(request,id_part):
+    print "Redirection Upload AMF ok"
     if request.method == 'POST':
         try:
             # get user name
             userid = None
             if request.user.is_authenticated():
                 userid = request.user.id
-
-            f=request.FILES['amf']
-            print f.name
-            subpath="catalogue/" + "oem-test/" + "part-id-%s/"%id_part + "AMF/"
-            path = DATABASE_DIRECTORY_TRANSITION + subpath
-
-            # Check that folder CAD exists
-            if not os.path.exists(path):
-                os.makedirs(path)
-
-            newfile=path+f.name
-            filename, file_extension = os.path.splitext(newfile)
-            #Check that file extension is .amf
-            if not (file_extension.lower()==".amf"):
-                raise ValueError('Wrong file extension, we need a .amf file')
-            # Check that file with same name doesn't exist and iterate on name if it does
-            if os.path.exists(newfile):
-                i=1
-                while os.path.exists("%s-%s%s"%(filename,i,file_extension)):
-                    i+=1
-                newfile="%s-%s%s"%(filename,i,file_extension)
-
-            # write in new file
-            with open(newfile, 'wb+') as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
-            print "New AMF uploaded at location " + newfile
-
-            # create related record in database
-            creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
-            name=ntpath.basename(newfile)
-            root_path=DATABASE_DIRECTORY_TRANSITION
-            file_path=subpath+name
-            new_amf=SP3D_AMF.objects.create(creation_date=creation_date,name=name,root_path=root_path,file_path=file_path, id_part=id_part,id_creator=userid)
-            print "AMF record added to sql database with id %s" % new_amf.id
+            # process upload
+            error=upload_amf(request.FILES['amf'], id_part, userid)
+            if error: raise ValueError(error)
         except ValueError as err :
-            print(err)
-        else:
-            print "AMF Uploading Failed"
+            print (err)
+        except:
+            print "AMF Uploading Failed1"
     return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
 
 @login_required
-def upload_config(request,id_part):
-    print "Redrection Upload AMF ok"
+def upload_config_direct(request,id_part):
+    print "Redirection Upload Config ok"
     if request.method == 'POST':
         try:
             # get user name
             userid = None
             if request.user.is_authenticated():
                 userid = request.user.id
-
-            f=request.FILES['config']
-            print f.name
-            subpath="catalogue/" + "oem-test/" + "part-id-%s/"%id_part + "CONFIG/"
-            path = DATABASE_DIRECTORY_TRANSITION + subpath
-
-            # Check that folder CAD exists
-            if not os.path.exists(path):
-                os.makedirs(path)
-
-            newfile=path+f.name
-            filename, file_extension = os.path.splitext(newfile)
-            #Check that file extension is .ini
-            if not (file_extension.lower()==".ini"):
-                raise ValueError('Wrong file extension, we need a .ini file')
-            # Check that file with same name doesn't exist and iterate on name if it does
-            if os.path.exists(newfile):
-                i=1
-                while os.path.exists("%s-%s%s"%(filename,i,file_extension)):
-                    i+=1
-                newfile="%s-%s%s"%(filename,i,file_extension)
-
-            # write in new file
-            with open(newfile, 'wb+') as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
-            print "New CONFIG uploaded at location " + newfile
-
-            # create related record in database
-            creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
-            name=ntpath.basename(newfile)
-            root_path=DATABASE_DIRECTORY_TRANSITION
-            file_path=subpath+name
-            new_config=SP3D_CONFIG.objects.create(creation_date=creation_date,name=name,root_path=root_path,file_path=file_path, id_part=id_part,id_creator=userid)
-            print "CONFIG record added to sql database with id %s" % new_config.id
+            # process upload
+            error=upload_config(request.FILES['config'], id_part, userid)
+            if error: raise ValueError(error)
         except ValueError as err :
             print (err)
-        else:
-            print "CONFIG Uploading Failed"
+        except:
+            print "CONFIG Uploading Failed1"
     return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
 
 
 # @csrf_exempt
 @login_required
 def add_part(request):
+    userid = request.user.id
+    user = User.objects.get(id=userid)
+    print "USER id : %s"% userid
+    print "USERNAME : %s"% user.username
+
     part_number=request.POST.get('part-number')
-    if part_number:
-        print "PARt:"
-        print part_number
+    oem_name=request.POST.get('oem')
+    oem=SP3D_Oem.objects.get(name=oem_name)
+
+    permission_list=request.POST.getlist('permissions')
+    permissions=""
+    for index in permission_list:
+        permissions=permissions+"%s-"%index
+
+    notes=request.POST.get('notes')
+    cad=request.FILES.get('cad')
+    is_oem=request.POST.get('is_oem')
+    existing_part=SP3D_Part.objects.filter(part_number=part_number).count()
+
+    try:
+        if not (oem and part_number):
+            raise ValueError("Error: no part number or corresponding oem")
+        if not existing_part==0:
+            raise ValueError("Error: part Number already rexists")
+
+        # create new record in database
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        new_part=SP3D_Part.objects.create(creation_date=creation_date,part_number=part_number, id_oem=oem.id,oem_name=oem.name,id_creator=user.id, permissions=permissions)
+
+
+        new_part_path = DATABASE_DIRECTORY_TRANSITION + "catalogue/oem-%s/part-id-%s/"%(oem.code, new_part.id)
+        sub_directories=["CAD/","AMF/","CONFIG/","GCODE/","IMAGES/","STL/"]
+
+        # Check that folder exists
+        if not os.path.exists(new_part_path):
+            os.makedirs(new_part_path)
+            for subpath in sub_directories:
+                os.makedirs(new_part_path + subpath)
+        else:
+            raise ValueError("Error: part folder already exists")
+
+        print "NEW PART ADDED TO DB: %s"%new_part.part_number
+
+        # print "PARt:"
+        # print part_number
+        # print "OEM NAME: %s"%oem_name
+        # print "PERMISSIONS: %s"%permissions
+        # print "NOTES: %s"%notes
+        # print "CAD: %s"%cad
+        # print "IS OEM: %s"%is_oem
+        # print "EXISTING PARTS: %s"%existing_part
+
+
+
         # try:
         #     cad_file=request.FILES['cad']
         #     is_oem_cad=request.POST.getlist('cad-oem-checkbox')
@@ -447,7 +467,7 @@ def add_part(request):
         # part_number=request.POST.get('part-number')
         #
         #     print f.name
-        #     subpath="catalogue/" + "oem-test/" + "part-id-%s/"%id_part + "IMAGES/"
+        #     subpath="catalogue/" + "oem-SP3D/" + "part-id-%s/"%id_part + "IMAGES/"
         #     path = DATABASE_DIRECTORY_TRANSITION + subpath
         #
         #     # Check that folder IMAGE exists
@@ -478,7 +498,10 @@ def add_part(request):
         #     print "Image record added to sql database with id %s" % new_image.id
         # except :
         #     print "Image Uploading Failed"
-    return HttpResponseRedirect('/parts/')
+    except ValueError as err:
+        print err
+        return redirect('/parts', error=err)
+    return HttpResponseRedirect('/parts/part-detail/%s'%new_part.id)
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -487,3 +510,167 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+# upload new ca
+def upload_cad(file,id_part,userid):
+    error=None
+    try:
+
+        part=SP3D_Part.objects.get(id=id_part)
+        oem_id=part.id_oem
+        oem=SP3D_Oem.objects.get(id=oem_id)
+
+        # kepep subpath separated from path, because used later
+        subpath="catalogue/oem-%s/part-id-%s/CAD/"%(oem.code,id_part)
+        path = DATABASE_DIRECTORY_TRANSITION + subpath
+
+        # Check that folder exists
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        newfile=path+"%s"%file
+        filename, file_extension = os.path.splitext(newfile)
+        #Check that file extension is .amf
+        if not (file_extension.lower()==".sldasm" or file_extension.lower()==".slddrw" or file_extension.lower()==".sldprt"):
+            raise ValueError('Wrong file extension, we need a .SLDASM or .SLDDRW or .SLDPRT')
+        # Check that file with same name doesn't exist and iterate on name if it does
+        if os.path.exists(newfile):
+            i=1
+            while os.path.exists("%s-iteration-%s%s"%(filename,i,file_extension)):
+                i+=1
+            newfile="%s-iteration-%s%s"%(filename,i,file_extension)
+
+        # write in new file
+        with open(newfile, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        print "New CAD uploaded at location " + newfile
+
+        # create related record in database
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        name=ntpath.basename(newfile)
+        root_path=DATABASE_DIRECTORY_TRANSITION
+        file_path=subpath+name
+        new_cad=SP3D_CAD.objects.create(creation_date=creation_date,name=name,root_path=root_path,file_path=file_path, id_part=id_part,id_creator=userid)
+        print "CAD record added to sql database with id %s" % new_cad.id
+    except ValueError as err :
+        print (err)
+        error=error + "%s"%err
+    except:
+        print "CAD Uploading Failed"
+        error = error + "CAD Uploading failed"
+    return error
+
+# upload amf
+def upload_amf(file,id_part,userid):
+    error=None
+    try:
+        part=SP3D_Part.objects.get(id=id_part)
+        oem_id=part.id_oem
+        oem=SP3D_Oem.objects.get(id=oem_id)
+
+        # kepep subpath separated from path, because used later
+        subpath="catalogue/oem-%s/part-id-%s/AMF/"%(oem.code,id_part)
+        path = DATABASE_DIRECTORY_TRANSITION + subpath
+
+        # Check that folder exists
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        newfile=path+"%s"%file
+        filename, file_extension = os.path.splitext(newfile)
+        #Check that file extension is .amf
+        if not file_extension.lower()==".amf":
+            raise ValueError('Wrong file extension, we need a .AMF')
+        # Check that file with same name doesn't exist and iterate on name if it does
+        if os.path.exists(newfile):
+            i=1
+            while os.path.exists("%s-iteration-%s%s"%(filename,i,file_extension)):
+                i+=1
+            newfile="%s-iteration-%s%s"%(filename,i,file_extension)
+
+        # write in new file
+        with open(newfile, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        print "New AMF uploaded at location " + newfile
+
+        # create related record in database
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        name=ntpath.basename(newfile)
+        root_path=DATABASE_DIRECTORY_TRANSITION
+        file_path=subpath+name
+        print "USERID IS %s" % userid
+        print "TYPE: %s"%type(userid)
+        print "CREATION DATE IS %s" % creation_date
+        print "TYPE: %s"%type(creation_date)
+        print "NAME IS  %s" % name
+        print "TYPE: %s"%type(name)
+        print "ROOTPATH IS %s" % root_path
+        print "TYPE: %s"%type(root_path)
+        print "FILEPATH IS %s" % file_path
+        print "TYPE: %s"%type(file_path)
+        print "IDPART IS %s" % userid
+        print "TYPE: %s"%type(userid)
+
+
+        new_amf=SP3D_AMF.objects.create(creation_date=creation_date,name=name,root_path=root_path,file_path=file_path, id_part=id_part,id_creator=userid)
+        print "AMF record added to sql database with id %s" % new_amf.id
+    except ValueError as err :
+        print (err)
+        error= error +"%s"%err
+    except:
+        print "AMF Uploading Failed"
+        error = error + "AMF Uploading failed"
+    return error
+
+# upload config
+def upload_config(file,id_part,userid):
+    error=None
+    try:
+        print "BALISE100"
+        part=SP3D_Part.objects.get(id=id_part)
+        print "BALISE101"
+        oem_id=part.id_oem
+        oem=SP3D_Oem.objects.get(id=oem_id)
+        # kepep subpath separated from path, because used later
+        subpath="catalogue/oem-%s/part-id-%s/CONFIG/"%(oem.code,id_part)
+        path = DATABASE_DIRECTORY_TRANSITION + subpath
+        print "BALISE1"
+        # Check that folder exists
+        if not os.path.exists(path):
+            os.makedirs(path)
+        print "BALISE2"
+        newfile=path+"%s"%file
+        filename, file_extension = os.path.splitext(newfile)
+        #Check that file extension is .config
+        if not file_extension.lower()==".ini":
+            raise ValueError('Wrong file extension, we need a .INI')
+        print "BALISE3"
+        # Check that file with same name doesn't exist and iterate on name if it does
+        if os.path.exists(newfile):
+            i=1
+            while os.path.exists("%s-iteration-%s%s"%(filename,i,file_extension)):
+                i+=1
+            newfile="%s-iteration-%s%s"%(filename,i,file_extension)
+
+        # write in new file
+        with open(newfile, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        print "New CONFIG uploaded at location " + newfile
+
+        # create related record in database
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        name=ntpath.basename(newfile)
+        root_path=DATABASE_DIRECTORY_TRANSITION
+        file_path=subpath+name
+        new_config=SP3D_CONFIG.objects.create(creation_date=creation_date,name=name,root_path=root_path,file_path=file_path, id_part=id_part,id_creator=userid)
+        print "CONFIG record added to sql database with id %s" % new_config.id
+    except ValueError as err :
+        print (err)
+        error=error +"%s"%err
+    except:
+        print "CONFIG Uploading Failed"
+        error = error + "CONFIG Uploading failed"
+    return error

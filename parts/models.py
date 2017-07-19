@@ -8,7 +8,7 @@ from django.db import models
 class SP3D_Part(models.Model):
 
     creation_date = models.DateTimeField('date published')
-    oem_number = models.CharField(max_length=200, default = '')
+    oem_name = models.CharField(max_length=200, default = '')
     part_number=models.CharField(max_length=200, default = '')
     id_oem=models.IntegerField(default=0)
     amf = models.IntegerField(default=0)
@@ -16,6 +16,7 @@ class SP3D_Part(models.Model):
     gcode = models.IntegerField(default=0)
     id_creator = models.IntegerField(default=0)
     notes=models.CharField(max_length=1000, default = '')
+    permissions=models.CharField(max_length=200, default = '')
 
     def __str__(self):
         return "Part number " + str(self.id)
