@@ -1,51 +1,30 @@
+{% load static %}
 <!DOCTYPE html>
 <html >
 <head>
   <meta charset="UTF-8">
   <title>SpareParts3D - Catalogue</title>
-  <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.9.1/jquery.tablesorter.min.js"></script>
   <!-- Bootstrap css and js -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  {% load staticfiles %}
-  <link href="{% static 'font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
-  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
-  <script>
-  $(function(){
-    var $table=$("#table").tablesorter(
-      // {
-      //   widgets: ["zebra", "filter"],
-      //   widgetOptions : {
-      //   // filter_anyMatch replaced! Instead use the filter_external option
-      //   // Set to use a jQuery selector (or jQuery object) pointing to the
-      //   // external filter (column specific or any match)
-      //   filter_external : '#search',
-      //   // add a default type search to the first name column
-      //   filter_defaultFilter: { 1 : '~{query}' },
-      //   // include column filters
-      //   filter_columnFilters: true,
-      //   filter_placeholder: { search : 'Search...' },
-      //   filter_saveFilters : true,
-      //   filter_reset: '.reset'
-      // }}
-);
-  });
 
-  </script>
-  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+  {% load staticfiles %}
+  <link href="{% static 'parts/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'parts/css/style.css' %}" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
+  <link rel="shortcut icon" type="image/png" href="{% static 'parts/favicon.ico' %}"/>
+
 </head>
 <body>
   {% include "utils/navbar.html" %}
   <div id="catalogue">
+{% include "utils/modals/add-part.html" %}
   <h1>Parts Catalogue</h1>
-
   <!-- Responsive table starts here -->
   <!-- For correct display on small screens you must add 'data-title' to each 'td' in your table -->
   <div class="table-responsive-vertical shadow-z-1">
   <!-- Table starts here -->
-  <table id="table" class="table table-hover table-mc-orange tablesorter">
+  <!-- <table id="table" class="table table-hover table-mc-orange tablesorter">
       <thead>
         <tr>
           <th>ID</th>
@@ -66,7 +45,7 @@
           {% if latest_part_list %}
               {% for part in latest_part_list %}
               <tr>
-                  <td data-title="ID">{{ part.id }}</td>
+                  <td data-title="ID"><a href="{% url 'parts:part_detail' id_part=part.id %}">{{ part.id }}</a></td>
                   <td data-title="Name">{{ part.oem_number }}</td>
                   <td data-title="amf">{{ part.amf }}</td>
                   <td data-title="config">{{ part.config }}</td>
@@ -78,7 +57,7 @@
                                             <a href="{% url 'parts:download_gcode' part.gcode %}" download>GCODE</a>
                                             {% endif %}</td>
                   <td data-title="Slice"><a href="{% url 'parts:slice_and_download' part.id %}" download>Slice and Download</a></td>
-                  <td data-title="Print"><a href="{% url 'parts:slice_and_print' id_part=part.id id_printer=1 %}">Slice and Print</a></td>
+                  <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=1 %}">Replicator</a></td>
                   <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=2 %}">C2</a></td>
                   <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=3 %}">Wanao</a></td>
                   <td data-title="Print">{% include "utils/printer_dropdown.html" %}</td>
@@ -90,12 +69,80 @@
               <p>No polls are available.</p>
           {% endif %}
       </tbody>
-    </table>
+    </table> -->
   </div>
+<div class="row">
+    <div class="col-lg-8 col-lg-offset-2">
+        <div class="panel-group" id="accordion">
 
+            {% if oem_list %}
+            {% for oem in oem_list %}
+            <div class="panel panel-default">
+                <a data-toggle="collapse" data-parent="#accordion" href="#{{oem.code}}">
+              <div class="panel-heading">
+                <h4 class="panel-title text-center">
+
+                  {{oem.name}}
+                </h4>
+              </div></a>
+              <div id="{{oem.code}}" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <!-- <div class="row">
+                        <div class="col-xs-4">
+                            <input type="search" class="form-control search" id="search-1" placeholder="Search" data-column="all">
+                        </div>
+                    </div> -->
+
+                    <table  class="table table-condensed table-bordered table-hover" data-toggle="table"   data-sort-order="desc" data-search="true" data-sort-name="date" data-search-text="">
+                                  <thead >
+                                    <tr>
+                                      <th data-field="id" class="col-xs-0">id</th>
+                                      <th data-field="printers" data-sortable="false" class="col-xs-0">Print</th>
+                                      <th data-field="part_number" data-sortable="true" class="col-xs-6">Part Number</th>
+                                      <th data-field="oem" data-sortable="false" class="col-xs-2">OEM</th>
+                                      <th data-field="created_by" data-sortable="false" class="col-xs-2">created by</th>
+                                      <th data-field="date" data-sortable="true" class="col-xs-2">on</th>
+
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {%if latest_part_list%}
+                                        {%for part in latest_part_list %}
+                                            {%if part.id_oem == oem.id %}
+                                            <tr class="{{class}}">
+                                              <td scope="row" class="align-middle"><b>{{part.id}}</b></td>
+                                              <td data-title="Print">{% include "utils/printer_dropdown.html" %}</td>
+                                              <td class="align-middle"><a href="{% url 'parts:part_detail' id_part=part.id %}">{{part.part_number}}</a></td>
+                                              <td class="align-middle">{{part.oem_name}}</td>
+                                              <td class="align-middle">{%for user in users%}{%if user.id == part.id_creator%}{{user.username}}{%endif%}{%endfor%}</td>
+                                              <td class="align-middle">{{ part.creation_date|date:"d/m/y H:i:s" }}</td>
+
+                                            </tr>
+                                            {%endif%}
+                                        {%endfor%}
+                                    {%endif%}
+                                  </tbody>
+                                </table>
+
+                </div>
+              </div>
+            </div>
+            {% endfor%}
+            {% endif%}
+
+
+            </div>
+      </div>
 </div>
 
 <!--     <script src="js/index.js"></script> -->
-
+<script>
+  $(document).ready(function(){
+      var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
+      socket.on('my response', function(msg) {
+          alert('Received: ' + msg.data);
+      });  
+  });
+</script>
 </body>
 </html>

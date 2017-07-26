@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'part_management.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'Django',
+        'NAME': 'Django_test',
         'USER': 'user01',
         'PASSWORD': 'SpareParts3D#',
         'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
@@ -117,8 +117,20 @@ USE_L10N = True
 
 USE_TZ = True
 
+# login redirection
+LOGIN_REDIRECT_URL = '/parts/'
+LOGIN_URL = '/login/'
+
+MEDIA_ROOT='/home/user01/SpareParts_Database/root/'
+MEDIA_URL='/media/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT='http://192.168.0.20:8000/static/parts/'
+# STATIC_ROOT='http://192.168.0.20:9000/static/parts/'
+# Add these new lines
+# STATICFILES_DIRS = (
+#     os.path.join(BASE_DIR, 'static'),
+# )
+#
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

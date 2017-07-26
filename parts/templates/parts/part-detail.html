@@ -1,6 +1,6 @@
 <!-- source code -->
 <!-- https://github.com/BlackrockDigital/startbootstrap-sb-admin -->
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,58 +13,314 @@
     {% load staticfiles %}
     <title>Part Detail</title>
     <!-- Bootstrap Core CSS -->
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <!-- Custom CSS -->
-    <link href="{% static 'css/sb-admin.css' %}" rel="stylesheet">
+    <link href="{% static 'parts/css/sb-admin.css' %}" rel="stylesheet">
     <!-- Morris Charts CSS -->
-    <link href="{% static 'css/plugins/morris.css' %}" rel="stylesheet">
+    <link href="{% static 'parts/css/plugins/morris.css' %}" rel="stylesheet">
     <!-- Custom Fonts -->
-    <link href="{% static 'font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'parts/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+    <!-- <link href="{% static 'parts/css/dropzone.css' %}" rel="stylesheet" type="text/css"> -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <link rel="shortcut icon" type="image/png" href="{% static 'parts/favicon.ico' %}"/>
+
 </head>
 
 <body>
 
-    <div id="wrapper">
+    <!-- <div id="wrapper"> -->
 
         <!-- Navigation1 -->
         {% include "utils/navbar.html" %}
-        {% include "utils/navbar1.html" %}
+
 
         <div id="page-wrapper">
 
             <div class="container-fluid">
 
-                <!-- Page Heading -->
-                <div class="row">
-                    <div class="col-lg-12">
-                        <h1 class="page-header">
-                            Dashboard <small>Statistics Overview</small>
-                        </h1>
-                        <ol class="breadcrumb">
-                            <li class="active">
-                                <i class="fa fa-dashboard"></i> Dashboard
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-                <!-- /.row -->
-
+                <!-- /.row alert-->
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="alert alert-info alert-dismissable">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                            <i class="fa fa-info-circle"></i>  <strong>Like SB Admin?</strong> Try out <a href="http://startbootstrap.com/template-overviews/sb-admin-2" class="alert-link">SB Admin 2</a> for additional features!
+                            <i class="fa fa-info-circle"></i>  <strong>Like this awesome cloud ?</strong> Give <a href="mailto:thibault.de-saint-sernin@sp3d.co?Subject=Cloud%20feedback" class="alert-link">Feedback</a> to the admin !
                         </div>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-lg-4 text-center"><h5><b>OEM : </b>{{part.oem_name}}</h5></div>
+                    <div class="col-lg-4 text-center"><h5><b>Part Number :  </b>{{part.part_number}}</h5></div>
+                    <div class="col-lg-4 text-center"><h5><b>Part Id : </b>{{part.id}}</h5></div>
+                </div>
+            </br>
+
+
+
+                <div class="row">
+
+                    <div class="col-lg-12">
+                        <!-- <form action="{{part.id}}/upload-image/" class="dropzone" id="my-awesome-dropzone">
+                            {% csrf_token %} -->
+                        <div class="panel panel-default">
+
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-file-picture-o"></i> Pictures</h3>
+                            </div>
+
+                            <div class="panel-body dropzone" action="{{part.id}}/upload-image/" id="image-dropzone">
+                                <div class="dz-message" data-dz-message><span>DROP THAT  HERE</span></div>
+
+                                <!-- <div id="previews" class="dropzone-previews"></div> -->
+                                <!-- { include "utils/img_upload_preview.html" } -->
+                                <!-- <img src="{{ MEDIA_URL }}"+"{{ image_url }}" class="img-rounded" alt="Cinque Terre" width="304" height="236"> -->
+                                {% if image_list %}
+                                    {% for image in image_list %}
+                                    <div class="image-container">
+                                    <img src="/media/{{ image.file_path }}" class="img-rounded" alt="" width="" height="236">
+                                    <button type="button" value="{{image.id}}" class="btn btn-danger btn-circle pull-right delete-image"><i class="glyphicon glyphicon-remove"></i></button>
+                                    </div>
+                                    {%endfor%}
+                                {% endif %}
+                                <!-- <button id="clickable">Click me to select files</button> -->
+                                <!-- <form action="/file-upload" id="picture-dropzone" class="dropzone"></form> -->
+                            </div>
+                        </div>
+                    <!-- </form> -->
+                    </div>
+
+                </div>
+
+                <div class="row ">
+                    <div class="col-lg-12 clearfix">
+                        {% if permission %}
+                        {%if not part.checked_out%}
+                            {% include "utils/modals/new_cad.html" %}
+                        {%endif%}
+                        {%endif%}
+                    </div>
+                </div>
+                <br/>
                 <!-- /.row -->
+                <div class="row">
+
+                    <!-- cad and 3fms -->
+                    <div class="col-lg-12">
+
+                        <div class="panel-group" id="accordion">
+                            {% if cad_list %}
+                            {% for cad in cad_list %}
+                            <div class="panel panel-default">
+
+                              <div class="panel-heading clearfix">
+
+
+                                    <h4 class="panel-title ">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#{{cad.id}}">
+                                      <i class="fa fa-cube"></i> &nbsp {{cad.name}}
+                                      </a>
+                                      {% if permission %}
+                                      {%if not part.checked_out%}
+                                          {% include "utils/modals/add-3mf.html" %}
+                                          {% include "utils/modals/checkout_cad.html" %}
+                                      {%endif%}
+                                      {%endif%}
+
+                                    </h4>
+
+
+                              </div>
+
+                                <div id="{{cad.id}}" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <table  class="table table-condensed table-bordered table-hover" data-toggle="table"   data-sort-order="desc" data-search="true" data-sort-name="" data-search-text="">
+                                          <thead >
+                                                <tr>
+                                                    <th data-field="id" data-sortable="true" class="col-xs-2">id</th>
+                                                    <th data-field="amf" data-sortable="false" class="col-xs-2">amf</th>
+                                                    <th data-field="config" data-sortable="true" class="col-xs-2">config</th>
+                                                    <th data-field="configb" data-sortable="true" class="col-xs-2">configb</th>
+                                                    <th data-field="date" data-sortable="true" class="col-xs-2">date</th>
+                                                    <th data-field="creator" data-sortable="true" class="col-xs-2">by</th>
+
+                                                </tr>
+                                          </thead>
+                                          <tbody>
+                                              {% if tmf_per_cad %}
+                                                  {% for key, value in tmf_per_cad.items %}
+                                                      {% if key == cad.id %}
+                                                          {% for tmf in value %}
+                                                              <tr>
+                                                                  <td>{{tmf.id}}</td>
+                                                                  <td>{{tmf.name_amf}}</td>
+                                                                  <td>{{tmf.name_config}}</td>
+                                                                  <td>{{tmf.name_configb}}</td>
+                                                                  <td>{{tmf.creation_date}}</td>
+                                                                  <td>{{tmf.id_creator}}</td>
+                                                              </tr>
+                                                          {%endfor%}
+                                                      {% endif %}
+                                                  {%endfor%}
+                                              {% endif %}
+                                          </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor%}
+                            {% endif%}
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+                <div class="row">
+
+                </div>
+
+
+
+
+                <!-- /.row CAD FILES-->
+                <!-- <div class="row">
+                    <div class="col-lg-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> CAD </h3>
+                            </div>
+                            <div class="panel-body">
+                                <form class="form-inline" action="{{part.id}}/upload-cad/" method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                        <input class="form-control-file" type="file"  accept=".sldasm,.slddrw,.sldprt" name="cad" aria-describedby="fileHelp">
+                                        <button class="btn btn-primary" type="submit" value="Upload CAD" name="submit">Upload</button>
+                                </form>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>id</th>
+                                                <th>name</th>
+                                                <th>date</th>
+                                                <th>by</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if cad_list %}
+                                            {% for cad in cad_list %}
+                                            <tr>
+                                                <td>{{cad.id}}</td>
+                                                <td>{{cad.name}}</td>
+                                                <td>{{cad.creation_date}}</td>
+                                                <td>{{cad.id_creator}}</td>
+                                            </tr>
+                                            {%endfor%}
+                                            {% endif %}
+                                    </table>
+                                </div>
+                                <div class="text-right">
+                                    <a href="#">View All Transactions <i class="fa fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
+
+
+            <!-- /. AMF FILES-->
+                <!-- <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> AMF </h3>
+                        </div>
+                        <div class="panel-body">
+                            <form class="form-inline" action="{{part.id}}/upload-amf/" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                    <input class="form-control-file" type="file" name="amf"  accept=".amf" aria-describedby="fileHelp">
+                                    <button class="btn btn-primary" type="submit" value="Upload AMF" name="submit">Upload</button>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>id</th>
+                                            <th>name</th>
+                                            <th>date</th>
+                                            <th>by</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if amf_list %}
+                                        {% for amf in amf_list %}
+                                        <tr>
+                                            <td>{{amf.id}}</td>
+                                            <td>{{amf.name}}</td>
+                                            <td>{{amf.creation_date}}</td>
+                                            <td>{{amf.id_creator}}</td>
+                                        </tr>
+                                        {%endfor%}
+                                        {% endif %}
+                                </table>
+                            </div>
+                            <div class="text-right">
+                                <a href="#">View All Transactions <i class="fa fa-arrow-circle-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- CONFIG -->
+                <!-- <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> CONFIG </h3>
+                        </div>
+                        <div class="panel-body">
+                            <form class="form-inline" action="{{part.id}}/upload-config/" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                    <input class="form-control-file" type="file"  accept=".ini" name="config" aria-describedby="fileHelp">
+                                    <button class="btn btn-primary" type="submit" value="Upload AMF" name="submit">Upload</button>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>id</th>
+                                            <th>name</th>
+                                            <th>date</th>
+                                            <th>by</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if config_list %}
+                                        {% for config in config_list %}
+                                        <tr>
+                                            <td>{{config.id}}</td>
+                                            <td>{{config.name}}</td>
+                                            <td>{{config.creation_date}}</td>
+                                            <td>{{config.id_creator}}</td>
+                                        </tr>
+                                        {%endfor%}
+                                        {% endif %}
+                                </table>
+                            </div>
+                            <div class="text-right">
+                                <a href="#">View All Transactions <i class="fa fa-arrow-circle-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> -->
+        <!-- /.row -->
 
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
@@ -232,82 +488,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Transactions Panel</h3>
-                            </div>
-                            <div class="panel-body">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Order #</th>
-                                                <th>Order Date</th>
-                                                <th>Order Time</th>
-                                                <th>Amount (USD)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>3326</td>
-                                                <td>10/21/2013</td>
-                                                <td>3:29 PM</td>
-                                                <td>$321.33</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3325</td>
-                                                <td>10/21/2013</td>
-                                                <td>3:20 PM</td>
-                                                <td>$234.34</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3324</td>
-                                                <td>10/21/2013</td>
-                                                <td>3:03 PM</td>
-                                                <td>$724.17</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3323</td>
-                                                <td>10/21/2013</td>
-                                                <td>3:00 PM</td>
-                                                <td>$23.71</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3322</td>
-                                                <td>10/21/2013</td>
-                                                <td>2:49 PM</td>
-                                                <td>$8345.23</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3321</td>
-                                                <td>10/21/2013</td>
-                                                <td>2:23 PM</td>
-                                                <td>$245.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3320</td>
-                                                <td>10/21/2013</td>
-                                                <td>2:15 PM</td>
-                                                <td>$5663.54</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3319</td>
-                                                <td>10/21/2013</td>
-                                                <td>2:13 PM</td>
-                                                <td>$943.45</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="text-right">
-                                    <a href="#">View All Transactions <i class="fa fa-arrow-circle-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                <!-- /.row -->
 
             </div>
             <!-- /.container-fluid -->
@@ -315,19 +496,24 @@
         </div>
         <!-- /#page-wrapper -->
 
-    </div>
+    <!-- </div> -->
     <!-- /#wrapper -->
-
+    <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
     <!-- jQuery -->
-    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'parts/js/jquery.js' %}"></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- <script src="{% static 'parts/js/bootstrap.min.js' %}"></script> -->
 
     <!-- Morris Charts JavaScript -->
-    <script src="{% static 'js/plugins/morris/raphael.min.js' %}"></script>
-    <script src="{% static 'js/plugins/morris/morris.min.js' %}"></script>
-    <script src="{% static 'js/plugins/morris/morris-data.js' %}"></script>
+    <script src="{% static 'parts/js/plugins/morris/raphael.min.js' %}"></script>
+    <!-- <script src="{% static 'js/plugins/morris/morris.min.js' %}"></script> -->
+    <!-- <script src="{% static 'js/plugins/morris/morris-data.js' %}"></script> -->
+    <script src="{% static 'parts/js/dropzone.js' %}"></script>
+    <!-- <script src="{% static 'parts/js/picture_dropzone.js' %}"></script> -->
+    <script src="{% static 'parts/js/part-detail.js' %}"></script>
 
 </body>
 

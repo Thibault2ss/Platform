@@ -1,0 +1,79 @@
+<!-- modal-->
+
+          <!-- Trigger the modal with a button -->
+<div class="row">
+            <button type="button" id="new_cad" class="btn btn-success pull-right" data-toggle="modal" data-target="#add_cad"><i class="fa fa-share-alt" aria-hidden="true"></i></button>
+            <!-- Modal -->
+            <div id="add_cad" class="modal fade" role="dialog">
+              <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">New CAD</h4>
+                  </div>
+                  <div class="modal-body">
+
+
+
+                      <form action="{{part.id}}/upload-cad/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
+                         <input type="hidden" name="part_id" value="{{part.id}}">
+
+                        <div class="form-group">
+                          <label for="cad">Add your CAD file</label>
+                          <input type="file" class="form-control-file" id= "cad" name="cad" aria-describedby="fileHelp", accept=".sldasm,.slddrw,.sldprt", required>
+                          <label class="form-check-label text-light">
+
+                          </label>
+                        </div>
+
+                        <h5>Which config Bundle would you like to start from ?</h5>
+                        </br>
+
+                        <span>Default</span>
+                          <div class="form-group">
+
+                                  <input id="default" name="tmf" value=0 type="radio" checked>
+                                  <label class="" for="default">Default config</label>&nbsp&nbsp&nbsp
+
+                          </div>
+                {%if cad_list%}
+                  {% if tmf_per_cad %}
+                      {%for cad in cad_list%}
+                      <span>{{cad.name}}</span>
+                        <div class="form-group">
+                              {% for key, value in tmf_per_cad.items %}
+                                  {% if key == cad.id %}
+                                      {% for tmf in value %}
+                                <input id="{{tmf.id}}" name="tmf" value={{tmf.id}} type="radio">
+                                <label class="" for="{{tmf.id}}">{{tmf.id}}</label>&nbsp&nbsp&nbsp
+                            {%endfor%}
+                            {%endif%}
+                        {%endfor%}
+                        </div>
+
+                    {%endfor%}
+                    {%endif%}
+                {%endif%}
+
+
+                        <button type="submit" class="btn btn-primary pull-right">Upload New CAD</button>
+
+                      </form>
+
+
+
+
+                  </div>
+                  <div class="modal-footer">
+
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+        </div>
+
+<!-- end of modal  -->
