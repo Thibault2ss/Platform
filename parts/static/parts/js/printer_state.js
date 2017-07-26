@@ -84,25 +84,10 @@ $(document).ready(function(){
         }
     });
 
+
     for (var id in myPrinters){
         print_with(id);
     }
 
-    // $replicator_link.click(function(){
-    //     var part_id = $(this).attr('id');
-    //     $.ajax({
-    //         url: './ajax/print/',
-    //         data:{
-    //             'printer_id':1,
-    //             'part_id':part_id
-    //         },
-    //         dataType:'json',
-    //         success:function(data){
-    //             if (data.gcode_sent){
-    //                 console.log(data.gcode_sent)
-    //             }
-    //         }
-    //     });
-    // });
 
 });

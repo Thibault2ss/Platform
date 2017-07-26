@@ -18,7 +18,7 @@
 <body>
   {% include "utils/navbar.html" %}
   <div id="catalogue">
-{% include "utils/modal.html" %}
+{% include "utils/modals/add-part.html" %}
   <h1>Parts Catalogue</h1>
   <!-- Responsive table starts here -->
   <!-- For correct display on small screens you must add 'data-title' to each 'td' in your table -->
@@ -167,6 +167,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.widgets.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+
     <script src="{% static 'parts/js/printer_state.js' %}"></script>
     <script src="{% static 'parts/js/part-search.js' %}"></script>
     {% if error %}

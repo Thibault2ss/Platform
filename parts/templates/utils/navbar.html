@@ -57,15 +57,26 @@
           </script>
 
           <ul class="nav navbar-nav navbar-right top-nav">
+          {% if permission %}
+                {% if part %}
+                    {% with part.id|stringformat:"s" as part_id %}
+                        {% with "/parts/part-detail/"|add:part_id as part_detail_path %}
+                            {% if request.path == part_detail_path %}
+                            <!-- we checked that we are on a part detail page -->
 
-            {% if part %}
-                {% with part.id|stringformat:"s" as part_id %}
-                    {% with "/parts/part-detail/"|add:part_id as part_detail_path %}
-                        {% if request.path == part_detail_path %}
-                        <li><a href="{{part.id}}/local">CHECKOUT PART</a></li>
-                        {%endif%}
+                            <!-- get the username of the one who checked out -->
+                                {% if part.checked_out %}
+                                    {%for user in users%}
+                                        {%if user.id == part.checked_out_by%}
+                                            <li><a>Checked out by {{user.first_name}}</a></li>
+                                        {%endif%}
+                                    {%endfor%}
+                                {%endif%}
+
+                            {%endif%}
+                        {%endwith%}
                     {%endwith%}
-                {%endwith%}
+                {% endif %}
             {% endif %}
 
 

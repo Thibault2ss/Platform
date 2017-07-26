@@ -17,6 +17,8 @@ class SP3D_Part(models.Model):
     id_creator = models.IntegerField(default=0)
     notes=models.CharField(max_length=1000, default = '')
     permissions=models.CharField(max_length=200, default = '')
+    checked_out=models.IntegerField(default=0)
+    checked_out_by = models.IntegerField(default=0)
 
     def __str__(self):
         return "Part number " + str(self.id)
@@ -75,10 +77,45 @@ class SP3D_CAD(models.Model):
     id_part = models.IntegerField(default=0)
     id_creator=models.IntegerField(default=0)
     is_oem_cad=models.IntegerField(default=0)
+    first_config = models.IntegerField(default=0)
     notes=models.CharField(max_length=1000, default = '')
 
     def __str__(self):
         return "CAD file Id " + str(self.id)
+
+class SP3D_STL(models.Model):
+
+    creation_date = models.DateTimeField('date published')
+    name = models.CharField(max_length=200, default = '')
+    root_path = models.CharField(max_length=200, default = '/home/user01/SpareParts_Database/root/')
+    file_path = models.CharField(max_length=200, default = '')
+    id_cad = models.IntegerField(default=0)
+    id_creator=models.IntegerField(default=0)
+    notes=models.CharField(max_length=1000, default = '')
+
+    def __str__(self):
+        return "STL file Id " + str(self.id)
+
+class SP3D_3MF(models.Model):
+    creation_date = models.DateTimeField('date published')
+    id_cad = models.IntegerField(default=0)
+
+    name_amf = models.CharField(max_length=200, default = '')
+    name_config = models.CharField(max_length=200, default = '')
+    name_configb = models.CharField(max_length=200, default = '')
+    name_gcode = models.CharField(max_length=200, default = '')
+
+    root_path = models.CharField(max_length=200, default = '/home/user01/SpareParts_Database/root/')
+    amf_path = models.CharField(max_length=200, default = '')
+    config_path = models.CharField(max_length=200, default = '')
+    configb_path = models.CharField(max_length=200, default = '')
+    gcode_path = models.CharField(max_length=200, default = '')
+
+    id_creator=models.IntegerField(default=0)
+    notes=models.CharField(max_length=1000, default = '')
+
+    def __str__(self):
+        return "3MF Id " + str(self.id)
 
 class SP3D_AMF(models.Model):
 
