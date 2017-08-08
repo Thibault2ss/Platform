@@ -1,7 +1,7 @@
 <!-- modal-->
 
           <!-- Trigger the modal with a button -->
-            <button type="button" class="btn btn-success btn-circle pull-right" data-toggle="modal" data-target="#add_3mf_to_{{cad.id}}"><i class="glyphicon glyphicon-plus"></i></button>
+            <button type="button" class="btn btn-warning btn-circle pull-right" data-toggle="modal" data-target="#add_3mf_to_{{cad.id}}"><i class="glyphicon glyphicon-plus"></i></button>
             <!-- Modal -->
             <div id="add_3mf_to_{{cad.id}}" class="modal fade" role="dialog">
               <div class="modal-dialog">
@@ -20,6 +20,7 @@
 
                       <form action="add-3mf/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
                          <input type="hidden" name="cad_id" value="{{cad.id}}">
+                         <input type="hidden" name="part_id" value="{{part.id}}">
 
                         <div class="form-group">
                           <label for="cad">AMF</label>
@@ -51,6 +52,11 @@
                           <label class="form-check-label text-light">
 
                           </label>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="notes">Notes</label>
+                          <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary pull-right">Submit</button>

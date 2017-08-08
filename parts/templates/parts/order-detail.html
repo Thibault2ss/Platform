@@ -1,0 +1,169 @@
+{% load static %}
+{% load tz %}
+{% load app_filters %}
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <!-- don't chnge title, linked to javascript -->
+  <title>SpareParts3D - Orders</title>
+  <!-- Bootstrap css and js -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+  {% load staticfiles %}
+  <link href="{% static 'parts/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'parts/css/style.css' %}" />
+  <link href="{% static 'parts/css/sb-admin.css' %}" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
+  <link rel="shortcut icon" type="image/png" href="{% static 'parts/favicon.ico' %}"/>
+  <link href="{% static 'parts/css/bootstrap-editable.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+
+</head>
+<body>
+  {% include "utils/navbar.html" %}
+
+  <div id="catalogue">
+
+
+
+<div class="row">
+        <h1>Order Detail</h1>
+</div>
+
+<div class="row">
+    <!-- RFQ -->
+    <div class="col-lg-4 col-sm-6">
+        <div class="panel panel-default ">
+            <div class="panel-heading clearfix">
+                {%if permission == 1%}
+                {%include "utils/modals/update-order.html"%}
+                {%endif%}
+                <h3 style="margin-top:5px" class="panel-title pull-right">Order<i class="fa fa-fw fa-info-circle"></i></h3>
+            </div>
+                <div class="list-group">
+
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-lock"></i>
+                        <span> <b>Order id: </b> {{order.id}} </span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-arrow-right"></i>
+                        <span> <b>Name: </b> <span id="order-name">{{order.name}}</span></span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-circle-o"></i>
+                        <span> <b>Type: </b> <span id="order-type">{{order.type}}</span></span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-calendar"></i>
+                        <span class=""><b>Creation Date:</b> {{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-calendar-o"></i>
+                        <span><b style="color:red">Due Date:</b> <span id="order-due-date">{{order.due_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span></span>
+                        <span class="badge due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                    </div>
+                    {%for user in users%}
+                    {%if user.id == order.assigned_to%}
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-user"></i>
+                        <span id="order-assigned-to" >{{user.id}}</span>
+                        <span> <b>Assigned to #: </b>{{user.first_name}} {{user.last_name}}</span>
+                    </div>
+                    {%endif%}
+                    {%endfor%}
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-edit"></i>
+                        <span><b>Notes: </b><span class="notes-editable" id="order-notes" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</span></span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-asterisk"></i>
+                        <span> <b>Quote #: </b><span id="order-quote-number">{{order.quote_number}}</span></span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-asterisk"></i>
+                        <span> <b>PO #: </b><span id="order-po-number">{{order.po_number}}</span></span>
+                    </div>
+
+                    {%if request.user.id == 1%}
+                    <!-- <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button> -->
+                    {%endif%}
+
+
+                </div>
+        </div>
+    </div>
+    <!-- RFQ -->
+    <div class="col-lg-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+
+                <h3 class="panel-title pull-right">Client<i class="fa fa-fw fa-info-circle"></i></h3>
+            </div>
+                <div class="list-group">
+
+                    {%for client in clients%}
+                    {%if client.id == order.id_client%}
+
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-coffee"></i>
+                        <span> <b>Client: </b>{{client.name}}</span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-user"></i>
+                        <span> <b>Contact: </b>{{client.primary_contact_name}}</span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-at"></i>
+                        <span> <b>email: </b>{{client.primary_contact_email}}</span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-cog"></i>
+                        <span> <b>Activity: </b>{{client.activity}}</span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-home"></i>
+                        <span> <b>Address: </b>{{client.address}}</span>
+                    </div>
+                    {%endif%}
+                    {%endfor%}
+                </div>
+            </div>
+        </div>
+</div>
+</div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+
+    </script>
+    <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!-- <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.9.1/jquery.tablesorter.min.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.widgets.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+
+    <script src="{% static 'parts/js/printer_state.js' %}"></script>
+    <script src="{% static 'parts/js/orders.js' %}"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+
+    <script src="{% static 'parts/js/bootstrap-editable.js' %}"></script>
+    {% if error %}
+        <script>
+        alert(error);
+        </script>
+    {% endif %}
+<!-- <script>
+  $(document).ready(function(){
+      var socket = io.connect('http://192.168.0.133:5000/test');
+      socket.on('my response', function(msg) {
+          console.log('Received: ' + msg.data);
+      });
+  });
+</script> -->
+</body>
+</html>

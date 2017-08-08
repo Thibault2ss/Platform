@@ -1,0 +1,89 @@
+
+          <!-- Trigger the modal with a button -->
+            <!-- <button id="update_order" type="button" style="margin-right:10px" class="btn btn-info btn-lg btn-sm pull-right" data-toggle="modal" data-target="#modal-add-order">+ order</button> -->
+            <button id="update_order" type="button" class="btn btn-default btn-circle" style="margin-left:0px" data-toggle="modal" data-target="#modal-update-order"><i class="fa fa-fw fa-edit"></i></button>
+            <!-- Modal -->
+            <div id="modal-update-order" class="modal fade" role="dialog">
+              <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Update Order</h4>
+                  </div>
+                  <div class="modal-body">
+
+                      <form action="/parts/update-order/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
+                          <input type="hidden" name="order_id" value="{{order.id}}">
+                          <div class="form-group">
+                            <label for="name">Order Name</label>
+                            <input type="text" class="form-control" name="name" id="name" aria-describedby="" placeholder="Enter an Explicit order name" required>
+                            <small id="" class="form-text text-muted"></small>
+                          </div>
+
+
+                        <div class="form-group">
+                          <label for="type">Type</label>
+                          <select class="form-control" name="type" id="type" required>
+                                    <option value="indus">Industrialisation</option>
+                                    <option value="prod">Production</option>
+                                    <option value="quote">Quote</option>
+                                    <option value="sample">Sample</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group"> <!-- Date input -->
+                            <label class="control-label" for="date">Due date</label>
+                            <input class="form-control" id="date" name="date" placeholder="MM/DD/YYYY" type="text" required/>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="quote-number">Quote number</label>
+                          <div class="input-group">
+                              <input type="text" class="form-control" name="quote-number" id="quote-number" aria-describedby="" placeholder="Enter Quote # or generate">
+                              <span class="input-group-btn">
+                                  <button class="btn btn-default" type="button" id="po-number">generate</button>
+                              </span>
+                          </div>
+                          <small id="" class="form-text text-muted"></small>
+                        </div>
+
+
+                        <div class="form-group">
+                          <label for="po-number">PO number</label>
+                          <div class="input-group">
+                              <input type="text" class="form-control" name="po-number" id="po-number" aria-describedby="" placeholder="Enter PO # or generate">
+                              <span class="input-group-btn">
+                                  <button class="btn btn-default" type="button" id="po-number">generate</button>
+                              </span>
+                          </div>
+                          <small id="" class="form-text text-muted"></small>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="type">Assign to </label>
+                          <select class="form-control" name="assign-to" id="assign-to" required>
+                              {%if users%}
+                              {%for user in users%}
+                                    <option value="{{user.id}}">{{user.first_name}} {{user.last_name}}</option>
+                                {%endfor%}
+                                {%endif%}
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="notes">Notes</label>
+                          <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary pull-right">Update Order</button>
+                      </form>
+
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
