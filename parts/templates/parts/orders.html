@@ -1,0 +1,191 @@
+{% load static %}
+{% load tz %}
+{% load app_filters %}
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <!-- don't chnge title, linked to javascript -->
+  <title>SpareParts3D - Orders</title>
+  <!-- Bootstrap css and js -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+  {% load staticfiles %}
+  <link href="{% static 'parts/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'parts/css/style.css' %}" />
+  <link href="{% static 'parts/css/sb-admin.css' %}" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
+  <link rel="shortcut icon" type="image/png" href="{% static 'parts/favicon.ico' %}"/>
+  <link href="{% static 'parts/css/bootstrap-editable.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+
+</head>
+<body>
+  {% include "utils/navbar.html" %}
+
+  <div id="catalogue">
+
+
+
+<div class="row">
+
+
+    {%include "utils/modals/add-client.html" %}
+    {%include "utils/modals/add-order.html" %}
+        <h1>Orders</h1>
+
+
+</div>
+
+
+<div class="row">
+    <!-- RFQ -->
+    <div class="col-lg-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title"><i class="fa fa-tasks fa-fw"></i> RFQ</h3>
+            </div>
+                <div class="list-group">
+                    {% if orders %}
+                    {% for order in orders %}
+                    {%if order.type == 'quote'%}
+                    <div href="" class="list-group-item">
+                        <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
+                        <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="order-detail/{{order.id}}"><i class="fa fa-fw fa-dollar"></i> {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                        <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</small>
+                        <small class="pull-right">{{order.quote_number}}</small>
+                    </div>
+                    {%if superpermission%}
+                    <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
+                    {%endif%}
+                    {%endif%}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+        </div>
+    </div>
+
+
+<!-- Production -->
+    <div class="col-lg-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title"><i class="fa fa-tasks fa-fw"></i> Production</h3>
+            </div>
+                <div class="list-group">
+                    {% if orders %}
+                    {% for order in orders %}
+                    {%if order.type == 'prod'%}
+                    <div href="" class="list-group-item">
+                        <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
+                        <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="order-detail/{{order.id}}"><i class="fa fa-fw fa-cubes"></i> {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                        <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</small>
+                        <small class="pull-right">{{order.po_number}}</small>
+                    </div>
+                    {%if superpermission%}
+                    <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
+                    {%endif%}
+                    {%endif%}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+        </div>
+    </div>
+
+
+<!-- Indus -->
+    <div class="col-lg-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title"><i class="fa fa-tasks fa-fw"></i> Industrialisation</h3>
+            </div>
+                <div class="list-group">
+                    {% if orders %}
+                    {% for order in orders %}
+                    {%if order.type == 'indus'%}
+                    <div href="" class="list-group-item">
+                        <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
+                        <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="order-detail/{{order.id}}"><i class="fa fa-fw fa-wrench"></i> {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                        <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</small>
+                        <!-- <small class="pull-right">{{order.quote_number}}</small> -->
+                    </div>
+                    {%if superpermission%}
+                    <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
+                    {%endif%}
+                    {%endif%}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <!-- Indus -->
+        <div class="col-lg-4 col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <h3 class="panel-title"><i class="fa fa-tasks fa-fw"></i> Sample</h3>
+                </div>
+                    <div class="list-group">
+                        {% if orders %}
+                        {% for order in orders %}
+                        {%if order.type == 'sample'%}
+                        <div href="" class="list-group-item">
+                            <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                            <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
+                            <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                            <h5 style="margin-bottom:5px;margin-top:0px"><a href="order-detail/{{order.id}}"><i class="fa fa-fw fa-cube"></i> {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                            <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</small>
+                            <!-- <small class="pull-right">{{order.quote_number}}</small> -->
+                        </div>
+                        {%if superpermission%}
+                        <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
+                        {%endif%}
+                        {%endif%}
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+            </div>
+        </div>
+
+</div>
+</div>
+</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+
+    </script>
+    <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!-- <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.9.1/jquery.tablesorter.min.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.widgets.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+
+    <script src="{% static 'parts/js/printer_state.js' %}"></script>
+    <script src="{% static 'parts/js/orders.js' %}"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+
+    <script src="{% static 'parts/js/bootstrap-editable.js' %}"></script>
+    {% if error %}
+        <script>
+        alert(error);
+        </script>
+    {% endif %}
+<!-- <script>
+  $(document).ready(function(){
+      var socket = io.connect('http://192.168.0.133:5000/test');
+      socket.on('my response', function(msg) {
+          console.log('Received: ' + msg.data);
+      });
+  });
+</script> -->
+</body>
+</html>

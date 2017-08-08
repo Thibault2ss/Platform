@@ -42,8 +42,8 @@ body {
     background-color: #12356d;
 }
 #catalogue {
-  margin: 20px auto;
-  padding-top: 20px;
+  margin: 0px auto;
+  padding-top: 0px;
   max-width: 2000px;
 }
 #catalogue h1 {
@@ -268,4 +268,24 @@ body {
   .table-responsive-vertical .table-hover.table-mc-deep-orange > tbody > tr > td:hover {
     background-color: #ffccbc;
   }
+}
+
+.label-1 {
+    background-color: #aaaaaa
+}
+.label-2 {
+    background-color: #0044CC
+}
+.label-3 {
+    background-color: #51A351
+}
+.label-4 {
+    background-color: #0088CC
+
+}
+.label-5 {
+    background-color: #F89406
+}
+.label-6 {
+    background-color: #BD362F
 }

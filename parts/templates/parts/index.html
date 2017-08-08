@@ -1,8 +1,10 @@
 {% load static %}
+{% load tz %}
 <!DOCTYPE html>
 <html >
 <head>
   <meta charset="UTF-8">
+  <!-- don't chnge title, linked to javascript -->
   <title>SpareParts3D - Catalogue</title>
   <!-- Bootstrap css and js -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -11,65 +13,35 @@
   {% load staticfiles %}
   <link href="{% static 'parts/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
   <link rel="stylesheet" type="text/css" href="{% static 'parts/css/style.css' %}" />
+  <link href="{% static 'parts/css/sb-admin.css' %}" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
   <link rel="shortcut icon" type="image/png" href="{% static 'parts/favicon.ico' %}"/>
 
 </head>
 <body>
   {% include "utils/navbar.html" %}
+
   <div id="catalogue">
-{% include "utils/modals/add-part.html" %}
+      <div class="row">
+
+          <div class="col-lg-11">
+              {% include "utils/statusbar.html" %}
+          </div>
+          <div class="col-lg-1">
+              {% include "utils/modals/add-part.html" %}
+          </div>
+      </div>
+      {%include "utils/printer_statusbar.html"%}
+      {%if user.id == 1%}
+      <a href="/parts/orders/">orders</a>
+      {%endif%}
+<!-- <a href="test/">test</a> -->
+
   <h1>Parts Catalogue</h1>
   <!-- Responsive table starts here -->
   <!-- For correct display on small screens you must add 'data-title' to each 'td' in your table -->
   <div class="table-responsive-vertical shadow-z-1">
-  <!-- Table starts here -->
-  <!-- <table id="table" class="table table-hover table-mc-orange tablesorter">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>amf</th>
-          <th>config</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Download</th>
-          <th>Slice</th>
-          <th>Print(old)</th>
-          <th>Print</th>
-          <th>Print</th>
-          <th>Printers</th>
-        </tr>
-      </thead>
-      <tbody>
-          {% if latest_part_list %}
-              {% for part in latest_part_list %}
-              <tr>
-                  <td data-title="ID"><a href="{% url 'parts:part_detail' id_part=part.id %}">{{ part.id }}</a></td>
-                  <td data-title="Name">{{ part.oem_number }}</td>
-                  <td data-title="amf">{{ part.amf }}</td>
-                  <td data-title="config">{{ part.config }}</td>
-                  <td data-title="Date">{{ part.creation_date|date:"d/m/Y H:i:s" }}</td>
-                  <td data-title="Status">{{ part.done }}</td>
-                  <td data-title="Download"><a href="{% url 'parts:download_amf' part.amf %}" download>AMF</a>,
-                                            <a href="{% url 'parts:download_config' part.config %}" download>CONFIG</a>,
-                                            {% if part.gcode %}
-                                            <a href="{% url 'parts:download_gcode' part.gcode %}" download>GCODE</a>
-                                            {% endif %}</td>
-                  <td data-title="Slice"><a href="{% url 'parts:slice_and_download' part.id %}" download>Slice and Download</a></td>
-                  <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=1 %}">Replicator</a></td>
-                  <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=2 %}">C2</a></td>
-                  <td data-title="Print"><a href="{% url 'parts:print_from_gcode' id_part=part.id id_printer=3 %}">Wanao</a></td>
-                  <td data-title="Print">{% include "utils/printer_dropdown.html" %}</td>
 
-              </tr>
-              {% endfor %}
-
-          {% else %}
-              <p>No polls are available.</p>
-          {% endif %}
-      </tbody>
-    </table> -->
   </div>
 <div class="row">
     <div class="col-lg-8 col-lg-offset-2">
@@ -97,11 +69,13 @@
                                   <thead >
                                     <tr>
                                       <th data-field="id" class="col-xs-0">id</th>
-                                      <th data-field="printers" data-sortable="false" class="col-xs-0">Print</th>
-                                      <th data-field="part_number" data-sortable="true" class="col-xs-6">Part Number</th>
+
+                                      <th data-field="part_number" data-sortable="true" class="col-xs-3">Part Number</th>
+                                      <th data-field="part_name" data-sortable="true" class="col-xs-3">Part Name</th>
                                       <th data-field="oem" data-sortable="false" class="col-xs-2">OEM</th>
-                                      <th data-field="created_by" data-sortable="false" class="col-xs-2">created by</th>
+                                      <th data-field="created_by" data-sortable="true" class="col-xs-1">created by</th>
                                       <th data-field="date" data-sortable="true" class="col-xs-2">on</th>
+                                      <th data-field="status" data-sortable="true" class="col-xs-1">Status</th>
 
                                     </tr>
                                   </thead>
@@ -111,11 +85,19 @@
                                             {%if part.id_oem == oem.id %}
                                             <tr class="{{class}}">
                                               <td scope="row" class="align-middle"><b>{{part.id}}</b></td>
-                                              <td data-title="Print">{% include "utils/printer_dropdown.html" %}</td>
+
                                               <td class="align-middle"><a href="{% url 'parts:part_detail' id_part=part.id %}">{{part.part_number}}</a></td>
+                                              <td class="align-middle"><a href="{% url 'parts:part_detail' id_part=part.id %}">{{part.part_name}}</a></td>
                                               <td class="align-middle">{{part.oem_name}}</td>
                                               <td class="align-middle">{%for user in users%}{%if user.id == part.id_creator%}{{user.username}}{%endif%}{%endfor%}</td>
-                                              <td class="align-middle">{{ part.creation_date|date:"d/m/y H:i:s" }}</td>
+                                              <td class="align-middle">{{ part.creation_date|timezone:"Asia/Singapore"|date:"d/m/y H:i:s" }}</td>
+                                              {% for status in status_eng_list %}
+                                              {% if status.id == part.status_eng %}
+                                              <td class="align-middle" class="">
+                                                  <span class="label label-{{status.id}}">{{status.name}}</span>
+                                              </td>
+                                              {% endif %}
+                                              {% endfor %}
 
                                             </tr>
                                             {%endif%}
@@ -135,8 +117,27 @@
       </div>
 </div>
 
-<!--     <script src="js/index.js"></script> -->
-<script>
+
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+
+    </script>
+    <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!-- <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.9.1/jquery.tablesorter.min.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.widgets.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+
+    <script src="{% static 'parts/js/printer_state.js' %}"></script>
+    <script src="{% static 'parts/js/part-search.js' %}"></script>
+    {% if error %}
+        <script>
+        alert(error);
+        </script>
+    {% endif %}
+<!-- <script>
   $(document).ready(function(){
       var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
       socket.on('my response', function(msg) {

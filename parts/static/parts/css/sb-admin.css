@@ -8,7 +8,7 @@
 
 body {
     margin-top: 100px;
-    background-color: #222;
+    background-color: #f5f5f5;
 }
 
 @media(min-width:768px) {
@@ -24,12 +24,30 @@ body {
 #page-wrapper {
     width: 100%;
     padding: 0;
-    background-color: #fff;
+    background-color: #f5f5f5;
 }
 
 .huge {
     font-size: 50px;
     line-height: normal;
+}
+.medium {
+    font-size: 20px;
+    line-height: normal;
+}
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.vertical-center {
+  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+  /*min-height: 100vh; /* These two lines are counted as one :-)       */*/
+
+  display: flex;
+  align-items: center;
 }
 
 @media(min-width:768px) {
@@ -229,6 +247,7 @@ ul.alert-dropdown {
 .btn-circle {
   width: 30px;
   height: 30px;
+  margin-left: 15px;
   text-align: center;
   padding: 6px 0;
   font-size: 12px;
@@ -270,4 +289,12 @@ ul.alert-dropdown {
 
 .dz-preview, .dz-message {
     display:none;
+}
+
+.part-notes{
+   width: 400px !important;
+}
+
+.order-notes{
+   width: 350px !important;
 }

@@ -2,15 +2,25 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
+
+class SP3D_Status_Eng(models.Model):
+    name = models.CharField(max_length=200, default = '')
+    def __str__(self):
+        return "Status id is " + str(self.id)
 
 class SP3D_Part(models.Model):
 
     creation_date = models.DateTimeField('date published')
     oem_name = models.CharField(max_length=200, default = '')
     part_number=models.CharField(max_length=200, default = '')
+    part_name = models.CharField(max_length=200, default = '')
     id_oem=models.IntegerField(default=0)
+    oem_part_number = models.CharField(max_length=200, default = '')
     amf = models.IntegerField(default=0)
     config = models.IntegerField(default=0)
     gcode = models.IntegerField(default=0)
@@ -19,9 +29,47 @@ class SP3D_Part(models.Model):
     permissions=models.CharField(max_length=200, default = '')
     checked_out=models.IntegerField(default=0)
     checked_out_by = models.IntegerField(default=0)
+    status_eng = models.IntegerField(default=1)
 
     def __str__(self):
         return "Part number " + str(self.id)
+
+class SP3D_Order(models.Model):
+
+    creation_date = models.DateTimeField('date published')
+    name = models.CharField(max_length=200, default = '')
+    type = models.CharField(max_length=200, default = '')
+    id_client = models.IntegerField(default=0)
+    quote_number = models.CharField(max_length=200, default = '')
+    po_number = models.CharField(max_length=200, default = '')
+    due_date = models.DateTimeField('date published', null=True)
+    assigned_to = models.IntegerField(default=0)
+    root_path = models.CharField(max_length=200, default = '')
+    parts = models.CharField(max_length=200, default = '')
+    quantities = models.CharField(max_length=200, default = '')
+    id_creator = models.IntegerField(default=0)
+    notes=models.CharField(max_length=1000, default = '')
+    permissions=models.CharField(max_length=200, default = '')
+    status_ord = models.IntegerField(default=1)
+    completion_date = models.DateTimeField('date published', null=True)
+    closed_by = models.IntegerField(default=0)
+
+    def __str__(self):
+        return "Order number " + str(self.id)
+
+class SP3D_Client(models.Model):
+
+    creation_date = models.DateTimeField('date published')
+    name = models.CharField(max_length=200, default = '')
+    primary_contact_name = models.CharField(max_length=200, default = '')
+    primary_contact_email = models.CharField(max_length=200, default = '')
+    address = models.CharField(max_length=200, default = '')
+    activity = models.CharField(max_length=200, default = '')
+    notes = models.CharField(max_length=200, default = '')
+
+    def __str__(self):
+        return "Client number " + str(self.id)
+
 
 class SP3D_Iteration(models.Model):
     iteration_id = models.IntegerField(default=0)
@@ -32,13 +80,28 @@ class SP3D_Iteration(models.Model):
     def __str__(self):
         return "Iteration number " + str(self.iteration_id)
 
+class SP3D_Status_Eng_History(models.Model):
+    part_id = models.IntegerField(default=0)
+    date = models.DateTimeField('date published')
+    id_status = models.IntegerField(default=1)
+    id_creator = models.IntegerField(default=0)
+    notes=models.CharField(max_length=1000, default = '')
+
+    def __str__(self):
+        return "Status Change Event id " + str(self.id)
+
 class SP3D_Print(models.Model):
 
     creation_date = models.DateTimeField('date published')
     id_part = models.IntegerField(default=0)
+    id_cad = models.IntegerField(default=0)
+    id_3mf = models.IntegerField(default=0)
     id_printer=models.IntegerField(default=0)
     log_id = models.IntegerField(default=0)
     done = models.IntegerField(default=0)
+    finished_date = models.DateTimeField('date published', null=True)
+    completed = models.IntegerField(default=0)
+    printing_time = models.IntegerField(null=True)
     id_creator=models.IntegerField(default=0)
     notes=models.CharField(max_length=1000, default = '')
 
@@ -96,6 +159,19 @@ class SP3D_STL(models.Model):
     def __str__(self):
         return "STL file Id " + str(self.id)
 
+class SP3D_CAD2D(models.Model):
+
+    creation_date = models.DateTimeField('date published')
+    name = models.CharField(max_length=200, default = '')
+    root_path = models.CharField(max_length=200, default = '/home/user01/SpareParts_Database/root/')
+    file_path = models.CharField(max_length=200, default = '')
+    id_cad = models.IntegerField(default=0)
+    id_creator=models.IntegerField(default=0)
+    notes=models.CharField(max_length=1000, default = '')
+
+    def __str__(self):
+        return "2d drawing file Id " + str(self.id)
+
 class SP3D_3MF(models.Model):
     creation_date = models.DateTimeField('date published')
     id_cad = models.IntegerField(default=0)
@@ -116,6 +192,19 @@ class SP3D_3MF(models.Model):
 
     def __str__(self):
         return "3MF Id " + str(self.id)
+
+class SP3D_Bulk_Files(models.Model):
+
+    creation_date = models.DateTimeField('date published')
+    name = models.CharField(max_length=200, default = '')
+    root_path = models.CharField(max_length=200, default = '/home/user01/SpareParts_Database/root/')
+    file_path = models.CharField(max_length=200, default = '')
+    id_part = models.IntegerField(default=0)
+    id_creator=models.IntegerField(default=0)
+    notes=models.CharField(max_length=1000, default = '')
+
+    def __str__(self):
+        return "Bulk File Id " + str(self.id)
 
 class SP3D_AMF(models.Model):
 
@@ -151,3 +240,17 @@ class SP3D_Oem(models.Model):
 
     def __str__(self):
         return "OEM id :" + str(self.id)
+
+class SP3D_Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    slack_name = models.TextField(max_length=200, default='')
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        SP3D_Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.sp3d_profile.save()

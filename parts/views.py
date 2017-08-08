@@ -5,12 +5,14 @@ from django.template import loader, RequestContext
 from django.shortcuts import render, render_to_response, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-from .models import SP3D_Part, SP3D_Print, SP3D_Printer, SP3D_Image, SP3D_CAD, SP3D_AMF, SP3D_CONFIG, SP3D_Oem, SP3D_3MF, SP3D_STL
+from .models import SP3D_Part, SP3D_Print, SP3D_Printer, SP3D_Image, SP3D_CAD, SP3D_AMF, SP3D_CONFIG, SP3D_Oem, SP3D_3MF, SP3D_STL, SP3D_CAD2D, SP3D_Status_Eng, SP3D_Status_Eng_History, SP3D_Bulk_Files, SP3D_Client, SP3D_Order
 from django.contrib.auth.models import User
 from .forms import UploadFileForm
 from threading import Thread
 from django.forms.models import model_to_dict
-
+from random import randint
+from datetime import datetime, timedelta
+from tzlocal import get_localzone
 
 
 import os
@@ -22,9 +24,13 @@ import time
 import threading
 import ntpath
 import ast
-
+import shutil
+import pytz
 # Create your views here.
 TOKEN_FLASK='123456789'
+
+SLACK_WEBHOOK_PRINTER = 'https://hooks.slack.com/services/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'
+
 DATABASE_DIRECTORY = '/home/user01/SpareParts_Database/files/'
 DATABASE_DIRECTORY_TRANSITION = '/home/user01/SpareParts_Database/root/'
 SLIC3R_DIRECTORY= '/home/user01/Slic3r/slic3r_dev/'
@@ -37,50 +43,233 @@ def index(request, error=""):
     latest_part_list = SP3D_Part.objects.order_by('-creation_date')
     users = User.objects.all()
     oems=SP3D_Oem.objects.all()
+    status_eng_list = SP3D_Status_Eng.objects.all()
     oem_list = SP3D_Oem.objects.all()
+    nb_opened = SP3D_Part.objects.filter(status_eng = 1 ).count()
+    nb_geometry = SP3D_Part.objects.filter(status_eng = 2 ).count()
+    nb_indus = SP3D_Part.objects.filter(status_eng = 3 ).count()
+    nb_qc = SP3D_Part.objects.filter(status_eng = 4 ).count()
+    nb_closed = SP3D_Part.objects.filter(status_eng = 5 ).count()
+    nb_rework = SP3D_Part.objects.filter(status_eng = 6 ).count()
     context = {
         'latest_part_list': latest_part_list,
         'users':users,
         'oems':oems,
         'error':error,
         'oem_list':oem_list,
+        'status_eng_list':status_eng_list,
+        'nb_opened':nb_opened,
+        'nb_geometry':nb_geometry,
+        'nb_indus':nb_indus,
+        'nb_qc':nb_qc,
+        'nb_closed':nb_closed,
+        'nb_rework':nb_rework,
     }
     print "COOKIES"
     print request.COOKIES
     return render(request, 'parts/index.html', context)
-    # return render_to_response('parts/index.html', context, RequestContext(request))
 
-# def part_detail(request):
-#     image_url="/files/"+"IMAGES/test.png"
-#     return render(request, 'parts/part-detail.html',{'image_url':image_url})
+@login_required
+def orders(request, error=""):
+    print "TESTTTTT: %s"%error
+    clients = SP3D_Client.objects.all().order_by('name')
+    # latest_part_list = SP3D_Part.objects.order_by('-creation_date')
+    users = User.objects.all()
+    orders = SP3D_Order.objects.all()
+
+    # oems=SP3D_Oem.objects.all()
+    # status_eng_list = SP3D_Status_Eng.objects.all()
+    # oem_list = SP3D_Oem.objects.all()
+    # nb_opened = SP3D_Part.objects.filter(status_eng = 1 ).count()
+    # nb_geometry = SP3D_Part.objects.filter(status_eng = 2 ).count()
+    # nb_indus = SP3D_Part.objects.filter(status_eng = 3 ).count()
+    # nb_qc = SP3D_Part.objects.filter(status_eng = 4 ).count()
+    # nb_closed = SP3D_Part.objects.filter(status_eng = 5 ).count()
+    # nb_rework = SP3D_Part.objects.filter(status_eng = 6 ).count()
+    context = {
+        'clients' :clients,
+        'orders':orders,
+        # 'latest_part_list': latest_part_list,
+        'users':users,
+        # 'oems':oems,
+        # 'error':error,
+        # 'oem_list':oem_list,
+        # 'status_eng_list':status_eng_list,
+        # 'nb_opened':nb_opened,
+        # 'nb_geometry':nb_geometry,
+        # 'nb_indus':nb_indus,
+        # 'nb_qc':nb_qc,
+        # 'nb_closed':nb_closed,
+        # 'nb_rework':nb_rework,
+    }
+    # print "COOKIES"
+    # print request.COOKIES
+    return render(request, 'parts/orders.html', context)
+
+@login_required
+def order_detail(request, id_order, error=""):
+    print "TESTTTTT: %s"%error
+    clients = SP3D_Client.objects.all().order_by('name')
+    # latest_part_list = SP3D_Part.objects.order_by('-creation_date')
+    users = User.objects.all()
+    order = SP3D_Order.objects.get(id=id_order)
+    client = SP3D_Client.objects.get(id=order.id_client)
+    permissions = map(int, filter( None , order.permissions.split("-")))
+    if request.user.id in permissions:
+        permission = 1
+    else:
+        permission=0
+    # oems=SP3D_Oem.objects.all()
+    # status_eng_list = SP3D_Status_Eng.objects.all()
+    # oem_list = SP3D_Oem.objects.all()
+    # nb_opened = SP3D_Part.objects.filter(status_eng = 1 ).count()
+    # nb_geometry = SP3D_Part.objects.filter(status_eng = 2 ).count()
+    # nb_indus = SP3D_Part.objects.filter(status_eng = 3 ).count()
+    # nb_qc = SP3D_Part.objects.filter(status_eng = 4 ).count()
+    # nb_closed = SP3D_Part.objects.filter(status_eng = 5 ).count()
+    # nb_rework = SP3D_Part.objects.filter(status_eng = 6 ).count()
+    context = {
+        'clients' :clients,
+        'order':order,
+        # 'latest_part_list': latest_part_list,
+        'users':users,
+        'permission':permission,
+        # 'oems':oems,
+        # 'error':error,
+        # 'oem_list':oem_list,
+        # 'status_eng_list':status_eng_list,
+        # 'nb_opened':nb_opened,
+        # 'nb_geometry':nb_geometry,
+        # 'nb_indus':nb_indus,
+        # 'nb_qc':nb_qc,
+        # 'nb_closed':nb_closed,
+        # 'nb_rework':nb_rework,
+    }
+    # print "COOKIES"
+    # print request.COOKIES
+    return render(request, 'parts/order-detail.html', context)
 
 @login_required
 def prints(request):
     latest_print_list = SP3D_Print.objects.order_by('-creation_date')
+    # list of all parts id related
+    part_id_list = []
+    for pr in latest_print_list:
+        if not pr.id_part in part_id_list:
+            part = SP3D_Part.objects.get(id = pr.id_part)
+            part_id_list.append(pr.id_part)
+    parts = SP3D_Part.objects.filter(id__in=part_id_list)
+    # get all printers
+    printers = SP3D_Printer.objects.all()
+    # get all printers
+    users = User.objects.all()
+
     context = {
         'latest_print_list': latest_print_list,
+        'parts':parts,
+        'printers':printers,
+        'users':users,
     }
     return render(request, 'parts/prints.html', context)
 
 @login_required
-def download_amf(request, id):
-    filename = DATABASE_DIRECTORY + "AMF/" + id + ".amf"
+def download_cad(request, id_part, id_cad):
+    # part= SP3D_Part.objects.get(id = id_part)
+    # oem = SP3D_Oem.objects.get(id = part.id_oem)
+    cad = SP3D_CAD.objects.get(id = id_cad)
+    filename = cad.root_path + cad.file_path
     response = HttpResponse(file(filename), content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
 @login_required
-def download_config(request, id_config):
-    filename = DATABASE_DIRECTORY + "CONFIG/" + id_config + ".ini"
+def download_bulk(request, id_part, id_bulk):
+    bulk = SP3D_Bulk_Files.objects.get(id = id_bulk)
+    filename = bulk.root_path + bulk.file_path
     response = HttpResponse(file(filename), content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
 @login_required
-def download_gcode(request, id_gcode):
-    filename = DATABASE_DIRECTORY + "GCODE/" + id_gcode + ".gcode"
+def download_amf(request, id_part, id_3mf):
+    # part= SP3D_Part.objects.get(id = id_part)
+    # oem = SP3D_Oem.objects.get(id = part.id_oem)
+    _3mf = SP3D_3MF.objects.get(id = id_3mf)
+    filename = _3mf.root_path + _3mf.amf_path
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+
+@login_required
+def download_config(request, id_part, id_3mf):
+    # part= SP3D_Part.objects.get(id = id_part)
+    # oem = SP3D_Oem.objects.get(id = part.id_oem)
+    _3mf = SP3D_3MF.objects.get(id = id_3mf)
+    filename = _3mf.root_path + _3mf.config_path
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+
+@login_required
+def download_configb(request, id_part, id_3mf):
+    # part= SP3D_Part.objects.get(id = id_part)
+    # oem = SP3D_Oem.objects.get(id = part.id_oem)
+    _3mf = SP3D_3MF.objects.get(id = id_3mf)
+    filename = _3mf.root_path + _3mf.configb_path
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+
+@login_required
+def download_gcode(request, id_part, id_3mf):
+    # part= SP3D_Part.objects.get(id = id_part)
+    # oem = SP3D_Oem.objects.get(id = part.id_oem)
+    _3mf = SP3D_3MF.objects.get(id = id_3mf)
+    filename = _3mf.root_path + _3mf.gcode_path
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+
+@login_required
+def download_cad2d(request, id_part, id_cad2d):
+    # part= SP3D_Part.objects.get(id = id_part)
+    # oem = SP3D_Oem.objects.get(id = part.id_oem)
+    cad2d = SP3D_CAD2D.objects.get(id = id_cad2d)
+    filename = cad2d.root_path + cad2d.file_path
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+
+@login_required
+def download_stl(request, id_part, id_stl):
+    # part= SP3D_Part.objects.get(id = id_part)
+    # oem = SP3D_Oem.objects.get(id = part.id_oem)
+    stl = SP3D_STL.objects.get(id = id_stl)
+    filename = stl.root_path + stl.file_path
+    response = HttpResponse(file(filename), content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+
+@login_required
+def download_log(request, id_print):
+    # part= SP3D_Part.objects.get(id = id_part)
+    # oem = SP3D_Oem.objects.get(id = part.id_oem)
+    _print = SP3D_Print.objects.get(id = id_print)
+    if not _print.done:
+        print "Print is not finished, cannot download log for print %s"%id_print
+        return HttpResponseRedirect("/parts/prints/")
+    filename = DATABASE_DIRECTORY_TRANSITION + "Print_Logs/print-%s/log-%s.txt"%(id_print, id_print)
+    if not os.path.isfile(filename):
+         print "Print Log log-%s.txt is not in folder, cannot download" %id_print
+         return HttpResponseRedirect("/parts/prints/")
     response = HttpResponse(file(filename), content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
@@ -110,12 +299,86 @@ def send_to_printer(local_ip, payload, f):
     requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
 
 @login_required
+def new_part_number(request):
+    try:
+        parts = SP3D_Part.objects.filter(part_number__startswith = "pn-").order_by('-part_number')
+        count = parts.count()
+        if count==0:
+            part_number = "pn-%06d" % 1
+            print "PART NUMBER: %s"%part_number
+        else:
+            index = 0
+            while index < count:
+                part_number = parts[index].part_number
+                print "LAST PART NUMBER: %s"%part_number
+                try:
+                    part_number = int(part_number.split("-")[1])
+                    part_number = part_number + 1
+                    part_number = "pn-%06d" % part_number
+                    break
+                except:
+                    index = index + 1
+                    print "NOT THIS PART: %s"%part_number
+
+        data = {
+            "part_number": part_number
+        }
+    except ValueError as err:
+        data = {
+            "part_number": 555,
+            "result": err
+        }
+    except:
+        data = {
+            "part_number": 777,
+            "result": "Problem happened during image deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
+def update_notes(request):
+    try:
+        print "Notes entered "
+        print "request form: %s"%request.POST
+        _id = request.POST.get("pk")
+        id_type = request.POST.get("type")
+        new_note = request.POST.get("value")
+        if id_type == '3mf':
+            obj = SP3D_3MF.objects.get(id=int(_id))
+        elif id_type == 'stl':
+            obj = SP3D_STL.objects.get(id=int(_id))
+        elif id_type == 'cad2d':
+            obj = SP3D_CAD2D.objects.get(id=int(_id))
+        elif id_type == 'stl':
+            obj = SP3D_Bulk_Files.objects.get(id=int(_id))
+        elif id_type == 'part':
+            obj = SP3D_Part.objects.get(id=int(_id))
+        elif id_type == 'order':
+            obj = SP3D_Order.objects.get(id=int(_id))
+        else:
+            raise ValueError("this type of notes not supported")
+        obj.notes = new_note
+        obj.save()
+        data = {
+            "result": "Note editing updated successfully"
+        }
+    except ValueError as err:
+        data = {
+            "result": err
+        }
+    except:
+        data = {
+            "result": "Problem happened during image deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
 def delete_image(request):
     try:
         image_id = request.GET.get('image_id', None)
         if not image_id : raise ValueError('image_id not found in ajax request')
         img = SP3D_Image.objects.get(id=image_id)
-        if not img : raise ValueError('image_id not found in mysql records')
+        if not img : raise ValueError('image not found in mysql records')
         os.remove(img.root_path + img.file_path)
         print "Image file deleted: %s"%img.name
         img.delete()
@@ -133,86 +396,310 @@ def delete_image(request):
         }
     return JsonResponse(data)
 
+@login_required
+def delete_part(request, ):
+    try:
+        id_part = request.GET.get('id_part', None)
+        if not id_part : raise ValueError('id_part not found in ajax request')
+        part = SP3D_Part.objects.get(id=id_part)
+        oem = SP3D_Oem.objects.get(id=part.id_oem)
+        if not part : raise ValueError('part not found in mysql records')
+        partid = part.id
+        shutil.rmtree(DATABASE_DIRECTORY_TRANSITION + "catalogue/oem-%s/part-id-%s"%(oem.code, part.id))
+        part.delete()
+        print "PART folder deleted: %s"%partid
+        data = {
+            "result": "deleted part successfully :%s"%partid
+        }
+    except:
+        print "PART folder NOT deleted: %s"%partid
+        data = {
+            "result": " part deletion ISSUE  :%s"%partid
+        }
+
+    return JsonResponse(data)
+
+@login_required
+def delete_3mf(request):
+    try:
+        id_3mf = request.GET.get('id_3mf', None)
+        if not id_3mf : raise ValueError('id_3mf not found in ajax request')
+        _3mf = SP3D_3MF.objects.get(id=id_3mf)
+        if not _3mf : raise ValueError('3mf not found in mysql records')
+        os.remove(_3mf.root_path + _3mf.amf_path)
+        os.remove(_3mf.root_path + _3mf.config_path)
+        os.remove(_3mf.root_path + _3mf.configb_path)
+        os.remove(_3mf.root_path + _3mf.gcode_path)
+        print "3mf file deleted : %s"%_3mf.id
+        _3mf.delete()
+        print "3mf record deleted"
+        data = {
+            "result": "3mf was deleted successfully"
+        }
+    except ValueError as err:
+        data = {
+            "result": err
+        }
+    except:
+        data = {
+            "result": "Problem happened during 3mf deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
+def delete_cad2d(request):
+    try:
+        id_cad2d = request.GET.get('id_cad2d', None)
+        if not id_cad2d : raise ValueError('id_cad2d not found in ajax request')
+        cad2d = SP3D_CAD2D.objects.get(id=id_cad2d)
+        if not cad2d : raise ValueError('cad2d not found in mysql records')
+        os.remove(cad2d.root_path + cad2d.file_path)
+        print "CAD2D file deleted: %s"%cad2d.id
+        cad2d.delete()
+        print "CAD2D record deleted"
+        data = {
+            "result": "CAD2D was deleted successfully"
+        }
+    except ValueError as err:
+        data = {
+            "result": err
+        }
+    except:
+        data = {
+            "result": "Problem happened during CAD2D deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
+def delete_stl(request):
+    try:
+        id_stl = request.GET.get('id_stl', None)
+        if not id_stl : raise ValueError('id_stl not found in ajax request')
+        stl = SP3D_STL.objects.get(id=id_stl)
+        if not stl : raise ValueError('stl not found in mysql records')
+        os.remove(stl.root_path + stl.file_path)
+        print "STL file deleted: %s"%stl.id
+        stl.delete()
+        print "STL record deleted"
+        data = {
+            "result": "STL was deleted successfully"
+        }
+    except ValueError as err:
+        data = {
+            "result": err
+        }
+    except:
+        data = {
+            "result": "Problem happened during STL deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
+def delete_bulk(request):
+    try:
+        print "REQUEST GET: %s"%request.GET
+        id_bulk = request.GET.get('id_bulk', None)
+        if not id_bulk : raise ValueError('id_bulk not found in ajax request')
+        bulk = SP3D_Bulk_Files.objects.get(id=id_bulk)
+        if not bulk : raise ValueError('bulk not found in mysql records')
+        os.remove(bulk.root_path + bulk.file_path)
+        print "BULK file deleted: %s"%bulk.id
+        bulk.delete()
+        print "bulk record deleted"
+        data = {
+            "result": "bulk was deleted successfully"
+        }
+    except ValueError as err:
+        data = {
+            "result": err
+        }
+    except:
+        data = {
+            "result": "Problem happened during bulk deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
+def delete_cad(request):
+    try:
+        id_cad = request.GET.get('id_cad', None)
+        if not id_cad : raise ValueError('id_cad not found in ajax request')
+        cad = SP3D_CAD.objects.get(id=id_cad)
+        if not cad : raise ValueError('cad not found in mysql records')
+        os.remove(cad.root_path + cad.file_path)
+        print "CAD file deleted: %s"%cad.id
+        cad.delete()
+        print "CAD record deleted"
+        data = {
+            "result": "CAD was deleted successfully"
+        }
+    except ValueError as err:
+        data = {
+            "result": err
+        }
+    except:
+        data = {
+            "result": "Problem happened during CAD deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
+def change_status_eng(request):
+    try:
+        userid = request.user.id
+        part_id = request.GET.get('id_part', None)
+        if not part_id : raise ValueError('id_part not found in ajax request')
+        status_id = request.GET.get('id_status', None)
+        if not status_id : raise ValueError('id_status not found in ajax request')
+        part = SP3D_Part.objects.get(id=part_id)
+        if not part : raise ValueError('part not found in mysql records')
+        part.status_eng = int(status_id)
+        part.save()
+
+        # add change to the history
+        new_record = SP3D_Status_Eng_History.objects.create(part_id=part.id, date=time.strftime('%Y-%m-%d %H:%M:%S'), id_status = int(status_id), id_creator = userid )
+        print "new record saved in status history"
+        print "Changed part %s status to : %s"%(part_id,status_id)
+        data = {
+            "result": "Status of part %s was updated successfully"%part_id
+        }
+    except ValueError as err:
+        data = {
+            "result": err
+        }
+    except:
+        data = {
+            "result": "Problem happened during image deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
+def test(request):
+    prints = SP3D_Print.objects.all()
+    for pr in prints:
+        td = pr.finished_date - pr.creation_date
+        pr.printing_time = int(td.days*86400 + td.seconds)
+        pr.save()
+    print "FINISHED"
+    # print"T1 is: %s"%t1
+    # print"T1 type: %s"%type(t1)
+    # t2 = pytz.utc.localize(datetime.now())
+    # print"T2 is: %s"%t2
+    # print"T2 type: %s"%type(t2)
+    # d=t2-t1
+    # print"D is: %s"%d
+    # print"D type: %s"%type(d)
+
+    return HttpResponseRedirect("/parts/")
+
 
 @login_required
 def ajax_print(request):
-    id_part=request.GET.get('part_id', None)
+    # get user who printed
+
+    userid = request.user.id
+    user = User.objects.get(id=userid)
+    # get all info
+    id_3mf=request.GET.get('id_3mf', None)
+    print "3MF ID IS: %s"%id_3mf
     id_printer=request.GET.get('printer_id',None)
+    _3mf = SP3D_3MF.objects.get(id=id_3mf)
+    id_cad = _3mf.id_cad
+    cad = SP3D_CAD.objects.get(id=id_cad)
+    id_part = cad.id_part
     part = SP3D_Part.objects.get(id=id_part)
+    id_oem = part.id_oem
+    oem = SP3D_Oem.objects.get(id=id_oem)
     printer= SP3D_Printer.objects.get(id=id_printer)
 
     # add print to database log
-    new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
+    new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_3mf=id_3mf, id_cad=id_cad, id_part=id_part, id_creator=userid)
+    print_log_path = DATABASE_DIRECTORY_TRANSITION + "Print_Logs/print-%s/" % new_print.id
+    if not os.path.isdir(print_log_path):
+        os.makedirs(print_log_path)
 
-    amf_file = DATABASE_DIRECTORY + "AMF/%s.amf"% part.amf
-    ini_file = DATABASE_DIRECTORY + "CONFIG/%s.ini" %part.config
-    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/%s.gcode"%part.amf
+    # get necessary files
+    amf_file = DATABASE_DIRECTORY_TRANSITION + "catalogue/oem-%s/part-id-%s/AMF/%s"%(oem.code, part.id, _3mf.name_amf)
+    config_file = DATABASE_DIRECTORY_TRANSITION + "catalogue/oem-%s/part-id-%s/CONFIG/%s"%(oem.code, part.id, _3mf.name_config)
+    gcode_file = print_log_path + "gcode-%s.gcode"%new_print.id
     local_ip=printer.local_ip
     try:
-        print subprocess.check_output(['perl',SLIC3R_DIRECTORY + 'slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
+        print subprocess.check_output(['perl',SLIC3R_DIRECTORY + 'slic3r.pl', '--load', config_file, '-o', gcode_file, amf_file])
     except:
         print "An error occured while slicing..."
-    filename = gcode_file
-    payload = {'token': TOKEN_FLASK,'id_print':new_print.id}
-    with open(filename) as f:
-        requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
+        remove_print(new_print.id)
+        data = {'error': "an error occured during slicing"}
+        return JsonResponse(data)
+
+    payload = {
+        'token': TOKEN_FLASK,
+        'id_print':new_print.id,
+        'id_3mf':_3mf.id,
+        'id_cad' : cad.id,
+        'id_part':part.id,
+        'username':user.first_name,
+        'id_printer':printer.id,
+        'printer_name':printer.name,
+        'printer_location':printer.location,
+        'printer_ip':printer.local_ip,
+
+            }
+    with open(gcode_file) as f:
+        response = requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
         # TRYING TO use threading not to wait before sending response
         # t = Thread(target=send_to_printer, kwargs={'local_ip':local_ip, 'payload':payload, 'f':f})
         # t.setDaemon(False)
         # t.start()
-    data = {
-        'gcode_sent': "Gcode was sent to printer, dude"
-    }
+    print "ABOUT TO SEND AJAX ANSWER TO CLIENT"
+    if response.status_code == 350:
+        message = "print %s, part %s, 3mf %s: Printer is already printing something"%(new_print.id, part.id, _3mf.id)
+        print message
+        data = {'error': message}
+        remove_print(new_print.id)
+    elif response.status_code == 360:
+        header = "%s: An error happened during print  :cry:"%printer.name
+        message = "Something happened during print, was it stopped manually ?\n print %s, part %s - %s, 3mf %s: \n%s" % (new_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
+        print message
+        data = {'error': message}
+        # slack_message(header, message, "#f44242")
+    elif response.status_code == 200:
+        header = "%s: A print finished successfully :muscle:"%printer.name
+        message = "gcode successfully printed, dude\nprint %s, part %s - %s, 3mf %s\n%s"%(new_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
+        print "AJAX CONTAINS: 200"
+        data = {'gcode_sent': message}
+        # slack_message(header, message, "#e33a3a")
+    else:
+        message = "print %s, part %s - %s, 3mf %s: something unknown happened on printer server"%(new_print.id, part.id, part.part_name, _3mf.id)
+        print message
+        data = {'error': message}
+    print "AJAX PRINT OVER"
     return JsonResponse(data)
 
-@login_required
-def print_from_gcode(request, id_part, id_printer):
-    part = SP3D_Part.objects.get(id=id_part)
-    printer= SP3D_Printer.objects.get(id=id_printer)
+def remove_print(id_print):
+    global DATABASE_DIRECTORY_TRANSITION
+    _print = SP3D_Print.objects.get(id=id_print)
+    print_logs = DATABASE_DIRECTORY_TRANSITION + "Print_Logs/print-%s" % _print.id
+    shutil.rmtree(print_logs)
+    _print.delete()
+    return True
 
-    # add print to database log
-    new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
+def slack_message(header, message, color):
+    global SLACK_WEBHOOK_PRINTER
+    slack_data = {
+                        "text": header,
+                        "attachments": [
+                            {
+                                "text": message,
+                                "color": color,
+                                "attachment_type": "default"
+                            }
+                        ]
+                    }
+    print "SENDING SLACK MESSAGE"
+    slack_res = requests.post(SLACK_WEBHOOK_PRINTER, data=json.dumps(slack_data), headers={'Content-Type': 'application/json'})
+    print "SLACK MESSAGE SENT"
+    return True
 
-    amf_file = DATABASE_DIRECTORY + "AMF/%s.amf"% part.amf
-    ini_file = DATABASE_DIRECTORY + "CONFIG/%s.ini" %part.config
-    gcode_file = "/home/user01/SpareParts_Database/files/GCODE/%s.gcode"%part.amf
-    local_ip=printer.local_ip
-    try:
-        print subprocess.check_output(['perl',SLIC3R_DIRECTORY + 'slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
-    except:
-        print "An error occured while slicing..."
-    filename = gcode_file
-    payload = {'token': TOKEN_FLASK,'id_print':new_print.id}
-    with open(filename) as f:
-        requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
-    response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
-    response['Content-Length'] = os.path.getsize(filename)
-    return response
-
-@login_required
-def slice_and_print(request, id_part, id_printer):
-    part = SP3D_Part.objects.get(id=id_part)
-    printer= SP3D_Printer.objects.get(id=id_printer)
-
-    # add print to database log
-    new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_part=id_part)
-
-    amf_file = DATABASE_DIRECTORY + "AMF/" + part.amf + ".amf"
-    ini_file = DATABASE_DIRECTORY + "CONFIG/" + part.config + ".ini"
-    gcode_file = DATABASE_DIRECTORY + "GCODE/" + part.amf + ".gcode"
-    try:
-        print subprocess.check_output(['perl',SLIC3R_DIRECTORY + 'slic3r.pl', '--load', ini_file, '-o', gcode_file, amf_file])
-    except:
-        print "An error occured while slicing..."
-    filename = gcode_file
-    payload = {'token': TOKEN_FLASK,'id_print':new_print.id}
-    with open(filename) as f:
-        requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
-    response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
-    response['Content-Length'] = os.path.getsize(filename)
-    return response
 
 @login_required
 def part_detail(request,id_part):
@@ -220,6 +707,7 @@ def part_detail(request,id_part):
     image_list = SP3D_Image.objects.filter(id_part=id_part)
     cad_list=SP3D_CAD.objects.filter(id_part=id_part).order_by('creation_date')
     users = User.objects.all()
+    status_eng_list = SP3D_Status_Eng.objects.all()
     permissions = map(int, filter( None , part.permissions.split("-")))
     if request.user.is_authenticated():
         username = request.user.username
@@ -228,8 +716,11 @@ def part_detail(request,id_part):
         permission = 1
     else:
         permission = 0
+    if userid == 1:
+        superpermission = 1
+    else:
+        superpermission = 0
 
-    id_cad_list=[]
     _3mf_per_cad={} #dictionnary of 3mf like:{'idcad' : _3mf_object, ...}
     for cad in cad_list:
         _3mf_list = SP3D_3MF.objects.filter(id_cad=cad.id).order_by('creation_date')
@@ -237,9 +728,24 @@ def part_detail(request,id_part):
         for _3mf in _3mf_list:
             _3mf_per_cad[cad.id].append(_3mf)
 
+    cad2d_per_cad={} #dictionnary of 2d drawings files like:{'idcad' : cad2d_object, ...}
+    for cad in cad_list:
+        cad2d_list = SP3D_CAD2D.objects.filter(id_cad=cad.id).order_by('creation_date')
+        cad2d_per_cad[cad.id]=[]
+        for cad2d in cad2d_list:
+            cad2d_per_cad[cad.id].append(cad2d)
 
-    amf_list=SP3D_AMF.objects.filter(id_part=id_part)
-    config_list=SP3D_CONFIG.objects.filter(id_part=id_part)
+    stl_per_cad={} #dictionnary of stl files like:{'idcad' : stl_object, ...}
+    for cad in cad_list:
+        stl_list = SP3D_STL.objects.filter(id_cad=cad.id).order_by('creation_date')
+        stl_per_cad[cad.id]=[]
+        for stl in stl_list:
+            stl_per_cad[cad.id].append(stl)
+
+
+    # amf_list=SP3D_AMF.objects.filter(id_part=id_part)
+    # config_list=SP3D_CONFIG.objects.filter(id_part=id_part)
+    bulk_files = SP3D_Bulk_Files.objects.filter(id_part=id_part)
 
     oem_list = SP3D_Oem.objects.all()
 
@@ -248,12 +754,17 @@ def part_detail(request,id_part):
         'part': part,
         'image_list':image_list,
         'cad_list':cad_list,
-        'amf_list':amf_list,
+        # 'amf_list':amf_list,
+        # 'config_list':config_list,
+        'bulk_files':bulk_files,
         'users':users,
-        'config_list':config_list,
         'oem_list':oem_list,
         'tmf_per_cad':_3mf_per_cad,
+        'cad2d_per_cad':cad2d_per_cad,
+        'stl_per_cad':stl_per_cad,
         'permission':permission,
+        'superpermission':superpermission,
+        'status_eng_list':status_eng_list,
 
     }
     return render(request, 'parts/part-detail.html', context)
@@ -268,7 +779,7 @@ def model_to_dict(model):
         # del model['creation_date']
     return model
 
-
+# deprecated
 @login_required
 def checkout_part(request,id_part):
     part = SP3D_Part.objects.get(id=id_part)
@@ -309,6 +820,7 @@ def checkout_part(request,id_part):
 
     return HttpResponseRedirect(LOCAL_APP + "/parts/part-detail/%s"%id_part)
 
+# deprecated
 @login_required
 def checkout_part1(request,id_part):
     part = SP3D_Part.objects.get(id=id_part)
@@ -380,6 +892,7 @@ def checkout_cad(request, id_part, id_cad):
     # we look for a cad list, even though only one will show up, because of how it was built before
     cad_list = SP3D_CAD.objects.filter(id=id_cad)
     stl_list = SP3D_STL.objects.filter(id_cad=id_cad)
+    cad2d_list = SP3D_CAD2D.objects.filter(id_cad=id_cad)
     configb0 = SP3D_3MF.objects.get(id=cad_list[0].first_config)
     permissions = part.permissions.split('-')
     checked_out = part.checked_out
@@ -404,15 +917,15 @@ def checkout_cad(request, id_part, id_cad):
     for item in cad_list:
         item=model_to_dict(item)
         data["cad-%s"%item["id"]] = [item]
-        print "done0"
     for item in stl_list:
         item=model_to_dict(item)
         data["stl-%s"%item["id"]] = [item]
-        print "done01"
+    for item in cad2d_list:
+        item=model_to_dict(item)
+        data["2dcad-%s"%item["id"]] = [item]
     for item in _3mf_list:
         item=model_to_dict(item)
         data["_3mf-%s"%item["id"]] = [item]
-        print "done1"
 
     # load all the files in these arrays:
     files=[]
@@ -421,6 +934,9 @@ def checkout_cad(request, id_part, id_cad):
             path=data[key][0]["root_path"]+data[key][0]["file_path"]
             files.append((key,(data[key][0]["name"],open(path,'rb'))))
         if key.startswith("stl"):
+            path=data[key][0]["root_path"]+data[key][0]["file_path"]
+            files.append((key,(data[key][0]["name"],open(path,'rb'))))
+        if key.startswith("2dcad"):
             path=data[key][0]["root_path"]+data[key][0]["file_path"]
             files.append((key,(data[key][0]["name"],open(path,'rb'))))
         if key.startswith("_3mf"):
@@ -450,7 +966,7 @@ def checkout_cad(request, id_part, id_cad):
         return HttpResponseRedirect(LOCAL_APP + "/local/existing")
     if not response.status_code==200:
         return HttpResponseRedirect("/parts/part-detail/%s"%id_part)
-        
+
     # search the part again, and check it out. Leave it searched again, otherwise error
     part = SP3D_Part.objects.get(id=id_part)
     part.checked_out = 1
@@ -459,109 +975,61 @@ def checkout_cad(request, id_part, id_cad):
     return HttpResponseRedirect(LOCAL_APP + "/local/%s"%id_part)
 
 @csrf_exempt
-def push(request,id_part):
+def print_finished(request):
     if request.method == 'POST':
-        token=request.POST.get("token")
-
-        userid = request.POST.get('userid')
-        username = request.POST.get('username')
-        files=request.FILES
-        print "FILES RECEIVED ARE: %s"%files
-        print "DATA RECEIVED IS: %s"%request.POST
-        print "DEBUG1: %s"%request.POST.get('cad_correspondance')
-        print "DEBUG1 TYPE: %s"%type(request.POST.get('cad_correspondance'))
-
-        old_cad_correspondance=ast.literal_eval(request.POST.get('cad_correspondance'))  #list of tuples like: ((cad_name , old_cad_id),...)
-        print 'DEBUG 1000'
-        new_cad_correspondance = [] #list of tuples like: ((cad_name , new_id_cad),...)
-        _3mf_cad_correspondance = [] #list of tuples like: ((id_3mf , id_cad),...)
-        oldid_newid=[]
-        print 'DEBUG 1001'
-        print type(_3mf_cad_correspondance)
+        token = request.POST.get("token")
+        error = request.POST.get("error")
+        print "ERRROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR IS: %s"%error
+        print_id = request.POST.get('print_id')
+        _print = SP3D_Print.objects.get(id=print_id)
+        part = SP3D_Part.objects.get(id=_print.id_part)
+        printer = SP3D_Printer.objects.get(id= _print.id_printer)
+        _3mf = SP3D_3MF.objects.get(id = _print.id_3mf)
+        user = User.objects.get(id=_print.id_creator)
+        print "USER"
+        print "USER SLACK NAME: %s"%user.sp3d_profile.slack_name
+        log_file = request.FILES.get('log_file')
         try:
-            for key in request.POST:
-                print "REQUEST ISS: %s"%request.POST
-                if key.startswith("cad_3mf"):
-                    print 'DEBUG 1018: %s'%key
-                    print 'DEBUG 1019: %s'%key.rsplit('_',1)[1]
-                    print 'DEBUG 1019 TYPE: %s'%type(key.rsplit('_',1)[1])
-                    print 'DEBUG 1019b: %s'%request.POST.get(key)
-                    print 'DEBUG 1019b TYPE: %s'%type(request.POST.get(key))
-                    print "DEBUG 1050 TYPE: %s"%type(_3mf_cad_correspondance)
+            # copy log that is sent into db
+            new_log = DATABASE_DIRECTORY_TRANSITION + "Print_Logs/print-%s/log-%s.txt" %(print_id, print_id)
+            with open(new_log, "w+") as f:
+                for line in log_file:
+                    f.write(line)
+            # update print record
+            _print.done = 1
+            _print.log_id = print_id
+            _print.finished_date = time.strftime('%Y-%m-%d %H:%M:%S')
+            if not error :
+                _print.completed = 1
+            else:
+                _print.completed = 0
+            _print.save()
+            # I import it again to make sure that I get the date times converted
+            _print = SP3D_Print.objects.get(id=print_id)
+            print "FINISHED DATE: %s"%_print.finished_date
+            print "FINISHED DATE TYPE: %s"%type(_print.finished_date)
+            print "CREATION DATE: %s"%_print.creation_date
+            print "CREATION DATE TYPE: %s"%type(_print.creation_date)
 
-                    _3mf_cad_correspondance.append((key.rsplit('_',1)[1] , request.POST.get(key)))
-                    print 'DEBUG 10199: %s'%_3mf_cad_correspondance
-                    print 'DEBUG 10199: %s'%type(_3mf_cad_correspondance)
-            _3mf_cad_correspondance=dict(_3mf_cad_correspondance)
-            print 'DEBUG 1020: %s' % _3mf_cad_correspondance
-            print 'DEBUG 1020 TYPE: %s' %type(_3mf_cad_correspondance)
+            td = _print.finished_date - _print.creation_date
+            print "timedelta type:%s, and its value is: %s"%(type(td),td)
+            print "DEBUG235: %s"%int(td.days*86400 + td.seconds)
+            _print.printing_time = int(td.days*86400 + td.seconds)
+            print "printing time is :%s"%_print.printing_time
+            _print.save()
 
-            for key in files:
-                if key.startswith("cad"):
-                    error,new_cad_id = upload_cad(files[key], id_part, int(userid))
-                    print "DEBUG99:"
-                    new_cad_correspondance.append(("%s"%files[key],new_cad_id))
-                    print "DEBUG100:"
-                    print old_cad_correspondance
-                    old_cad_correspondance=dict([old_cad_correspondance])
-                    print type(old_cad_correspondance)
-                    print "%s"%files[key]
-                    old_cad_id = old_cad_correspondance["%s"%files[key]]
-                    print "DEBUG101: %s"%old_cad_id
-                    oldid_newid.append((old_cad_id,new_cad_id))
-                    print "DEBUG101b: %s"%oldid_newid
-                    if error:raise ValueError(error)
-            oldid_newid=dict(oldid_newid)
-            _3mf_finished=[]
-            for key in files:
-                print "DEBUG102:"
-                if (key.startswith("amf") or key.startswith("config") or key.startswith("configb")):
-                    print "DEBUG103:"
-                    filename = "%s"%files[key]
-                    _3mf_id = filename.rsplit('.',1)[0].split('-',1)[1]
-                    print "DEBUG104:"
-                    print _3mf_cad_correspondance
-                    print _3mf_id
-                    old_cad_id=_3mf_cad_correspondance[_3mf_id]
-                    print "DEBUG105:"
-                    if not _3mf_id in _3mf_finished:
-                        print "DEBUG106:"
-                        print "DEBUG106b: %s"%oldid_newid
-                        for key1 in oldid_newid:
-                            print "DEBUG107:%s" % key1
-                            print "DEBUG107b:%s" % old_cad_id
-                            if key1 == old_cad_id:
-                                print "DEBUG108:"
-                                final_cad_id = oldid_newid[key1]
-                                print "DEBUG109:"
-                            else:
-                                print "DEBUG110:"
-                                final_cad_id = old_cad_id
-                                print "DEBUG111:"
-                        amf_file, config_file, configb_file = None, None, None
-                        print "DEBUG112:"
-                        for key1 in files:
-                            if (("%s"%files[key1]).startswith("amf") or ("%s"%files[key1]).startswith("config")):
-                                print "DEBUG113:"
-                                print ("%s"%files[key1])
-                                print (("%s"%files[key1]).rsplit('.',1)[0].split('-')[1])
-                                if (("%s"%files[key1]).rsplit('.',1)[0].split('-')[1]) == _3mf_id and (("%s"%files[key1]).rsplit('.',1)[0].split('-')[0]=="amf"):
-                                    print "DEBUG114:"
-                                    amf_file = files[key1]
-                                elif (("%s"%files[key1]).rsplit('.',1)[0].split('-')[1]) == _3mf_id and (("%s"%files[key1]).rsplit('.',1)[0].split('-')[0]=="config"):
-                                    print "DEBUG115:"
-                                    config_file = files[key1]
-                                elif (("%s"%files[key1]).rsplit('.',1)[0].split('-')[1]) == _3mf_id and (("%s"%files[key1]).rsplit('.',1)[0].split('-')[0]=="configb"):
-                                    print "DEBUG116:"
-                                    configb_file = files[key1]
-                        if not (amf_file and config_file and configb_file):
-                            print "DEBUG117:"
-                            raise ValueError("Not All three files are there: amf, config and configb")
-                        print "DEBUG118:"
-                        error=upload_3mf(amf_file, config_file, configb_file, final_cad_id, int(userid))
-                    print "DEBUG119:"
-                    if error:raise ValueError(error)
-                    _3mf_finished.append(_3mf_id)
+            # handle slack messages
+            if error:
+                header = "%s: An error happened during print  :cry::cry::cry::cry::cry::cry:"%printer.name
+                message = "from SP3D Cloud: %s\nSomething happened during print, was it stopped manually ?\n print %s, part %s - %s, 3mf %s: \n%s" % (error, _print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
+                print "GOTO SLACK MESSAGE"
+                slack_message(header, message, "#f44242")
+            else:
+                header = "%s: A print finished successfully :muscle::muscle:"%printer.name
+                message = "from SP3D cloud: \ngcode successfully printed, dude\nprint %s, part %s - %s, 3mf %s\n%s"%(_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
+                print "GOTO SLACK MESSAGE"
+                slack_message(header, message, "#43db7b")
+
         except ValueError as err:
             print "DEBUG122:"
             print (err)
@@ -570,6 +1038,7 @@ def push(request,id_part):
             print "DEBUG123:"
             return HttpResponse(status=500)
         print "DEBUG124:"
+
     return HttpResponse()
 
 @csrf_exempt
@@ -579,6 +1048,8 @@ def push_cad(request , id_part):
         part = SP3D_Part.objects.get(id=id_part)
         userid = request.POST.get('userid')
         username = request.POST.get('username')
+        print "NOTES ARE: %s"%request.POST.get('notes')
+        notes_dic = ast.literal_eval(request.POST.get('notes'))
         files=request.FILES
         cad_id = request.POST.get('cad_id')
         print "FILES RECEIVED ARE: %s"%files
@@ -588,6 +1059,9 @@ def push_cad(request , id_part):
             for key in files:
                 if key.startswith("stl"):
                     error , new_stl_id = upload_stl(files[key], int(id_part), int(cad_id), int(userid))
+                    if error:raise ValueError(error)
+                if key.startswith("cad2d"):
+                    error , new_cad2d_id = upload_cad2d(files[key], int(id_part), int(cad_id), int(userid))
                     if error:raise ValueError(error)
             _3mf_finished=[]
             for key in files:
@@ -606,9 +1080,9 @@ def push_cad(request , id_part):
                         print "DEBUG112:"
                         for key1 in files:
                             filename1 = "%s"%files[key1]
-                            filetype = filename1.rsplit('.',1)[0].split('-')[0]
-                            file3mfid = filename1.rsplit('.',1)[0].split('-')[1]
                             if (filename1.startswith("amf") or filename1.startswith("config") or filename1.startswith("gcode")):
+                                filetype = filename1.rsplit('.',1)[0].split('-')[0]
+                                file3mfid = filename1.rsplit('.',1)[0].split('-')[1]
                                 print "DEBUG113:"
                                 print filename1
                                 print file3mfid
@@ -628,7 +1102,8 @@ def push_cad(request , id_part):
                             print "DEBUG117:"
                             raise ValueError("Not All four files are there: amf, config, configb and gcode")
                         print "DEBUG118:"
-                        error = upload_3mf_1(amf_file, config_file, configb_file, gcode_file, int(cad_id), int(userid))
+                        note = notes_dic[_3mf_id] #add the note
+                        error = upload_3mf(amf_file, config_file, configb_file, gcode_file, int(cad_id), int(userid), note)
                     print "DEBUG119:"
                     if error:raise ValueError(error)
                     _3mf_finished.append(_3mf_id)
@@ -653,7 +1128,7 @@ def upload_image(request,id_part):
     if request.method == 'POST':
         try:
             #  get user name
-            userid = None
+            userid = 0
             if request.user.is_authenticated():
                 userid = request.user.id
             part=SP3D_Part.objects.get(id=id_part)
@@ -772,13 +1247,14 @@ def add_part(request):
     print "USERNAME : %s"% user.username
 
     part_number=request.POST.get('part-number')
+    part_name=request.POST.get('part-name')
     oem_name=request.POST.get('oem')
     oem=SP3D_Oem.objects.get(name=oem_name)
 
     permission_list=request.POST.getlist('permissions')
-    permissions=""
+    permissions="1-"
     for index in permission_list:
-        permissions="1-" + permissions + "%s-" % index
+        permissions= permissions + "%s-" % index
 
     notes=request.POST.get('notes')
     cad=request.FILES.get('cad')
@@ -793,11 +1269,11 @@ def add_part(request):
 
         # create new record in database
         creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
-        new_part=SP3D_Part.objects.create(creation_date=creation_date,part_number=part_number, id_oem=oem.id,oem_name=oem.name,id_creator=user.id, permissions=permissions)
+        new_part=SP3D_Part.objects.create(creation_date=creation_date,part_number=part_number, id_oem=oem.id,oem_name=oem.name,id_creator=user.id, permissions=permissions, part_name=part_name, notes=notes)
 
 
         new_part_path = DATABASE_DIRECTORY_TRANSITION + "catalogue/oem-%s/part-id-%s/"%(oem.code, new_part.id)
-        sub_directories=["CAD/","AMF/","CONFIG/","GCODE/","IMAGES/","STL/"]
+        sub_directories=["CAD/","AMF/","CONFIG/","GCODE/","IMAGES/","STL/", "CAD2D/", "BULK/"]
 
         # Check that folder exists
         if not os.path.exists(new_part_path):
@@ -877,13 +1353,164 @@ def get_client_ip(request):
 @login_required
 def add_3mf(request):
     if request.method == 'POST':
+        userid = request.user.id
         files = request.FILES
         form = request.POST
+
+        id_part = request.POST.get("part_id")
+        id_cad = request.POST.get("cad_id")
+        notes = request.POST.get("notes")
+
+        amf_file = request.FILES.get('amf')
+        config_file = request.FILES.get('config')
+        configb_file = request.FILES.get('configb')
+        gcode_file = request.FILES.get('gcode')
+
+        upload_3mf(amf_file, config_file, configb_file, gcode_file, id_cad, userid, notes)
+
         print "FILES: %s"%files
         print "form is: %s"%form
         context={}
-    return HttpResponseRedirect('/parts/part-detail/297')
+    return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
 
+# add new client
+@login_required
+def add_client(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        files = request.FILES
+
+        client_name = request.POST.get("client-name")
+        contact_name = request.POST.get("contact-name")
+        email = request.POST.get("email")
+        activity = request.POST.get("activity")
+        address = request.POST.get("address")
+        notes = request.POST.get("notes")
+
+        nb_sim_client = SP3D_Client.objects.filter(name = client_name).count()
+        if nb_sim_client:
+            return HttpResponseRedirect('/parts/orders/')
+
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        new_client = SP3D_Client.objects.create(creation_date=creation_date, name=client_name, primary_contact_name=contact_name, primary_contact_email= email, address= address, activity=activity, notes=notes)
+        print "NEW CLIENT CREATED WITH ID: %s"%new_client.id
+        context={}
+    return HttpResponseRedirect('/parts/orders/')
+
+# add new order
+@login_required
+def add_order(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        files = request.FILES
+
+        order_type = request.POST.get("type")
+        client_id = request.POST.get("client")
+        due_date = pytz.timezone("Asia/Singapore").localize(datetime.strptime(request.POST.get("date"), '%d-%m-%Y'))
+        quote_number = request.POST.get("quote-number")
+        po_number = request.POST.get("po-number")
+        assigned_to = request.POST.get("assign-to")
+        order_name = request.POST.get("name")
+        notes = request.POST.get("notes")
+        permission_list=request.POST.getlist('permissions')
+        permissions="1-"
+        for index in permission_list:
+            permissions= permissions + "%s-" % index
+
+        root_path = DATABASE_DIRECTORY_TRANSITION + "Orders/"
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        new_order = SP3D_Order.objects.create(creation_date=creation_date, root_path=root_path, name=order_name, type=order_type, id_client= client_id, quote_number= quote_number, po_number=po_number, due_date=due_date, assigned_to=assigned_to, notes=notes, id_creator=userid, permissions = permissions)
+        # print "NEW CLIENT CREATED WITH ID: %s"%new_client.id
+        # context={}
+    return HttpResponseRedirect('/parts/orders/')
+
+# update new order
+@login_required
+def update_order(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        id_order = request.POST.get("order_id")
+        order_type = request.POST.get("type")
+        due_date = pytz.timezone("Asia/Singapore").localize(datetime.strptime(request.POST.get("date"), '%d-%m-%Y'))
+        quote_number = request.POST.get("quote-number")
+        po_number = request.POST.get("po-number")
+        assigned_to = request.POST.get("assign-to")
+        order_name = request.POST.get("name")
+        notes = request.POST.get("notes")
+
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        old_order = SP3D_Order.objects.get(id=id_order)
+        old_order.type = order_type
+        old_order.due_date = due_date
+        old_order.name = order_name
+        old_order.quote_number = quote_number
+        old_order.po_number = po_number
+        old_order.assigned_to = assigned_to
+        old_order.notes = notes
+        old_order.save()
+
+    return HttpResponseRedirect('/parts/orders/order-detail/%s'%id_order)
+
+# add new 2d drawing
+@login_required
+def add_cad2d(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        files = request.FILES
+        form = request.POST
+
+        id_part = request.POST.get("part_id")
+        id_cad = request.POST.get("cad_id")
+        notes = request.POST.get("notes")
+        cad2d_file = request.FILES.get('cad2d')
+
+        upload_cad2d(cad2d_file, id_part, id_cad, userid, notes)
+
+        print "FILES: %s"%files
+        print "form is: %s"%form
+        context={}
+    return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
+
+# add new stl
+@login_required
+def add_stl(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        files = request.FILES
+        form = request.POST
+
+        id_part = request.POST.get("part_id")
+        id_cad = request.POST.get("cad_id")
+        notes = request.POST.get("notes")
+        stl_file = request.FILES.get('stl')
+
+        upload_stl(stl_file, id_part, id_cad, userid, notes)
+
+        print "FILES: %s"%files
+        print "form is: %s"%form
+        context={}
+    return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
+
+# add new bulk
+@csrf_exempt
+@login_required
+def add_bulk(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        print "userid is: %s"%userid
+        files = request.FILES
+        form = request.POST
+        print "BULK FORM: %s"%form
+        id_part = request.POST.get("part_id")
+        notes = request.POST.get("notes")
+        bulk_file = request.FILES.get('bulk')
+
+        upload_bulk(bulk_file, id_part, userid, notes)
+
+        print "FILES: %s"%files
+        print "form is: %s"%form
+        context={}
+    return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
 
 # upload new cad
 def upload_cad(file,id_part,userid):
@@ -940,10 +1567,11 @@ def upload_cad(file,id_part,userid):
     print "DEBUG51:"
     return result
 
-# upload new stl
-def upload_stl(file , id_part , id_cad, userid):
-    error=None
+# upload new stl file
+def upload_stl(file , id_part , id_cad, userid, notes=""):
+    error=""
     try:
+        print "DEBUG 6000"
         part = SP3D_Part.objects.get(id = id_part)
         oem_id=part.id_oem
         oem=SP3D_Oem.objects.get(id=oem_id)
@@ -951,7 +1579,7 @@ def upload_stl(file , id_part , id_cad, userid):
         # kepep subpath separated from path, because used later
         subpath="catalogue/oem-%s/part-id-%s/STL/"%(oem.code,id_part)
         path = DATABASE_DIRECTORY_TRANSITION + subpath
-
+        print "DEBUG 6010"
         # Check that folder exists
         if not os.path.exists(path):
             os.makedirs(path)
@@ -959,7 +1587,7 @@ def upload_stl(file , id_part , id_cad, userid):
         newfile=path+"%s"%file
         filename, file_extension = os.path.splitext(newfile)
         #Check that file extension is .amf
-        if not (file_extension.lower()==".stl"):
+        if not file_extension.lower()==".stl":
             raise ValueError('Wrong file extension, we need a .stl')
         # Check that file with same name doesn't exist and iterate on name if it does
         if os.path.exists(newfile):
@@ -967,21 +1595,21 @@ def upload_stl(file , id_part , id_cad, userid):
             while os.path.exists("%s-iteration-%s%s"%(filename,i,file_extension)):
                 i+=1
             newfile = "%s-iteration-%s%s"%(filename,i,file_extension)
-
+        print "DEBUG 6030"
         # write in new file
         with open(newfile, 'wb+') as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
         print "New STL uploaded at location " + newfile
-
+        print "DEBUG 6040"
         # create related record in database
         creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
         name=ntpath.basename(newfile)
         root_path=DATABASE_DIRECTORY_TRANSITION
         file_path=subpath+name
-        new_stl=SP3D_STL.objects.create(creation_date=creation_date, name=name, root_path=root_path, file_path=file_path, id_cad=int(id_cad), id_creator=userid)
+        new_stl=SP3D_STL.objects.create(creation_date=creation_date, name=name, root_path=root_path, file_path=file_path, id_cad=int(id_cad), id_creator=userid, notes=notes)
         print "STL record added to sql database with id %s" % new_stl.id
-
+        print "DEBUG 6080"
         print "DEBUG50:"
     except ValueError as err :
         print (err)
@@ -991,6 +1619,115 @@ def upload_stl(file , id_part , id_cad, userid):
         error = error + "STL Uploading failed"
 
     result=[error, new_stl.id]
+    print "DEBUG51:"
+    return result
+
+# upload new stl file
+def upload_bulk(file , id_part , userid, notes=""):
+    error=""
+    try:
+        print "DEBUG 6000"
+        print "ID PART %s"%id_part
+        print "NOTES %s"%notes
+        part = SP3D_Part.objects.get(id = id_part)
+        oem_id=part.id_oem
+        oem=SP3D_Oem.objects.get(id=oem_id)
+
+        # kepep subpath separated from path, because used later
+        subpath="catalogue/oem-%s/part-id-%s/BULK/"%(oem.code,id_part)
+        path = DATABASE_DIRECTORY_TRANSITION + subpath
+        # Check that folder exists
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        newfile=path+"%s"%file
+        filename, file_extension = os.path.splitext(newfile)
+        # Check that file with same name doesn't exist and iterate on name if it does
+        if os.path.exists(newfile):
+            i=1
+            while os.path.exists("%s-%s%s"%(filename,i,file_extension)):
+                i+=1
+            newfile = "%s-%s%s"%(filename,i,file_extension)
+        print "DEBUG 6030"
+        # write in new file
+        with open(newfile, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        print "New BULK uploaded at location " + newfile
+        print "DEBUG 6040"
+        # create related record in database
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        name=ntpath.basename(newfile)
+        root_path=DATABASE_DIRECTORY_TRANSITION
+        file_path=subpath+name
+        new_bulk=SP3D_Bulk_Files.objects.create(creation_date=creation_date, name=name, root_path=root_path, file_path=file_path, id_part=int(id_part), id_creator=userid, notes=notes)
+        print "Bulk record added to sql database with id %s" % new_bulk.id
+        print "DEBUG 6080"
+        print "DEBUG50:"
+    except ValueError as err :
+        print (err)
+        error=error + "%s"%err
+    except:
+        print "BULK Uploading Failed"
+        error = error + "BULK Uploading failed"
+
+    result=[error, new_bulk.id]
+    print "DEBUG51:"
+    return result
+
+
+# upload new 2d drawing
+def upload_cad2d(file , id_part , id_cad, userid, notes=""):
+    error=""
+    try:
+        print "DEBUG 6000"
+        part = SP3D_Part.objects.get(id = id_part)
+        oem_id=part.id_oem
+        oem=SP3D_Oem.objects.get(id=oem_id)
+
+        # kepep subpath separated from path, because used later
+        subpath="catalogue/oem-%s/part-id-%s/CAD2D/"%(oem.code,id_part)
+        path = DATABASE_DIRECTORY_TRANSITION + subpath
+        print "DEBUG 6010"
+        # Check that folder exists
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        newfile=path+"%s"%file
+        filename, file_extension = os.path.splitext(newfile)
+        #Check that file extension is .amf
+        if not (file_extension.lower()==".slddrw" or file_extension.lower()==".pdf"):
+            raise ValueError('Wrong file extension, we need a .slddrw or .pdf')
+        # Check that file with same name doesn't exist and iterate on name if it does
+        if os.path.exists(newfile):
+            i=1
+            while os.path.exists("%s-iteration-%s%s"%(filename,i,file_extension)):
+                i+=1
+            newfile = "%s-iteration-%s%s"%(filename,i,file_extension)
+        print "DEBUG 6030"
+        # write in new file
+        with open(newfile, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        print "New 2D Drawing uploaded at location " + newfile
+        print "DEBUG 6040"
+        # create related record in database
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        name=ntpath.basename(newfile)
+        root_path=DATABASE_DIRECTORY_TRANSITION
+        file_path=subpath+name
+        new_cad2d=SP3D_CAD2D.objects.create(creation_date=creation_date, name=name, root_path=root_path, file_path=file_path, id_cad=int(id_cad), id_creator=userid, notes=notes)
+        print "STL record added to sql database with id %s" % new_cad2d.id
+        print "DEBUG 6080"
+        print "DEBUG50:"
+    except ValueError as err :
+        print (err)
+        error=error + "%s"%err
+    except:
+        print "CAD2D Uploading Failed"
+        error = error + "CAD2D Uploading failed"
+
+    result=[error, new_cad2d.id]
     print "DEBUG51:"
     return result
 
@@ -1109,103 +1846,7 @@ def upload_config(file,id_part,userid):
     return error
 
 # UPLOAD 3MF
-def upload_3mf(amf_file, config_file, configb_file, id_cad, userid):
-    error=None
-    try:
-        print "BALISE 2000: %s"%id_cad
-        cad=SP3D_CAD.objects.get(id=id_cad)
-        id_part=cad.id_part
-        part=SP3D_Part.objects.get(id=id_part)
-        oem_id=part.id_oem
-        oem=SP3D_Oem.objects.get(id=oem_id)
-        print "BALISE200"
-        extension_amf=("%s"%amf_file).rsplit('.',1)[1]
-        extension_config=("%s"%config_file).rsplit('.',1)[1]
-        extension_configb=("%s"%configb_file).rsplit('.',1)[1]
-        if not extension_amf == "amf":
-            raise ValueError("Wrong extension file, supposed to be .amf")
-        if not extension_config == "ini":
-            raise ValueError("Wrong extension file, supposed to be .ini")
-        if not extension_configb == "ini":
-            raise ValueError("Wrong extension file, supposed to be .ini")
-
-
-        subpath_amf="catalogue/oem-%s/part-id-%s/AMF/"%(oem.code,part.id)
-        subpath_config="catalogue/oem-%s/part-id-%s/CONFIG/"%(oem.code,part.id)
-
-        print "BALISE201"
-
-        path_amf = DATABASE_DIRECTORY_TRANSITION + subpath_amf
-        path_config = DATABASE_DIRECTORY_TRANSITION + subpath_config
-        print "BALISE1"
-        # Check that folder exists
-        if not os.path.exists(path_amf):
-            os.makedirs(path_amf)
-        if not os.path.exists(path_config):
-            os.makedirs(path_config)
-        print "BALISE2"
-
-        # create related record in database
-        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
-        if ("%s"%file).startswith("amf"):
-            namestart="amf"
-
-        root_path=DATABASE_DIRECTORY_TRANSITION
-        new_3mf=SP3D_3MF.objects.create(creation_date=creation_date,root_path=root_path, id_cad=int(id_cad),id_creator=userid)
-        print "3MF record added to sql database with id %s" % new_3mf.id
-        new_3mf.name_amf = 'amf-%s.amf' % new_3mf.id
-        new_3mf.name_config = 'config-%s.ini' % new_3mf.id
-        new_3mf.name_configb = 'configb-%s.ini' % new_3mf.id
-        new_3mf.amf_path = subpath_amf + 'amf-%s.amf' % new_3mf.id
-        new_3mf.config_path = subpath_config + 'config-%s.ini' % new_3mf.id
-        new_3mf.configb_path = subpath_config + 'configb-%s.ini' % new_3mf.id
-        new_3mf.save()
-
-
-        new_amf = root_path + new_3mf.amf_path
-        new_config = root_path + new_3mf.config_path
-        new_configb = root_path + new_3mf.configb_path
-
-        amf_name, amf_extension = os.path.splitext(new_amf)
-        config_name, config_extension = os.path.splitext(new_config)
-        configb_name, configb_extension = os.path.splitext(new_configb)
-
-        # # #Check that file extension is .config
-        # if not _extension.lower()==".ini":
-        #     raise ValueError('Wrong file extension, we need a .INI')
-        print "BALISE3"
-        # Check that file with same name doesn't exist and iterate on name if it does
-        # if os.path.exists(new_amf):
-        #     it=1
-        #     while os.path.exists("%s-iteration-%s%s"%(filename,it,file_extension)):
-        #         it+=1
-        #     newfile="%s-iteration-%s%s"%(filename,it,file_extension)
-
-        # write in new file
-        with open(new_amf, 'wb+') as destination:
-            for chunk in amf_file.chunks():
-                destination.write(chunk)
-        print "New AMF uploaded at location " + new_amf
-        with open(new_config, 'wb+') as destination:
-            for chunk in config_file.chunks():
-                destination.write(chunk)
-        print "New CONFIG uploaded at location " + new_config
-        with open(new_configb, 'wb+') as destination:
-            for chunk in configb_file.chunks():
-                destination.write(chunk)
-        print "New CONFIGB uploaded at location " + new_configb
-
-
-    except ValueError as err :
-        print (err)
-        error=error +"%s"%err
-    except:
-        print "3MF Uploading Failed"
-        error = error + "3MF Uploading failed"
-    return error
-
-# UPLOAD 3MF
-def upload_3mf_1(amf_file, config_file, configb_file, gcode_file, id_cad, userid):
+def upload_3mf(amf_file, config_file, configb_file, gcode_file, id_cad, userid, notes):
     error=None
     try:
         print "BALISE 2000: %s"%id_cad
@@ -1252,7 +1893,7 @@ def upload_3mf_1(amf_file, config_file, configb_file, gcode_file, id_cad, userid
         creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
 
         root_path=DATABASE_DIRECTORY_TRANSITION
-        new_3mf=SP3D_3MF.objects.create(creation_date=creation_date,root_path=root_path, id_cad=int(id_cad),id_creator=userid)
+        new_3mf=SP3D_3MF.objects.create(creation_date=creation_date,root_path=root_path, id_cad=int(id_cad),id_creator=userid, notes=notes)
         print "3MF record added to sql database with id %s" % new_3mf.id
         # names of files in 3mf
         new_3mf.name_amf = 'amf-%s.amf' % new_3mf.id

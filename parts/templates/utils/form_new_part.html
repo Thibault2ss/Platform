@@ -12,7 +12,13 @@
   <div class="form-group">
     <label for="part-number">Part Number</label>
     <input type="text" class="form-control" name="part-number" id="part-number" aria-describedby="" placeholder="Enter part number" required>
-    <small id="emailHelp" class="form-text text-muted">choose non-existent part number</small>
+    <small id="" class="form-text text-muted">choose non-existent part number</small>
+  </div>
+
+  <div class="form-group">
+    <label for="part-name">Part Name</label>
+    <input type="text" class="form-control" name="part-name" id="part-name" aria-describedby="" placeholder="Enter part name" required>
+    <small id="" class="form-text text-muted">give an explicit part name</small>
   </div>
 
   <div class="form-group">
@@ -29,13 +35,15 @@
     <label for="notes">Notes</label>
     <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
   </div>
-  <div class="form-group">
+  <!-- add a cad at the same time -->
+
+  <!-- <div class="form-group">
     <label for="cad">CAD</label>
     <input type="file" class="form-control-file" id="cad" name="cad" aria-describedby="fileHelp">
     <label class="form-check-label text-light">
       <input type="checkbox" name="is_oem" class="form-check-input">
       this CAD is the reference OEM CAD
     </label>
-  </div>
+  </div> -->
   <button type="submit" class="btn btn-primary pull-right">Submit</button>
 </form>
