@@ -18,7 +18,12 @@
 
 
 
-                      <form action="add-bulk/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
+                      <form action="/parts/add-bulk/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
+                         {%if order%}
+                            <input type="hidden" id="bulk_type" name="bulk_type" value="order">
+                         {%else%}
+                            <input type="hidden" id="bulk_type" name="bulk_type" value="part">
+                         {%endif%}
 
                          <input type="hidden" name="part_id" value="{{part.id}}">
 

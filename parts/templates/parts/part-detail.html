@@ -45,6 +45,7 @@
         <!-- Navigation1 -->
         {% include "utils/navbar.html" %}
 
+{%include "utils/modals/printers-modal.html"%}
 
         <div id="page-wrapper">
 
@@ -62,6 +63,9 @@
                         {%endif%}
                     </div>
                 </div> -->
+                {%if superpermission%}
+                <button type="button" value="{{part.id}}" class="btn btn-danger btn-circle pull-right delete-part"><i class="glyphicon glyphicon-remove"></i></button>
+                {%endif%}
 
                 <div class="row">
                     <div class="col-lg-3 text-center"><h5><b>OEM : </b>{{part.oem_name}}</h5></div>
@@ -188,7 +192,10 @@
                                                           {% for tmf in value %}
                                                               <tr>
                                                                   <td><b>{{tmf.id}}</b></td>
-                                                                  <td data-title="Print">{% include "utils/printer_dropdown.html" %}</td>
+                                                                  <td data-title="Print">
+                                                                      {%if request.user.id == 1%}{% include "utils/printer_dropdown.html" %}{%endif%}
+                                                                      <button id="print-{{tmf.id}}" type="button" style="margin-right:10px" class="btn btn-info btn-sm btn-print" data-toggle="modal" data-target="#modal-printers"><i class="fa fa-print"></i></button>
+                                                                  </td>
                                                                   <td><a href="{{part.id}}/download_amf/{{tmf.id}}/">{{tmf.name_amf}}</a></td>
                                                                   <td><a href="{{part.id}}/download_config/{{tmf.id}}/">{{tmf.name_config}}</a></td>
                                                                   <td><a href="{{part.id}}/download_configb/{{tmf.id}}/">{{tmf.name_configb}}</a></td>
@@ -349,19 +356,22 @@
                             </div>
 
 
-                            <div class="panel-body dropzone" action="add-bulk/" id="bulk-dropzone">
+                            <div class="panel-body dropzone" action="/parts/add-bulk/" id="bulk-dropzone">
                                 <input type="hidden" id="id_part" name="id_part" value="{{part.id}}">
                                 <input type="hidden" id="notes" name="notes" value="">
+                                <input type="hidden" id="bulk_type" name="bulk_type" value="part">
                                 <div class="dz-message" data-dz-message><span>DROP THAT  HERE</span></div>
                                 <div class="list-group">
                                     {% if bulk_files %}
                                     {% for bulk_file in bulk_files %}
-                                    <a href="{{part.id}}/download_bulk/{{bulk_file.id}}/" class="list-group-item">
+                                    <div class="list-group-item">
                                         <span class="badge">{{bulk_file.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span>
-                                        <i class="fa fa-fw fa-cloud-download"></i> {{bulk_file.name}}
-                                        <small class="notes-editable" data-type="text" data-pk="{{bulk_file.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'bulk'}" data-url="/parts/ajax/update-notes/">- {{bulk_file.notes}}</small>
+                                        <a href="/parts/download_bulk/{{bulk_file.id}}/">
+                                            <i class="fa fa-fw fa-cloud-download"></i> {{bulk_file.name}} -
+                                        </a>
+                                            <small>Notes: <span class="notes-editable" data-type="text" data-pk="{{bulk_file.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'bulk'}" data-url="/parts/ajax/update-notes/">{{bulk_file.notes}}</span></small>
 
-                                    </a>
+                                    </div>
                                     {%if superpermission%}
                                     <button type="button" value="{{bulk_file.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
                                     {%endif%}
@@ -496,7 +506,11 @@
     <script src="{% static 'parts/js/dropzone.js' %}"></script>
     <!-- <script src="{% static 'parts/js/picture_dropzone.js' %}"></script> -->
     <script src="{% static 'parts/js/part-detail.js' %}"></script>
+
     <script src="{% static 'parts/js/printer_state.js' %}"></script>
+
+
+    <!-- <script src="{% static 'parts/js/printer_state_1.js' %}"></script> -->
     <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script> -->
 
     <script src="{% static 'parts/js/bootstrap-editable.js' %}"></script>

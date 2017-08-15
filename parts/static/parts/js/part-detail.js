@@ -349,14 +349,59 @@ for (var key in STATUS_COLOR){
             this.on("sending", function(file, xhr, formData) {
                var id_part = $('#bulk-dropzone #id_part').val();
                var notes = $('#bulk-dropzone #notes').val();
+               var bulk_type = $('#bulk-dropzone #bulk_type').val();
                console.log("FORMDATA:"+formData);
                console.log("id part:" + id_part);
                console.log("notes:" + notes);
                formData.append("part_id", id_part); // Append all the additional input data of your form here!
                formData.append("notes", notes);
+               formData.append("bulk_type", bulk_type);
                console.log("ADDDED");
             });
         }
     };
+
+
+    ///////////////////////////////////////////////////LIVE Z-OFFSET HANDLING////////////////////////////////////////////////
+
+    // live qtty handling: plus button
+        $('.z-offset-right-plus').click(function(e){
+           // Stop acting like a button
+           e.preventDefault();
+           var id_printer = $(this).attr("id").split("-")[1];
+           var z_offset = parseFloat($('#z-offset-'+id_printer).val());
+           console.log(id_printer);
+
+        //    check if is negative, not integer or not number
+           if (isNaN(z_offset) || z_offset<0 || !$.isNumeric(z_offset)){
+               z_offset = 0;
+               console.log("weird")
+           }
+               $('#z-offset-'+id_printer).val((z_offset + 0.05).toFixed(2));
+               console.log("value is: " + $('#z-offset-'+id_printer).val());
+
+       });
+
+
+     // live qtty handling: minus button
+        $('.z-offset-left-minus').click(function(e){
+            console.log("clicked minus");
+           // Stop acting like a button
+           e.preventDefault();
+           var id_printer = $(this).attr("id").split("-")[1];
+           var z_offset = parseFloat($('#z-offset-'+id_printer).val());
+           if (isNaN(z_offset) || z_offset<0 || !$.isNumeric(z_offset)){
+               z_offset = 0;
+           }
+           // If is not undefined
+               // Increment
+               if(z_offset>0){
+                   $('#z-offset-'+id_printer).val((z_offset - 0.05).toFixed(2));
+                   console.log("value is: " + $('#z-offset-'+id_printer).val());
+               }
+
+       });
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 });

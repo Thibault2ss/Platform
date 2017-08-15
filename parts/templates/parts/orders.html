@@ -2,7 +2,7 @@
 {% load tz %}
 {% load app_filters %}
 <!DOCTYPE html>
-<html >
+<html style = "overflow: hidden">
 <head>
   <meta charset="UTF-8">
   <!-- don't chnge title, linked to javascript -->
@@ -24,138 +24,184 @@
 <body>
   {% include "utils/navbar.html" %}
 
-  <div id="catalogue">
+  <div id="order-page">
 
 
 
-<div class="row">
-
-
-    {%include "utils/modals/add-client.html" %}
-    {%include "utils/modals/add-order.html" %}
-        <h1>Orders</h1>
-
-
+<div class="row" style="margin-bottom:10px">
+    <div class="col col-lg-4 col-sm-4">
+        <ul class="nav nav-pills nav-pills-status custom-colors">
+            {% if closed %}
+                <li><a  class="filter-status button-opened" href="/parts/orders/">Opened</a></li>
+                <li class="active"><a class="filter-status button-closed">Closed</a></li>
+            {%else%}
+                <li class="active"><a class="filter-status button-opened">Opened</a></li>
+                <li><a class="filter-status button-closed" href="/parts/orders/closed/">Closed</a></li>
+            {%endif%}
+        </ul>
+    </div>
+    <div class="col-lg-6 col-sm-6">
+        <ul class="nav nav-pills nav-pills-users">
+            <li class="active"><a data-toggle="pill" class="filter-user-id" id="" href="">All</a></li>
+            {%for user in users%}
+            <li><a data-toggle="pill" class="filter-user-id" id="{{user.username}}" href="">{{user.username}}</a></li>
+            {%endfor%}
+        </ul>
+    </div>
+    <div class="col col-lg-2 col-sm-2">
+        {%include "utils/modals/add-client.html" %}
+        {%include "utils/modals/add-order.html" %}
+    </div>
 </div>
 
 
 <div class="row">
     <!-- RFQ -->
-    <div class="col-lg-4 col-sm-6">
-        <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-                <h3 class="panel-title"><i class="fa fa-tasks fa-fw"></i> RFQ</h3>
+    <div class="col col-lg-4 col-sm-6">
+        <div class="panel panel-default ">
+            <div class="panel-heading clearfix {%if closed == 1%}theme-red{%else%}theme-orange{%endif%}">
+                <div class="row">
+                    <div class="col-lg-4 col-sm-4">
+                        <h3 class="panel-title" style="margin-top:10px"><i class="fa fa-tasks fa-fw"></i> RFQ</h3>
+                    </div>
+                    <div class="col-lg-8 col-sm-8">
+                        <div class="input-group pull-right">
+                            <span class="input-group-addon {%if closed == 1%}btn-danger{%else%}theme-orange{%endif%}"><i class="fa fa-fw fa-search" style="color:white"></i></span>
+                            <input id="filter-rfq" type="text" class="form-control filter" placeholder="Search...">
+                        </div>
+                    </div>
+                </div>
             </div>
+            <div class="searchable-rfq scrollbar custom-scrollbar {%if closed == 1%}scrollbar-red{%else%}scrollbar-orange{%endif%}" style="max-height:75vh;">
                 <div class="list-group">
                     {% if orders %}
                     {% for order in orders %}
                     {%if order.type == 'quote'%}
-                    <div href="" class="list-group-item">
+                    <div href="" class="list-group-item {{order.creation_date|created_recently}}">
+                        {%if closed%}
+                        <span class="badge badge-success completion_date">{{order.completion_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>closed by {%for user in users%}{%if user.id == order.closed_by%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%else%}
                         <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
-                        <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
                         <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
-                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="order-detail/{{order.id}}"><i class="fa fa-fw fa-dollar"></i> {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                        {%endif%}
+                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="{% url 'parts:order_detail' id_order=order.id %}"><i class="fa fa-fw fa-dollar"></i> {{order.id}} - {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
                         <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</small>
                         <small class="pull-right">{{order.quote_number}}</small>
+                        {% if request.user.id == 1 %}
+                        <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-order"><i class="glyphicon glyphicon-remove"></i></button>
+                        {%endif%}
                     </div>
-                    {%if superpermission%}
-                    <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
-                    {%endif%}
+
                     {%endif%}
                     {% endfor %}
                     {% endif %}
                 </div>
+            </div>
         </div>
     </div>
 
 
 <!-- Production -->
-    <div class="col-lg-4 col-sm-6">
+    <div class="col col-lg-4 col-sm-6">
         <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-                <h3 class="panel-title"><i class="fa fa-tasks fa-fw"></i> Production</h3>
+            <div class="panel-heading clearfix {%if closed == 1%}theme-red{%else%}theme-orange{%endif%}">
+                <div class="row">
+                    <div class="col-lg-4 col-sm-4">
+                        <h3 class="panel-title" style="margin-top:10px"><i class="fa fa-tasks fa-fw"></i> Prod</h3>
+                    </div>
+                    <div class="col-lg-8 col-sm-8">
+                        <div class="input-group pull-right">
+                            <span class="input-group-addon {%if closed == 1%}btn-danger{%else%}theme-orange{%endif%}"><i class="fa fa-fw fa-search" style="color:white"></i></span>
+                            <input id="filter-prod" type="text" class="form-control filter" placeholder="Search...">
+                        </div>
+                    </div>
+                </div>
             </div>
+            <div class="searchable-prod scrollbar custom-scrollbar {%if closed == 1%}scrollbar-red{%else%}scrollbar-orange{%endif%}" style="max-height:75vh;">
                 <div class="list-group">
                     {% if orders %}
                     {% for order in orders %}
-                    {%if order.type == 'prod'%}
-                    <div href="" class="list-group-item">
+                    {%if order.type == 'prod' or order.type == 'sample'%}
+                    <div href="" class="list-group-item {{order.creation_date|created_recently}}">
+                        {%if closed%}
+                        <span class="badge badge-success completion_date">{{order.completion_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>closed by {%for user in users%}{%if user.id == order.closed_by%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%else%}
                         <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
-                        <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
                         <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
-                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="order-detail/{{order.id}}"><i class="fa fa-fw fa-cubes"></i> {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                        {%endif%}
+                        <h5 style="margin-bottom:5px;margin-top:0px">
+                            <a href="{% url 'parts:order_detail' id_order=order.id %}">
+                                {%if order.type == 'sample'%}
+                                <i class="fa fa-fw fa-eye"></i>
+                                {%else%}
+                                <i class="fa fa-fw fa-cubes"></i>
+                                {%endif%}
+                                {{order.id}} - {{order.name}}
+                            </a>-
+                            <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small>
+                        </h5>
                         <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</small>
                         <small class="pull-right">{{order.po_number}}</small>
+                        {% if request.user.id == 1 %}
+                        <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-order"><i class="glyphicon glyphicon-remove"></i></button>
+                        {%endif%}
                     </div>
-                    {%if superpermission%}
-                    <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
-                    {%endif%}
                     {%endif%}
                     {% endfor %}
                     {% endif %}
                 </div>
+            </div>
         </div>
     </div>
 
 
 <!-- Indus -->
-    <div class="col-lg-4 col-sm-6">
+    <div class="col col-lg-4 col-sm-6">
         <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-                <h3 class="panel-title"><i class="fa fa-tasks fa-fw"></i> Industrialisation</h3>
+            <div class="panel-heading clearfix {%if closed == 1%}theme-red{%else%}theme-orange{%endif%}">
+                <div class="row">
+                    <div class="col-lg-4 col-sm-4">
+                        <h3 class="panel-title" style="margin-top:10px"><i class="fa fa-tasks fa-fw"></i> Indus</h3>
+                    </div>
+                    <div class="col-lg-8 col-sm-8">
+                        <div class="input-group pull-right">
+                            <span class="input-group-addon {%if closed == 1%}btn-danger{%else%}theme-orange{%endif%}"><i class="fa fa-fw fa-search" style="color:white"></i></span>
+                            <input id="filter-indus" type="text" class="form-control filter" placeholder="Search...">
+                        </div>
+                    </div>
+                </div>
             </div>
+            <div class="searchable-indus scrollbar custom-scrollbar {%if closed == 1%}scrollbar-red{%else%}scrollbar-orange{%endif%}" style="max-height:75vh;">
                 <div class="list-group">
                     {% if orders %}
                     {% for order in orders %}
                     {%if order.type == 'indus'%}
-                    <div href="" class="list-group-item">
+                    <div href="" class="list-group-item {{order.creation_date|created_recently}}">
+                        {%if closed%}
+                        <span class="badge badge-success completion_date">{{order.completion_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>closed by {%for user in users%}{%if user.id == order.closed_by%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%else%}
                         <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
-                        <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
                         <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
-                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="order-detail/{{order.id}}"><i class="fa fa-fw fa-wrench"></i> {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
-                        <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</small>
-                        <!-- <small class="pull-right">{{order.quote_number}}</small> -->
+                        {%endif%}
+                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="{% url 'parts:order_detail' id_order=order.id %}"><i class="fa fa-fw fa-wrench"></i> {{order.id}} - {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                        <small style="margin-left:20px" >Notes: <span class="notes-editable" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</span></small>
+                        {% if request.user.id == 1 %}
+                        <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-order"><i class="glyphicon glyphicon-remove"></i></button>
+                        {%endif%}
                     </div>
-                    {%if superpermission%}
-                    <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
-                    {%endif%}
+
                     {%endif%}
                     {% endfor %}
                     {% endif %}
                 </div>
+            </div>
         </div>
     </div>
 </div>
-<div class="row">
-    <!-- Indus -->
-        <div class="col-lg-4 col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-heading clearfix">
-                    <h3 class="panel-title"><i class="fa fa-tasks fa-fw"></i> Sample</h3>
-                </div>
-                    <div class="list-group">
-                        {% if orders %}
-                        {% for order in orders %}
-                        {%if order.type == 'sample'%}
-                        <div href="" class="list-group-item">
-                            <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
-                            <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
-                            <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
-                            <h5 style="margin-bottom:5px;margin-top:0px"><a href="order-detail/{{order.id}}"><i class="fa fa-fw fa-cube"></i> {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
-                            <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</small>
-                            <!-- <small class="pull-right">{{order.quote_number}}</small> -->
-                        </div>
-                        {%if superpermission%}
-                        <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
-                        {%endif%}
-                        {%endif%}
-                        {% endfor %}
-                        {% endif %}
-                    </div>
-            </div>
-        </div>
 
-</div>
 </div>
 </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>

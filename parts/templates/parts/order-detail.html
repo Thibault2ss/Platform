@@ -37,8 +37,10 @@
     <div class="col-lg-4 col-sm-6">
         <div class="panel panel-default ">
             <div class="panel-heading clearfix">
+                {%if order.status_ord == 0 %}
                 {%if permission == 1%}
                 {%include "utils/modals/update-order.html"%}
+                {%endif%}
                 {%endif%}
                 <h3 style="margin-top:5px" class="panel-title pull-right">Order<i class="fa fa-fw fa-info-circle"></i></h3>
             </div>
@@ -65,11 +67,12 @@
                         <span><b style="color:red">Due Date:</b> <span id="order-due-date">{{order.due_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span></span>
                         <span class="badge due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
                     </div>
+
                     {%for user in users%}
                     {%if user.id == order.assigned_to%}
                     <div class="list-group-item">
                         <i class="fa fa-fw fa-user"></i>
-                        <span id="order-assigned-to" >{{user.id}}</span>
+                        <span id="order-assigned-to" style="display:None" >{{user.id}}</span>
                         <span> <b>Assigned to #: </b>{{user.first_name}} {{user.last_name}}</span>
                     </div>
                     {%endif%}
@@ -78,47 +81,97 @@
                         <i class="fa fa-fw fa-edit"></i>
                         <span><b>Notes: </b><span class="notes-editable" id="order-notes" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</span></span>
                     </div>
+                    {%if order.type == "quote"%}
                     <div class="list-group-item">
                         <i class="fa fa-fw fa-asterisk"></i>
                         <span> <b>Quote #: </b><span id="order-quote-number">{{order.quote_number}}</span></span>
                     </div>
+                    {%endif%}
+                    {%if order.type == "prod" or order.type == "sample"%}
                     <div class="list-group-item">
                         <i class="fa fa-fw fa-asterisk"></i>
                         <span> <b>PO #: </b><span id="order-po-number">{{order.po_number}}</span></span>
                     </div>
+                    {%endif%}
+                    {%if order.status_ord == 1%}
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-calendar-o"></i>
+                        <span><b style="color:green">Closed Date:</b> <span id="order-completion-date">{{order.completion_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span></span>
+                        <span class="badge completion_date">{{order.completion_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-fw fa-user"></i>
+                        <span> <b>Closed by </b><span id="order-po-number">{%for user in users%}{%if user.id == order.closed_by %} {{user.first_name}} {{user.last_name}}{%endif%}{%endfor%}</span></span>
+                    </div>
+                    {%endif%}
+
 
                     {%if request.user.id == 1%}
-                    <!-- <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button> -->
+                    <!-- <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right"><i class="glyphicon glyphicon-remove"></i></button> -->
                     {%endif%}
 
 
                 </div>
         </div>
+
+        <!-- bulk files -->
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title"><i class="fa fa-files-o fa-fw"></i> Bulk Files</h3>
+            </div>
+
+
+            <div class="panel-body dropzone" action="/parts/add-bulk/" style="min-height:100px" id="bulk-dropzone">
+                <input type="hidden" id="id_order" name="id_order" value="{{order.id}}">
+                <input type="hidden" id="notes" name="notes" value="">
+                <input type="hidden" id="bulk_type" name="bulk_type" value="order">
+                <div class="dz-message" data-dz-message><span>DROP THAT  HERE</span></div>
+                <div class="list-group">
+                    {% if bulk_files %}
+                    {% for bulk_file in bulk_files %}
+                    <div href="/parts/download_bulk/{{bulk_file.id}}/" class="list-group-item">
+                        <span class="badge">{{bulk_file.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span>
+                        <a href="/parts/download_bulk/{{bulk_file.id}}/">
+                            <i class="fa fa-fw fa-cloud-download"></i> {{bulk_file.name}} -
+                        </a>
+                            <small>Notes: <span class="notes-editable" data-type="text" data-pk="{{bulk_file.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'bulk'}" data-url="/parts/ajax/update-notes/">{{bulk_file.notes}}</span></small>
+
+                    </div>
+                    {%if request.user.id == 1%}
+                    <button type="button" value="{{bulk_file.id}}" class="btn btn-danger btn-circle pull-right delete-bulk"><i class="glyphicon glyphicon-remove"></i></button>
+                    {%endif%}
+                    {% endfor %}
+                    {%else%}
+                        <span> Drag File Here</span>
+                    {% endif %}
+                </div>
+                <!-- <div class="text-right">
+                    <a href="#">View All Activity <i class="fa fa-arrow-circle-right"></i></a>
+                </div> -->
+            </div>
+        </div>
+
     </div>
-    <!-- RFQ -->
+    <!-- Client -->
     <div class="col-lg-4 col-sm-6">
         <div class="panel panel-default">
             <div class="panel-heading clearfix">
-
                 <h3 class="panel-title pull-right">Client<i class="fa fa-fw fa-info-circle"></i></h3>
             </div>
                 <div class="list-group">
-
-                    {%for client in clients%}
-                    {%if client.id == order.id_client%}
 
                     <div class="list-group-item">
                         <i class="fa fa-fw fa-coffee"></i>
                         <span> <b>Client: </b>{{client.name}}</span>
                     </div>
-                    <div class="list-group-item">
+                    <!-- <div class="list-group-item">
                         <i class="fa fa-fw fa-user"></i>
                         <span> <b>Contact: </b>{{client.primary_contact_name}}</span>
                     </div>
                     <div class="list-group-item">
                         <i class="fa fa-fw fa-at"></i>
                         <span> <b>email: </b>{{client.primary_contact_email}}</span>
-                    </div>
+                    </div> -->
                     <div class="list-group-item">
                         <i class="fa fa-fw fa-cog"></i>
                         <span> <b>Activity: </b>{{client.activity}}</span>
@@ -127,11 +180,168 @@
                         <i class="fa fa-fw fa-home"></i>
                         <span> <b>Address: </b>{{client.address}}</span>
                     </div>
+
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <div class="row">
+                        <div class="col-lg-5 col-sm-5">
+                            <h3 class="panel-title" style="margin-top:5px"><i class="fa fa-fw fa-info"></i>Contact</h3>
+                        </div>
+                        <div class="col-lg-5 col-sm-5">
+                            <form action="/parts/change-order-contact/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
+                                <div class="form-group" style="max-height:20px">
+                                    <input type="hidden" name="id-order" value="{{order.id}}">
+                                    <select class="form-control" name="id-contact" id="id-contact" onchange="this.form.submit()" required>
+                                            <option>choose</option>
+                                            {%for contact in contacts%}
+                                            <option value="{{contact.id}}">{{contact.prefix}} {{contact.first_name}} {{contact.last_name}}</option>
+                                            {%endfor%}
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-lg-2 col-sm-2">
+                            {%if permission == 1%}
+                            {% include "utils/modals/add-contact.html" %}
+                            {%endif%}
+                        </div>
+                    </div>
+
+                </div>
+                {%for contact in contacts%}
+                {%if contact.id == order.id_contact%}
+                    <div class="list-group">
+
+                        <div class="list-group-item">
+                            <i class="fa fa-fw fa-user"></i>
+                            <span> <b>first name: </b>{{contact.prefix}} {{contact.first_name}}</span>
+                        </div>
+                        <div class="list-group-item">
+                            <i class="fa fa-fw fa-user"></i>
+                            <span> <b>last name: </b>{{contact.last_name}}</span>
+                        </div>
+                        <div class="list-group-item">
+                            <i class="fa fa-fw fa-rocket"></i>
+                            <span> <b>position: </b>{{contact.position}}</span>
+                        </div>
+                        <div class="list-group-item">
+                            <i class="fa fa-fw fa-at"></i>
+                            <span> <b>email: </b>{{contact.email}}</span>
+                        </div>
+                        <div class="list-group-item">
+                            <i class="fa fa-fw fa-phone"></i>
+                            <span> <b>personal phone: </b>{{contact.phone_perso}}</span>
+                        </div>
+                        <div class="list-group-item">
+                            <i class="fa fa-fw fa-phone"></i>
+                            <span> <b>office phone: </b>{{contact.phone_office}}</span>
+                        </div>
+                    </div>
                     {%endif%}
                     {%endfor%}
                 </div>
-            </div>
+
         </div>
+
+        <!-- Parts -->
+        <div class="col-lg-4 col-sm-6">
+            <div class="panel panel-default ">
+                <div class="panel-heading clearfix" >
+                    <div class="row">
+                        <div class="col-lg-1 col-sm-1">
+                            {%if order.status_ord == 0%}
+                            {%if permission == 1%}
+                            {%include "utils/modals/part-to-order.html"%}
+                            {%endif%}
+                            {%endif%}
+                        </div>
+                        <div class="col-lg-1 col-sm-1">
+                            {%if order.status_ord == 0%}
+                            {%if permission == 1%}
+                            <button id="add_part" type="button" class="btn btn-default btn-circle" style="margin-left:0px" data-toggle="modal" data-target="#modal-add-part"><i class="fa fa-fw fa-plus"></i></button>
+                            {% include "utils/modals/add-part.html" %}
+                            {%endif%}
+                            {%endif%}
+                        </div>
+                        <div class="col-lg-10 col-sm-10">
+                            <h3 class="panel-title pull-right" style="margin-top:5px">Parts<i class="fa fa-fw fa-info-circle"></i></h3>
+                        </div>
+                    </div>
+                </div>
+                    <div class="list-group">
+
+                        {% if parts %}
+                        {% for part in parts %}
+
+                        <div href="" class="list-group-item">
+                            {% for status in status_eng_list %}
+                            {% if status.id == part.status_eng %}
+                            <span class="label label-{{status.id}} pull-right" style="height:17px; margin-left:4px;padding-top:4px">{{status.name}}</span>
+                            {%endif%}
+                            {%endfor%}
+                            <span class="badge due_date">{{part.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span>
+
+                            <!-- <span class="badge">{{order.creation_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span> -->
+                            <small class="pull-right" style="margin-right:5px"><i>{{part.part_number}}</i></small>
+                            <h5 style="margin-bottom:5px;margin-top:0px"><a href="/parts/part-detail/{{part.id}}"><i class="fa fa-fw fa-cube"></i> {{part.id}} : {{part.part_name}} </a>- <small>{{part.oem_name}}</small></h5>
+
+                            <!-- <small class="pull-right">{{part.part_number}}</small> -->
+                            <!-- plus minus quantitty -->
+                            <div class="row">
+                                <div class="col-lg-8 col-sm-8">
+                                <small style="margin-left:20px">Notes: <span class="notes-editable" data-type="text" data-pk="{{part.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'part'}" data-url="/parts/ajax/update-notes/">{{part.notes}}</span></small>
+                                </div>
+
+                                <div class="col-lg-4 col-sm-4">
+                                    <div class="input-group" style="margin-top:3px;" >
+                                        {%if permission%}
+                                            <span class="input-group-btn">
+                                                <button type="button" id="minus-{{part.id}}" class="quantity-left-minus btn btn-default btn-number btn-sm"  data-type="minus" data-field="">
+                                                  <span class="glyphicon glyphicon-minus"></span>
+                                                </button>
+                                            </span>
+                                            {%for key, value in parts_qtty.items%}
+                                            {%if key == part.id|stringformat:"i"%}
+                                            <input type="text" id="quantity-{{part.id}}" name="quantity-{{part.id}}" class="form-control input-quantity input-sm" value="{{value}}" min="0" max="300">
+                                            <input type="hidden" id="order-id" name="order-id" value={{order.id}}>
+                                            {% endif %}
+                                            {% endfor %}
+                                            <span class="input-group-btn">
+                                                <button type="button" id="plus-{{part.id}}" class="quantity-right-plus btn btn-default btn-number btn-sm" data-type="" data-field="">
+                                                    <span class="glyphicon glyphicon-plus"></span>
+                                                </button>
+                                            </span>
+                                        {%else%}
+                                            {%for key, value in parts_qtty.items%}
+                                            {%if key == part.id|stringformat:"i"%}
+                                                <span>Quantity: <b>{{value}}
+                                            {% endif %}
+                                            {% endfor %}
+                                        {%endif%}
+                                        <span class="input-group-btn">
+                                            <button type="button" id="save-{{part.id}}" class="btn btn-success btn-number btn-sm save-qtty" style="display:None" data-type="plus" data-field="">
+                                                <span class="glyphicon glyphicon-floppy-disk"></span>
+                                            </button>
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        {%if superpermission%}
+                        <button type="button" value="{{order.id}}-{{part.id}}" class="btn btn-danger btn-circle pull-right delete-order-part"><i class="glyphicon glyphicon-remove"></i></button>
+                        {%endif%}
+
+                        {% endfor %}
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
 </div>
 </div>
 
@@ -146,9 +356,10 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.widgets.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
+    <script src="{% static 'parts/js/dropzone.js' %}"></script>
     <script src="{% static 'parts/js/printer_state.js' %}"></script>
     <script src="{% static 'parts/js/orders.js' %}"></script>
+    <script src="{% static 'parts/js/order-detail.js' %}"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
 
     <script src="{% static 'parts/js/bootstrap-editable.js' %}"></script>

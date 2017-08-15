@@ -1,34 +1,18 @@
 {% block printer_statusbar %}
     <div class="row printer_statusbar" style=" ">
+        <!-- pass printers variables to javascript -->
+        <script type="text/javascript">
+        var myPrinters= {};
+        {%for printer in printers%}
+           myPrinters[{{printer.id}}] = {name:"{{printer.name}}", ip:"{{printer.local_ip}}"};
+        {%endfor%}
+        </script>
+        <div class="col-lg-2 col-sx-2 col-centered"></div>
+        {%for printer in printers%}
+            <div class="col-lg-1 col-sx-1 col-centered">
+                <span id="printer-label-{{printer.id}}" class="label printer-label label-default">{{printer.name}} Disconnected</span>
+            </div>
+        {%endfor%}
 
-        <!-- <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-print"></i></a> -->
-        <!-- <button href="#" class="dropdown-toggle btn btn-sm" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-print"></i></button> -->
-        <!-- <ul class="dropdown-menu alert-dropdown" style="z-index:100;"> -->
-            <div class="col-lg-1 col-sx-1 col-lg-offset-2 col-centered">
-                <div class="c1-link"><span class="label c1-label label-default">C1 Disconnected</span></div>
-            </div>
-            <div class="col-lg-1 col-sx-1 col-centered">
-                <div class="c2-link"><span class="label c2-label label-default">C2 Disconnected</span></div>
-            </div>
-            <div class="col-lg-1 col-sx-1 col-centered">
-                <div class="c3-link"><span class="label c3-label label-default">C3 Disconnected</span></div>
-            </div>
-            <div class="col-lg-1 col-sx-1 col-centered">
-                <div class="c4-link"><span class="label c4-label label-default">C4 Disconnected</span></div>
-            </div>
-            <div class="col-lg-1 col-sx-1 col-centered">
-                <div class="c5-link"><span class="label c5-label label-default">C5 Disconnected</span></div>
-            </div>
-            <div class="col-lg-1 col-sx-1 col-centered">
-                <div class="c6-link"><span class="label c6-label label-default">C6 Disconnected</span></div>
-            </div>
-            <div class="col-lg-1 col-sx-1 col-centered">
-                <div class="wanaho-link"><span class="label wanaho-label label-default">WANAHO Disconnected</span></div>
-            </div>
-			<div class="col-lg-1 col-sx-1 col-centered">
-                <div class="replicator-link"><span class="label replicator-label label-default">REPLICATOR Disconnected</span></div>
-            </div>
-
-        <!-- </ul> -->
     </div>
 {% endblock printer_statusbar %}

@@ -15,61 +15,39 @@
                       <form action="/parts/add-client/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
 
                         <div class="form-group">
-                          <label for="part-number">Client name</label>
+                          <label for="client-name">Client name</label>
                           <input type="text" class="form-control" name="client-name" id="client-name" aria-describedby="" placeholder="Enter client Name" required>
                           <small id="" class="form-text text-muted">choose non-existent client name</small>
                         </div>
 
                         <div class="form-group">
-                          <label for="part-number">Contact name</label>
-                          <input type="text" class="form-control" name="contact-name" id="contact-name" aria-describedby="" placeholder="Enter Name of primary contact" required>
-                          <small id="" class="form-text text-muted"></small>
+                          <label for="client-code">Client Code Name</label>
+                          <input type="text" class="form-control" name="client-code" id="client-code" aria-describedby="" placeholder="Enter client code" required>
+                          <small id="" class="form-text text-muted">usually 3 to 5 letters</small>
                         </div>
 
                         <div class="form-group">
-                          <label for="part-name">email</label>
-                          <input type="email" class="form-control" name="email" id="email" aria-describedby="" placeholder="Enter contact email" required>
-                          <small id="" class="form-text text-muted"></small>
-                        </div>
+                          <label for="type">Activity</label>
+                          <select class="form-control" name="activity" id="activity" required>
+                                    <option value="corpo_gift">corporate gift</option>
+                                    <option value="home_app_manu">home appliance manufacturing</option>
+                                    <option value="plastic_inj">plastic injection</option>
+                                    <option value="proto">prototyping</option>
+                                    <option value="sp_prt_dist">spare parts distributor</option>
 
-                        <div class="form-group">
-                          <label for="part-name">Activity</label>
-                          <input type="text" class="form-control" name="activity" id="activity" aria-describedby="" placeholder="Enter client Activity" required>
-                          <small id="" class="form-text text-muted"></small>
-                        </div>
-
-                        <!-- <div class="form-group">
-                          <label for="oem">Activity</label>
-                          <select class="form-control" name="activity" id="activity">
-                            {%if oems%}
-                                {%for oem in oems%}
-                                    <option>{{oem.name}}</option>
-                                {%endfor%}
-                            {%endif%}
                           </select>
-                        </div> -->
+                        </div>
 
                         <div class="form-group">
                           <label for="address">Address</label>
                           <textarea class="form-control" id="address" name="address" rows="3"></textarea>
                         </div>
 
-
-
                         <div class="form-group">
                           <label for="notes">Notes</label>
                           <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                         </div>
-                        <!-- add a cad at the same time -->
 
-                        <!-- <div class="form-group">
-                          <label for="cad">CAD</label>
-                          <input type="file" class="form-control-file" id="cad" name="cad" aria-describedby="fileHelp">
-                          <label class="form-check-label text-light">
-                            <input type="checkbox" name="is_oem" class="form-check-input">
-                            this CAD is the reference OEM CAD
-                          </label>
-                        </div> -->
                         <button type="submit" class="btn btn-primary pull-right">Submit</button>
                       </form>
 

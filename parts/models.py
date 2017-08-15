@@ -45,12 +45,12 @@ class SP3D_Order(models.Model):
     due_date = models.DateTimeField('date published', null=True)
     assigned_to = models.IntegerField(default=0)
     root_path = models.CharField(max_length=200, default = '')
-    parts = models.CharField(max_length=200, default = '')
-    quantities = models.CharField(max_length=200, default = '')
+    parts = models.CharField(max_length=200, default = '{}')
     id_creator = models.IntegerField(default=0)
+    id_contact = models.IntegerField(default=0)
     notes=models.CharField(max_length=1000, default = '')
     permissions=models.CharField(max_length=200, default = '')
-    status_ord = models.IntegerField(default=1)
+    status_ord = models.IntegerField(default=0)
     completion_date = models.DateTimeField('date published', null=True)
     closed_by = models.IntegerField(default=0)
 
@@ -61,14 +61,29 @@ class SP3D_Client(models.Model):
 
     creation_date = models.DateTimeField('date published')
     name = models.CharField(max_length=200, default = '')
-    primary_contact_name = models.CharField(max_length=200, default = '')
-    primary_contact_email = models.CharField(max_length=200, default = '')
+    code = models.CharField(max_length=10, default = '')
     address = models.CharField(max_length=200, default = '')
     activity = models.CharField(max_length=200, default = '')
     notes = models.CharField(max_length=200, default = '')
 
     def __str__(self):
         return "Client number " + str(self.id)
+
+class SP3D_Contact(models.Model):
+
+    creation_date = models.DateTimeField('date published')
+    prefix = models.CharField(max_length=20, default = '')
+    first_name = models.CharField(max_length=200, default = '')
+    last_name = models.CharField(max_length=200, default = '')
+    email = models.CharField(max_length=200, default = '')
+    phone_perso = models.CharField(max_length=200, default = '')
+    phone_office = models.CharField(max_length=200, default = '')
+    position = models.CharField(max_length=200, default = '')
+    id_client = models.IntegerField(default=0)
+    notes = models.CharField(max_length=200, default = '')
+
+    def __str__(self):
+        return "Contact number " + str(self.id)
 
 
 class SP3D_Iteration(models.Model):
@@ -88,7 +103,17 @@ class SP3D_Status_Eng_History(models.Model):
     notes=models.CharField(max_length=1000, default = '')
 
     def __str__(self):
-        return "Status Change Event id " + str(self.id)
+        return "Engineering Status Change Event id " + str(self.id)
+
+class SP3D_Status_Ord_History(models.Model):
+    id_order = models.IntegerField(default=0)
+    date = models.DateTimeField('date published')
+    id_status = models.IntegerField(default=0)
+    id_creator = models.IntegerField(default=0)
+    notes=models.CharField(max_length=1000, default = '')
+
+    def __str__(self):
+        return "Order Status Change Event id " + str(self.id)
 
 class SP3D_Print(models.Model):
 
@@ -113,6 +138,7 @@ class SP3D_Printer(models.Model):
     name = models.CharField(max_length=200, default = 'Printer001')
     location = models.CharField(max_length=200, default = 'SP3D Office Singapore')
     local_ip=models.CharField(max_length=200, default = '')
+    z_offset=models.FloatField(default = 0.1)
     notes=models.CharField(max_length=1000, default = '')
 
     def __str__(self):
@@ -200,11 +226,52 @@ class SP3D_Bulk_Files(models.Model):
     root_path = models.CharField(max_length=200, default = '/home/user01/SpareParts_Database/root/')
     file_path = models.CharField(max_length=200, default = '')
     id_part = models.IntegerField(default=0)
-    id_creator=models.IntegerField(default=0)
+    id_order = models.IntegerField(default=0, null=True)
+    id_creator=models.IntegerField(default=0, null=True)
     notes=models.CharField(max_length=1000, default = '')
 
     def __str__(self):
         return "Bulk File Id " + str(self.id)
+
+class SP3D_Po_Revision(models.Model):
+
+    creation_date = models.DateTimeField('date published')
+    id_client = models.CharField(max_length=200, default = '')
+    id_order = models.IntegerField(default=0, null=True)
+    client_contact = models.IntegerField(null=True)
+    revision = models.IntegerField(default=0)
+    po_number = models.CharField(max_length=200, default = '')
+    parts = models.CharField(max_length=200, default = '')
+    root_path = models.CharField(max_length=200, default = '/home/user01/SpareParts_Database/root/')
+    file_path = models.CharField(max_length=200, default = '')
+    id_creator=models.IntegerField(default=0, null=True)
+    notes=models.CharField(max_length=1000, default = '')
+    value = models.DecimalField(max_digits=6, decimal_places=2, null=True)
+    currency = models.CharField(max_length=20, default = '')
+    lead_time = models.IntegerField(default=0)
+
+    def __str__(self):
+        return "Po Revision Id " + str(self.id)
+
+class SP3D_Quote_Revision(models.Model):
+
+    creation_date = models.DateTimeField('date published')
+    id_client = models.CharField(max_length=200, default = '')
+    id_order = models.IntegerField(default=0, null=True)
+    client_contact = models.IntegerField(null=True)
+    revision = models.IntegerField(default=0)
+    quote_number = models.CharField(max_length=200, default = '')
+    parts = models.CharField(max_length=200, default = '')
+    root_path = models.CharField(max_length=200, default = '/home/user01/SpareParts_Database/root/')
+    file_path = models.CharField(max_length=200, default = '')
+    id_creator=models.IntegerField(default=0, null=True)
+    notes=models.CharField(max_length=1000, default = '')
+    value = models.DecimalField(max_digits=6, decimal_places=2, null=True)
+    currency = models.CharField(max_length=20, default = '')
+    lead_time = models.IntegerField(default=0)
+
+    def __str__(self):
+        return "Quote Revision Id " + str(self.id)
 
 class SP3D_AMF(models.Model):
 

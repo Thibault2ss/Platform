@@ -20,10 +20,22 @@
                             <small id="" class="form-text text-muted"></small>
                           </div>
 
+                          <div class="form-group">
+                            <label for="type">for Client</label>
+                            <select class="form-control" name="client" id="client" required>
+                                <option value=""></option>
+                                {%if clients%}
+                                {%for client in clients%}
+                                      <option value="{{client.id}}">{{client.name}}</option>
+                                  {%endfor%}
+                                  {%endif%}
+                            </select>
+                          </div>
 
                         <div class="form-group">
-                          <label for="type">Type</label>
+                          <label for="type">Order Type</label>
                           <select class="form-control" name="type" id="type" required>
+                                    <option value=""></option>
                                     <option value="indus">Industrialisation</option>
                                     <option value="prod">Production</option>
                                     <option value="quote">Quote</option>
@@ -31,48 +43,39 @@
                           </select>
                         </div>
 
-                        <div class="form-group">
-                          <label for="type">Client</label>
-                          <select class="form-control" name="client" id="client" required>
-                              {%if clients%}
-                              {%for client in clients%}
-                                    <option value="{{client.id}}">{{client.name}}</option>
-                                {%endfor%}
-                                {%endif%}
-                          </select>
-                        </div>
-
-                        <div class="form-group"> <!-- Date input -->
-                            <label class="control-label" for="date">Due date</label>
-                            <input class="form-control" id="date" name="date" placeholder="MM/DD/YYYY" type="text" required/>
-                        </div>
-
-                        <div class="form-group">
+                        <div class="form-group" id="form-group-quote" style="display:none">
                           <label for="quote-number">Quote number</label>
                           <div class="input-group">
                               <input type="text" class="form-control" name="quote-number" id="quote-number" aria-describedby="" placeholder="Enter Quote # or generate">
                               <span class="input-group-btn">
-                                  <button class="btn btn-default" type="button" id="po-number">generate</button>
+                                  <button class="btn btn-default" type="button" id="generate-quote-nb">generate</button>
                               </span>
                           </div>
                           <small id="" class="form-text text-muted"></small>
                         </div>
 
 
-                        <div class="form-group">
+                        <div class="form-group" id="form-group-prod" style="display:none">
                           <label for="po-number">PO number</label>
                           <div class="input-group">
                               <input type="text" class="form-control" name="po-number" id="po-number" aria-describedby="" placeholder="Enter PO # or generate">
                               <span class="input-group-btn">
-                                  <button class="btn btn-default" type="button" id="po-number">generate</button>
+                                  <button class="btn btn-default" type="button" id="generate-po-nb">generate</button>
                               </span>
                           </div>
                           <small id="" class="form-text text-muted"></small>
                         </div>
 
+                        <div class="form-group"> <!-- Date input -->
+                            <label class="control-label" for="date">Due date</label>
+                            <input class="form-control" id="date" name="date" placeholder="MM-DD-YYYY" type="text" required/>
+                        </div>
+
+
                         <div class="form-group">
                           <label for="type">Assign to </label>
                           <select class="form-control" name="assign-to" id="assign-to" required>
+                              <option value=""></option>
                               {%if users%}
                               {%for user in users%}
                                     <option value="{{user.id}}">{{user.first_name}} {{user.last_name}}</option>

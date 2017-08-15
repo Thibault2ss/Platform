@@ -5,7 +5,7 @@ from django.template import loader, RequestContext
 from django.shortcuts import render, render_to_response, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-from .models import SP3D_Part, SP3D_Print, SP3D_Printer, SP3D_Image, SP3D_CAD, SP3D_AMF, SP3D_CONFIG, SP3D_Oem, SP3D_3MF, SP3D_STL, SP3D_CAD2D, SP3D_Status_Eng, SP3D_Status_Eng_History, SP3D_Bulk_Files, SP3D_Client, SP3D_Order
+from .models import SP3D_Part, SP3D_Print, SP3D_Printer, SP3D_Image, SP3D_CAD, SP3D_AMF, SP3D_CONFIG, SP3D_Oem, SP3D_3MF, SP3D_STL, SP3D_CAD2D, SP3D_Status_Eng, SP3D_Status_Eng_History, SP3D_Status_Ord_History, SP3D_Bulk_Files, SP3D_Client, SP3D_Order, SP3D_Po_Revision, SP3D_Quote_Revision, SP3D_Contact
 from django.contrib.auth.models import User
 from .forms import UploadFileForm
 from threading import Thread
@@ -13,6 +13,7 @@ from django.forms.models import model_to_dict
 from random import randint
 from datetime import datetime, timedelta
 from tzlocal import get_localzone
+from configbundle import ConfigBundle
 
 
 import os
@@ -26,6 +27,7 @@ import ntpath
 import ast
 import shutil
 import pytz
+import collections
 # Create your views here.
 TOKEN_FLASK='123456789'
 
@@ -45,6 +47,7 @@ def index(request, error=""):
     oems=SP3D_Oem.objects.all()
     status_eng_list = SP3D_Status_Eng.objects.all()
     oem_list = SP3D_Oem.objects.all()
+    printers = SP3D_Printer.objects.all().order_by("name")
     nb_opened = SP3D_Part.objects.filter(status_eng = 1 ).count()
     nb_geometry = SP3D_Part.objects.filter(status_eng = 2 ).count()
     nb_indus = SP3D_Part.objects.filter(status_eng = 3 ).count()
@@ -57,6 +60,7 @@ def index(request, error=""):
         'oems':oems,
         'error':error,
         'oem_list':oem_list,
+        'printers':printers,
         'status_eng_list':status_eng_list,
         'nb_opened':nb_opened,
         'nb_geometry':nb_geometry,
@@ -71,56 +75,62 @@ def index(request, error=""):
 
 @login_required
 def orders(request, error=""):
-    print "TESTTTTT: %s"%error
+    # if (request.user.id == 2):
+    #     return HttpResponseRedirect("/parts/")
     clients = SP3D_Client.objects.all().order_by('name')
-    # latest_part_list = SP3D_Part.objects.order_by('-creation_date')
     users = User.objects.all()
-    orders = SP3D_Order.objects.all()
-
-    # oems=SP3D_Oem.objects.all()
-    # status_eng_list = SP3D_Status_Eng.objects.all()
-    # oem_list = SP3D_Oem.objects.all()
-    # nb_opened = SP3D_Part.objects.filter(status_eng = 1 ).count()
-    # nb_geometry = SP3D_Part.objects.filter(status_eng = 2 ).count()
-    # nb_indus = SP3D_Part.objects.filter(status_eng = 3 ).count()
-    # nb_qc = SP3D_Part.objects.filter(status_eng = 4 ).count()
-    # nb_closed = SP3D_Part.objects.filter(status_eng = 5 ).count()
-    # nb_rework = SP3D_Part.objects.filter(status_eng = 6 ).count()
+    orders = SP3D_Order.objects.filter(status_ord = 0).order_by("due_date")
     context = {
         'clients' :clients,
         'orders':orders,
-        # 'latest_part_list': latest_part_list,
         'users':users,
-        # 'oems':oems,
-        # 'error':error,
-        # 'oem_list':oem_list,
-        # 'status_eng_list':status_eng_list,
-        # 'nb_opened':nb_opened,
-        # 'nb_geometry':nb_geometry,
-        # 'nb_indus':nb_indus,
-        # 'nb_qc':nb_qc,
-        # 'nb_closed':nb_closed,
-        # 'nb_rework':nb_rework,
+        'closed':0,
     }
-    # print "COOKIES"
-    # print request.COOKIES
+    return render(request, 'parts/orders.html', context)
+
+@login_required
+def orders_closed(request, error=""):
+    # if (request.user.id == 2):
+    #     return HttpResponseRedirect("/parts/")
+    clients = SP3D_Client.objects.all().order_by('name')
+    users = User.objects.all()
+    orders = SP3D_Order.objects.filter(status_ord = 1).order_by("completion_date")
+    context = {
+        'clients' :clients,
+        'orders':orders,
+        'users':users,
+        'closed':1,
+    }
     return render(request, 'parts/orders.html', context)
 
 @login_required
 def order_detail(request, id_order, error=""):
+    # if not request.user.id==1:
+    #     return HttpResponseRedirect("/parts/")
     print "TESTTTTT: %s"%error
-    clients = SP3D_Client.objects.all().order_by('name')
-    # latest_part_list = SP3D_Part.objects.order_by('-creation_date')
+    # clients = SP3D_Client.objects.all().order_by('name')
+    oems = SP3D_Oem.objects.all().order_by('name')
+    status_eng_list = SP3D_Status_Eng.objects.all()
+    bulk_files = SP3D_Bulk_Files.objects.filter(id_order=int(id_order))
+    latest_part_list = {}
+    for oem in oems:
+        latest_part_list[oem.id] = SP3D_Part.objects.filter(id_oem = oem.id).order_by('-creation_date')
     users = User.objects.all()
     order = SP3D_Order.objects.get(id=id_order)
     client = SP3D_Client.objects.get(id=order.id_client)
+    contacts = SP3D_Contact.objects.filter(id_client=order.id_client)
     permissions = map(int, filter( None , order.permissions.split("-")))
     if request.user.id in permissions:
         permission = 1
     else:
         permission=0
     # oems=SP3D_Oem.objects.all()
-    # status_eng_list = SP3D_Status_Eng.objects.all()
+    status_eng_list = SP3D_Status_Eng.objects.all()
+    parts_qtty = ast.literal_eval(order.parts)
+    part_id_list = list(parts_qtty.keys())
+
+    parts = SP3D_Part.objects.filter(id__in = part_id_list).order_by("id")
+
     # oem_list = SP3D_Oem.objects.all()
     # nb_opened = SP3D_Part.objects.filter(status_eng = 1 ).count()
     # nb_geometry = SP3D_Part.objects.filter(status_eng = 2 ).count()
@@ -129,15 +139,19 @@ def order_detail(request, id_order, error=""):
     # nb_closed = SP3D_Part.objects.filter(status_eng = 5 ).count()
     # nb_rework = SP3D_Part.objects.filter(status_eng = 6 ).count()
     context = {
-        'clients' :clients,
+        'client' :client,
+        'contacts':contacts,
         'order':order,
-        # 'latest_part_list': latest_part_list,
+        'latest_part_list': latest_part_list,
         'users':users,
         'permission':permission,
-        # 'oems':oems,
+        'oems':oems,
+        'parts':parts,
+        'parts_qtty':parts_qtty,
+        'status_eng_list':status_eng_list,
+        'bulk_files':bulk_files,
         # 'error':error,
         # 'oem_list':oem_list,
-        # 'status_eng_list':status_eng_list,
         # 'nb_opened':nb_opened,
         # 'nb_geometry':nb_geometry,
         # 'nb_indus':nb_indus,
@@ -184,7 +198,7 @@ def download_cad(request, id_part, id_cad):
     return response
 
 @login_required
-def download_bulk(request, id_part, id_bulk):
+def download_bulk(request, id_bulk):
     bulk = SP3D_Bulk_Files.objects.get(id = id_bulk)
     filename = bulk.root_path + bulk.file_path
     response = HttpResponse(file(filename), content_type='text/plain')
@@ -355,6 +369,8 @@ def update_notes(request):
             obj = SP3D_Part.objects.get(id=int(_id))
         elif id_type == 'order':
             obj = SP3D_Order.objects.get(id=int(_id))
+        elif id_type == 'bulk':
+            obj = SP3D_Bulk_Files.objects.get(id=int(_id))
         else:
             raise ValueError("this type of notes not supported")
         obj.notes = new_note
@@ -369,6 +385,97 @@ def update_notes(request):
     except:
         data = {
             "result": "Problem happened during image deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
+def ajax_save_quantity(request):
+    try:
+        id_part = request.GET.get('id_part', None)
+        id_order = request.GET.get('id_order', None)
+        quantity = request.GET.get('quantity', None)
+        order = SP3D_Order.objects.get(id=int(id_order))
+        # test if quantity is not a string
+        try:
+            int(quantity)
+        except:
+            raise ValueError("Quantity is not numeric")
+        if not (int(quantity)==quantity or quantity>=0):
+            raise ValueError("Quantity is not integer or positive")
+        # add to dictionnary
+        parts_qtty = ast.literal_eval(order.parts)
+        if id_part in parts_qtty:
+            if int(quantity)==0:
+                del parts_qtty[id_part]
+            else:
+                parts_qtty[id_part]=int(quantity)
+        else:
+            parts_qtty[id_part] = int(quantity)
+
+        # sort dictionnary
+        parts_qtty = collections.OrderedDict(sorted(parts_qtty.items()))
+        parts_qtty = json.dumps(parts_qtty)
+        order.parts = "%s"%parts_qtty
+        order.save()
+        data = {
+            "result": "Part Quantity was changed successfully"
+        }
+    except ValueError as err:
+        data = {
+            "error": err
+        }
+    except:
+        data = {
+            "error": "Problem happened quantity change"
+        }
+    return JsonResponse(data)
+
+@login_required
+def ajax_generate_po_nb(request):
+    try:
+        id_client = request.GET.get('id_client', None)
+        client = SP3D_Client.objects.get(id=int(id_client))
+        client_code = client.code
+        now = datetime.now()
+        print now.year, now.month, now.day, now.hour, now.minute, now.second
+        id_client = request.GET.get('id_client', None)
+
+        po_number = "PO-%s-%s%02d%02d"%(client.code, now.year, now.month, now.day )
+        data = {
+            "result": po_number,
+        }
+    except ValueError as err:
+        data = {
+            "error": err
+        }
+    except:
+        data = {
+            "error": "Problem happened quantity change"
+        }
+    return JsonResponse(data)
+
+
+@login_required
+def ajax_generate_quote_nb(request):
+    try:
+        id_client = request.GET.get('id_client', None)
+        client = SP3D_Client.objects.get(id=int(id_client))
+        client_code = client.code
+        now = datetime.now()
+        print now.year, now.month, now.day, now.hour, now.minute, now.second
+        id_client = request.GET.get('id_client', None)
+
+        quote_number = "QT-%s-%s%02d%02d"%(client.code, now.year, now.month, now.day )
+        data = {
+            "result": quote_number,
+        }
+    except ValueError as err:
+        data = {
+            "error": err
+        }
+    except:
+        data = {
+            "error": "Problem happened quantity change"
         }
     return JsonResponse(data)
 
@@ -397,7 +504,7 @@ def delete_image(request):
     return JsonResponse(data)
 
 @login_required
-def delete_part(request, ):
+def delete_part(request ):
     try:
         id_part = request.GET.get('id_part', None)
         if not id_part : raise ValueError('id_part not found in ajax request')
@@ -405,6 +512,12 @@ def delete_part(request, ):
         oem = SP3D_Oem.objects.get(id=part.id_oem)
         if not part : raise ValueError('part not found in mysql records')
         partid = part.id
+
+        # remove status change records:
+        status_history = SP3D_Status_Eng_History.objects.filter(part_id=part.id)
+        for record in status_history:
+            record.delete()
+
         shutil.rmtree(DATABASE_DIRECTORY_TRANSITION + "catalogue/oem-%s/part-id-%s"%(oem.code, part.id))
         part.delete()
         print "PART folder deleted: %s"%partid
@@ -415,6 +528,45 @@ def delete_part(request, ):
         print "PART folder NOT deleted: %s"%partid
         data = {
             "result": " part deletion ISSUE  :%s"%partid
+        }
+
+    return JsonResponse(data)
+
+@login_required
+def delete_order(request):
+    try:
+        id_order = request.GET.get('id_order', None)
+        if not id_order : raise ValueError('id_order not found in ajax request')
+        order = SP3D_Order.objects.get(id=id_order)
+        if not order : raise ValueError('order not found in mysql records')
+        orderid = order.id
+        pos = SP3D_Po_Revision.objects.filter(id_order=order.id)
+        quotes = SP3D_Quote_Revision.objects.filter(id_order=order.id)
+        bulk_files = SP3D_Bulk_Files.objects.filter(id_order = order.id)
+        status_history = SP3D_Status_Ord_History.objects.filter(id_order=order.id)
+        shutil.rmtree(DATABASE_DIRECTORY_TRANSITION + "Orders/order-%s"%order.id)
+        order.delete()
+        for bulk in bulk_files:
+            bulk.delete()
+        for quote in quotes:
+            quote.delete()
+        for po in pos:
+            po.delete()
+        for record in status_history:
+            record.delete()
+        print "ORDER folder deleted: %s"%orderid
+        data = {
+            "result": "deleted order successfully :%s"%orderid
+        }
+    except ValueError as err:
+        print "ORDER %s deletion issue: %s"%(orderid,err)
+        data = {
+            "error": "ORDER %s deletion issue: %s"%(orderid,err)
+        }
+    except:
+        print "ORDER folder NOT deleted: %s"%orderid
+        data = {
+            "error": " order deletion ISSUE on order:%s, ORDER FOLDER NOT DELETED"%orderid
         }
 
     return JsonResponse(data)
@@ -574,6 +726,43 @@ def change_status_eng(request):
     return JsonResponse(data)
 
 @login_required
+def change_status_order(request):
+    try:
+        userid = request.user.id
+        id_order = request.GET.get('id_order', None)
+        if not id_order : raise ValueError('id_order not found in ajax request')
+        id_status = request.GET.get('id_status', None)
+        if not id_status : raise ValueError('id_status not found in ajax request')
+        order = SP3D_Order.objects.get(id=int(id_order))
+        if not order : raise ValueError('order not found in mysql records')
+        order.status_ord = int(id_status)
+        if int(id_status) == 1:
+            order.completion_date = datetime.now()
+            order.closed_by = userid
+        order.save()
+
+        # add change to the history
+        new_record = SP3D_Status_Ord_History.objects.create(id_order=order.id, date=time.strftime('%Y-%m-%d %H:%M:%S'), id_status = int(id_status), id_creator = userid )
+        print "new record saved in status history"
+        print "Changed order %s status to : %s"%(id_order,id_status)
+        data = {
+            "result": "Status of order %s was updated successfully"%id_order
+        }
+    except ValueError as err:
+        data = {
+            "result": err
+        }
+    except ValueError as err:
+        data = {
+            "error": err
+        }
+    except:
+        data = {
+            "error": "Problem happened during image deletion, check records"
+        }
+    return JsonResponse(data)
+
+@login_required
 def test(request):
     prints = SP3D_Print.objects.all()
     for pr in prints:
@@ -601,6 +790,20 @@ def ajax_print(request):
     user = User.objects.get(id=userid)
     # get all info
     id_3mf=request.GET.get('id_3mf', None)
+    z_offset=request.GET.get('z_offset', None)
+    try:
+        z_offset = float(z_offset)
+        if (z_offset>0.5 or z_offset<-0.2):
+            raise ValueError("z_offset not in allowed range: -0.2 to 0.5")
+    except ValueError as err:
+        data = {'error': "%s"%err}
+        print "%s"%err
+        return JsonResponse(data)
+    except:
+        data = {'error': "Z offset is not a float number:%s"%z_offset}
+        print "Z offset is wrong"
+        return JsonResponse(data)
+
     print "3MF ID IS: %s"%id_3mf
     id_printer=request.GET.get('printer_id',None)
     _3mf = SP3D_3MF.objects.get(id=id_3mf)
@@ -611,6 +814,9 @@ def ajax_print(request):
     id_oem = part.id_oem
     oem = SP3D_Oem.objects.get(id=id_oem)
     printer= SP3D_Printer.objects.get(id=id_printer)
+
+    # check if printer is already printing or not:
+    # response = requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
 
     # add print to database log
     new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_3mf=id_3mf, id_cad=id_cad, id_part=id_part, id_creator=userid)
@@ -623,6 +829,11 @@ def ajax_print(request):
     config_file = DATABASE_DIRECTORY_TRANSITION + "catalogue/oem-%s/part-id-%s/CONFIG/%s"%(oem.code, part.id, _3mf.name_config)
     gcode_file = print_log_path + "gcode-%s.gcode"%new_print.id
     local_ip=printer.local_ip
+
+    # modify config file:
+    configb = ConfigBundle(config_file)
+    config_file = configb.change_config_param("post_process", '"/usr/bin/perl /home/user01/Slic3r/slic3r_dev/offset_z_post_process.pl %s"'%z_offset, print_log_path + "config-%s.ini"%new_print.id)
+    print "changed config with z_offset equal to: %s"%z_offset
     try:
         print subprocess.check_output(['perl',SLIC3R_DIRECTORY + 'slic3r.pl', '--load', config_file, '-o', gcode_file, amf_file])
     except:
@@ -708,6 +919,7 @@ def part_detail(request,id_part):
     cad_list=SP3D_CAD.objects.filter(id_part=id_part).order_by('creation_date')
     users = User.objects.all()
     status_eng_list = SP3D_Status_Eng.objects.all()
+    printers=SP3D_Printer.objects.all().order_by("name")
     permissions = map(int, filter( None , part.permissions.split("-")))
     if request.user.is_authenticated():
         username = request.user.username
@@ -754,6 +966,7 @@ def part_detail(request,id_part):
         'part': part,
         'image_list':image_list,
         'cad_list':cad_list,
+        'printers':printers,
         # 'amf_list':amf_list,
         # 'config_list':config_list,
         'bulk_files':bulk_files,
@@ -1247,6 +1460,7 @@ def add_part(request):
     print "USERNAME : %s"% user.username
 
     part_number=request.POST.get('part-number')
+    oem_part_number=request.POST.get('oem-part-number')
     part_name=request.POST.get('part-name')
     oem_name=request.POST.get('oem')
     oem=SP3D_Oem.objects.get(name=oem_name)
@@ -1269,8 +1483,7 @@ def add_part(request):
 
         # create new record in database
         creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
-        new_part=SP3D_Part.objects.create(creation_date=creation_date,part_number=part_number, id_oem=oem.id,oem_name=oem.name,id_creator=user.id, permissions=permissions, part_name=part_name, notes=notes)
-
+        new_part=SP3D_Part.objects.create(creation_date=creation_date,part_number=part_number, oem_part_number=oem_part_number, id_oem=oem.id,oem_name=oem.name,id_creator=user.id, permissions=permissions, part_name=part_name, notes=notes)
 
         new_part_path = DATABASE_DIRECTORY_TRANSITION + "catalogue/oem-%s/part-id-%s/"%(oem.code, new_part.id)
         sub_directories=["CAD/","AMF/","CONFIG/","GCODE/","IMAGES/","STL/", "CAD2D/", "BULK/"]
@@ -1285,57 +1498,12 @@ def add_part(request):
 
         print "NEW PART ADDED TO DB: %s"%new_part.part_number
 
-        # print "PARt:"
-        # print part_number
-        # print "OEM NAME: %s"%oem_name
-        # print "PERMISSIONS: %s"%permissions
-        # print "NOTES: %s"%notes
-        # print "CAD: %s"%cad
-        # print "IS OEM: %s"%is_oem
-        # print "EXISTING PARTS: %s"%existing_part
+        # if order exist, attach part created to order
+        id_order=request.POST.get('id_order')
+        if id_order or (id_order is not None):
+            add_parts_to_order(id_order, {"%s"%new_part.id:1})
+            return HttpResponseRedirect('/parts/orders/order-detail/%s'%id_order)
 
-
-
-        # try:
-        #     cad_file=request.FILES['cad']
-        #     is_oem_cad=request.POST.getlist('cad-oem-checkbox')
-        #     oem=request.POST.get('oem')
-        # permissions=request.POST.getlist('permissions')
-        # notes=request.POST.get('notes')
-        # part_number=request.POST.get('part-number')
-        #
-        #     print f.name
-        #     subpath="catalogue/" + "oem-SP3D/" + "part-id-%s/"%id_part + "IMAGES/"
-        #     path = DATABASE_DIRECTORY_TRANSITION + subpath
-        #
-        #     # Check that folder IMAGE exists
-        #     if not os.path.exists(path):
-        #         os.makedirs(path)
-        #
-        #     newfile=path+f.name
-        #     # Check that file with same name doesn't exist and iterate on name if it does
-        #     if os.path.exists(newfile):
-        #         filename, file_extension = os.path.splitext(newfile)
-        #         i=1
-        #         while os.path.exists("%s-%s%s"%(filename,i,file_extension)):
-        #             i+=1
-        #         newfile="%s-%s%s"%(filename,i,file_extension)
-        #
-        #     # write in new file
-        #     with open(newfile, 'wb+') as destination:
-        #         for chunk in f.chunks():
-        #             destination.write(chunk)
-        #     print "New image uploaded at location " + newfile
-        #
-        #     # create related record in database
-        #     creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
-        #     name=ntpath.basename(newfile)
-        #     root_path=DATABASE_DIRECTORY_TRANSITION
-        #     file_path=subpath+name
-        #     new_image=SP3D_Image.objects.create(creation_date=creation_date,name=name,root_path=root_path,file_path=file_path, id_part=id_part)
-        #     print "Image record added to sql database with id %s" % new_image.id
-        # except :
-        #     print "Image Uploading Failed"
     except ValueError as err:
         print err
         return redirect('/parts', error=err)
@@ -1381,21 +1549,62 @@ def add_client(request):
         files = request.FILES
 
         client_name = request.POST.get("client-name")
-        contact_name = request.POST.get("contact-name")
-        email = request.POST.get("email")
         activity = request.POST.get("activity")
         address = request.POST.get("address")
         notes = request.POST.get("notes")
+        code = request.POST.get("client-code").upper()
 
         nb_sim_client = SP3D_Client.objects.filter(name = client_name).count()
         if nb_sim_client:
             return HttpResponseRedirect('/parts/orders/')
 
         creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
-        new_client = SP3D_Client.objects.create(creation_date=creation_date, name=client_name, primary_contact_name=contact_name, primary_contact_email= email, address= address, activity=activity, notes=notes)
+        new_client = SP3D_Client.objects.create(creation_date=creation_date, name=client_name, code=code, address= address, activity=activity, notes=notes)
         print "NEW CLIENT CREATED WITH ID: %s"%new_client.id
         context={}
     return HttpResponseRedirect('/parts/orders/')
+
+# add new contact
+@login_required
+def add_contact(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        prefix = request.POST.get("contact-prefix")
+        id_order = request.POST.get("order-id")
+        id_client = request.POST.get("client-id")
+
+        first_name = request.POST.get("contact-first-name")
+        last_name = request.POST.get("contact-last-name")
+        email = request.POST.get("contact-email")
+        position = request.POST.get("contact-position")
+        phone_perso = request.POST.get("contact-phone-perso")
+        phone_office = request.POST.get("contact-phone-office")
+        notes = request.POST.get("notes")
+
+        creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        new_contact = SP3D_Contact.objects.create(creation_date=creation_date, prefix=prefix, first_name=first_name, last_name=last_name, email=email, position= position, phone_perso= phone_perso, phone_office=phone_office, notes=notes, id_client=id_client)
+        print "NEW CLIENT CREATED WITH ID: %s"%new_contact.id
+        # attach contact to order
+        order=SP3D_Order.objects.get(id=id_order)
+        order.id_contact = int(new_contact.id)
+        order.save()
+
+        context={}
+    return HttpResponseRedirect('/parts/orders/order-detail/%s/'%id_order)
+
+# add new contact
+@login_required
+def change_order_contact(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        id_order = request.POST.get("id-order")
+        id_contact = request.POST.get("id-contact")
+
+        order = SP3D_Order.objects.get(id=id_order)
+        order.id_contact = int(id_contact)
+        order.save()
+        context={}
+    return HttpResponseRedirect('/parts/orders/order-detail/%s/'%id_order)
 
 # add new order
 @login_required
@@ -1418,10 +1627,22 @@ def add_order(request):
             permissions= permissions + "%s-" % index
 
         root_path = DATABASE_DIRECTORY_TRANSITION + "Orders/"
+        # create record in DB
         creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
         new_order = SP3D_Order.objects.create(creation_date=creation_date, root_path=root_path, name=order_name, type=order_type, id_client= client_id, quote_number= quote_number, po_number=po_number, due_date=due_date, assigned_to=assigned_to, notes=notes, id_creator=userid, permissions = permissions)
-        # print "NEW CLIENT CREATED WITH ID: %s"%new_client.id
-        # context={}
+
+        # create folder in SERVER
+        # create folder containing files
+        new_order_path = root_path + "order-%s/"%new_order.id
+        sub_directories=["BULK/"]
+        # Check that folder exists
+        if not os.path.exists(new_order_path):
+            os.makedirs(new_order_path)
+            for subpath in sub_directories:
+                os.makedirs(new_order_path + subpath)
+        else:
+            raise ValueError("Error: Order folder already exists")
+
     return HttpResponseRedirect('/parts/orders/')
 
 # update new order
@@ -1450,6 +1671,62 @@ def update_order(request):
         old_order.save()
 
     return HttpResponseRedirect('/parts/orders/order-detail/%s'%id_order)
+
+# update new order
+@login_required
+def part_to_order(request):
+    if request.method == 'POST':
+        userid = request.user.id
+        id_order = request.POST.get("order_id")
+        order = SP3D_Order.objects.get(id=id_order)
+
+        parts_added = request.POST.getlist("parts")
+        print "PARTS SELECTED ARE: %s"%parts_added
+        print "POST IS: %s"%request.POST
+        new_parts_qtty={}
+        for key, value in request.POST.iteritems():
+            if key.startswith("qtty") and value:
+                id_part = key.split("-")[1]
+                new_parts_qtty[id_part]=value
+
+        add_parts_to_order(id_order, new_parts_qtty)
+
+        # due_date = pytz.timezone("Asia/Singapore").localize(datetime.strptime(request.POST.get("date"), '%d-%m-%Y'))
+        # quote_number = request.POST.get("quote-number")
+        # po_number = request.POST.get("po-number")
+        # assigned_to = request.POST.get("assign-to")
+        # order_name = request.POST.get("name")
+        # notes = request.POST.get("notes")
+        #
+        # creation_date=time.strftime('%Y-%m-%d %H:%M:%S')
+        # old_order = SP3D_Order.objects.get(id=id_order)
+        # old_order.type = order_type
+        # old_order.due_date = due_date
+        # old_order.name = order_name
+        # old_order.quote_number = quote_number
+        # old_order.po_number = po_number
+        # old_order.assigned_to = assigned_to
+        # old_order.notes = notes
+        # old_order.save()
+
+    return HttpResponseRedirect('/parts/orders/order-detail/%s'%id_order)
+
+def add_parts_to_order(id_order , new_parts_dict):
+    order = SP3D_Order.objects.get(id = int(id_order))
+    part_dict = ast.literal_eval(order.parts)
+    for key, value in new_parts_dict.iteritems():
+        if key in part_dict:
+            part_dict[key] = int(part_dict[key]) + int(value)
+        else:
+            part_dict[key] = int(value)
+
+    # sort dictionnary
+    part_dict = collections.OrderedDict(sorted(part_dict.items()))
+    part_dict = json.dumps(part_dict)
+
+    order.parts = "%s"%part_dict
+    order.save()
+    return True
 
 # add new 2d drawing
 @login_required
@@ -1499,18 +1776,27 @@ def add_bulk(request):
         userid = request.user.id
         print "userid is: %s"%userid
         files = request.FILES
+        bulk_file = request.FILES.get('bulk')
+        notes = request.POST.get("notes")
+        bulk_type = request.POST.get("bulk_type")
         form = request.POST
         print "BULK FORM: %s"%form
-        id_part = request.POST.get("part_id")
-        notes = request.POST.get("notes")
-        bulk_file = request.FILES.get('bulk')
+        if  bulk_type== "part":
+            id_link = request.POST.get("part_id")
+        elif bulk_type == "order":
+            id_link = request.POST.get("order_id")
 
-        upload_bulk(bulk_file, id_part, userid, notes)
+        upload_bulk(bulk_file, id_link, userid, notes, bulk_type)
 
         print "FILES: %s"%files
         print "form is: %s"%form
         context={}
-    return HttpResponseRedirect('/parts/part-detail/%s'%id_part)
+
+        if bulk_type== "part":
+            return HttpResponseRedirect('/parts/part-detail/%s'%id_link)
+        elif bulk_type == "order":
+            return HttpResponseRedirect('/parts/orders/order-detail/%s'%id_link)
+
 
 # upload new cad
 def upload_cad(file,id_part,userid):
@@ -1623,19 +1909,27 @@ def upload_stl(file , id_part , id_cad, userid, notes=""):
     return result
 
 # upload new stl file
-def upload_bulk(file , id_part , userid, notes=""):
+def upload_bulk(file , id_link , userid, notes="", bulk_type = "part"):
     error=""
     try:
         print "DEBUG 6000"
-        print "ID PART %s"%id_part
+        print "ID LINK %s"%id_link
         print "NOTES %s"%notes
-        part = SP3D_Part.objects.get(id = id_part)
-        oem_id=part.id_oem
-        oem=SP3D_Oem.objects.get(id=oem_id)
 
-        # kepep subpath separated from path, because used later
-        subpath="catalogue/oem-%s/part-id-%s/BULK/"%(oem.code,id_part)
-        path = DATABASE_DIRECTORY_TRANSITION + subpath
+        if bulk_type == "part":
+            part = SP3D_Part.objects.get(id = id_link)
+            oem_id=part.id_oem
+            oem=SP3D_Oem.objects.get(id=oem_id)
+            # keep subpath separated from path, because used later
+            subpath="catalogue/oem-%s/part-id-%s/BULK/"%(oem.code,id_link)
+            path = DATABASE_DIRECTORY_TRANSITION + subpath
+            id_part = id_link
+            id_order = 0
+        elif bulk_type == "order":
+            subpath="Orders/order-%s/BULK/"%id_link
+            path = DATABASE_DIRECTORY_TRANSITION + subpath
+            id_part = 0
+            id_order = id_link
         # Check that folder exists
         if not os.path.exists(path):
             os.makedirs(path)
@@ -1660,7 +1954,7 @@ def upload_bulk(file , id_part , userid, notes=""):
         name=ntpath.basename(newfile)
         root_path=DATABASE_DIRECTORY_TRANSITION
         file_path=subpath+name
-        new_bulk=SP3D_Bulk_Files.objects.create(creation_date=creation_date, name=name, root_path=root_path, file_path=file_path, id_part=int(id_part), id_creator=userid, notes=notes)
+        new_bulk=SP3D_Bulk_Files.objects.create(creation_date=creation_date, name=name, root_path=root_path, file_path=file_path, id_part=int(id_part), id_order=int(id_order), id_creator=userid, notes=notes)
         print "Bulk record added to sql database with id %s" % new_bulk.id
         print "DEBUG 6080"
         print "DEBUG50:"

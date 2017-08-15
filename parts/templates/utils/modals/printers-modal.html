@@ -1,0 +1,69 @@
+
+<script type="text/javascript">
+var myPrinters= {};
+{%for printer in printers%}
+   myPrinters[{{printer.id}}] = {name:"{{printer.name}}", ip:"{{printer.local_ip}}"};
+{%endfor%}
+</script>
+
+<div id="modal-printers" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Print</h4>
+      </div>
+      <div class="modal-body">
+
+
+
+              <ul class="list-group">
+                  {%for printer in printers%}
+
+                     <form action="#" method="post" enctype="multipart/form-data" class="clearfix">
+                         {% csrf_token %}
+                         <input type="hidden" id="id_3mf" name="id_3mf" class="id_3mf" value="">
+                         <input type="hidden" name="id_printer" value="{{printer.id}}">
+                         <div class="row" style="padding:4px">
+                             <div class="col-lg-3 col-sm-3">
+                                 <div class="input-group" style="margin-top:3px;" >
+                                     <span class="input-group-btn">
+                                         <button type="button" id="minus-{{printer.id}}" class="z-offset-left-minus btn btn-default btn-number btn-sm"  data-type="minus" data-field="">
+                                           <span class="glyphicon glyphicon-minus"></span>
+                                         </button>
+                                     </span>
+
+                                     <input type="text" id="z-offset-{{printer.id}}" name="z-offset-{{printer.id}}" class="form-control input-quantity input-sm" value="{{printer.z_offset}}" min="0" max="1">
+
+
+                                     <span class="input-group-btn">
+                                         <button type="button" id="plus-{{printer.id}}" class="z-offset-right-plus btn btn-default btn-number btn-sm" data-type="" data-field="">
+                                             <span class="glyphicon glyphicon-plus"></span>
+                                         </button>
+                                     </span>
+                                </div>
+                             </div>
+                             <div class="col-lg-4 col-sm-4">
+                                 <button type="submit" style="width:100px" id="btn-printer-{{printer.id}}" class="btn btn-default btn-printer">{{printer.name}} </button>
+                             </div>
+                             <div class="col-lg-4 col-sm-4">
+                             </div>
+                        </div>
+
+
+                    </form>
+
+                  {%endfor%}
+
+              </ul>
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>

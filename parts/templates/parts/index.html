@@ -28,14 +28,11 @@
               {% include "utils/statusbar.html" %}
           </div>
           <div class="col-lg-1">
+              <button id="add_part" type="button" class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#modal-add-part">+</button>
               {% include "utils/modals/add-part.html" %}
           </div>
       </div>
       {%include "utils/printer_statusbar.html"%}
-      {%if user.id == 1%}
-      <a href="/parts/orders/">orders</a>
-      {%endif%}
-<!-- <a href="test/">test</a> -->
 
   <h1>Parts Catalogue</h1>
   <!-- Responsive table starts here -->
@@ -131,7 +128,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
 
     <script src="{% static 'parts/js/printer_state.js' %}"></script>
-    <script src="{% static 'parts/js/part-search.js' %}"></script>
+    <script src="{% static 'parts/js/index.js' %}"></script>
     {% if error %}
         <script>
         alert(error);
@@ -142,7 +139,7 @@
       var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
       socket.on('my response', function(msg) {
           alert('Received: ' + msg.data);
-      });  
+      });
   });
 </script>
 </body>

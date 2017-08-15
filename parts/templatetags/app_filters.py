@@ -24,3 +24,11 @@ def seconds_to_duration(value):
     print "MINUTE: %s"%minutes
 
     return "%s h %s m"%(hours, minutes)
+
+@register.filter(name='created_recently')
+def created_recently(value):
+    delta = value.date() - date.today()
+    if delta.days > -2:
+        return "list-group-item-success"
+    else:
+        return ""
