@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.core import serializers
+from django.core.urlresolvers import reverse
 from django.template import loader, RequestContext
 from django.shortcuts import render, render_to_response, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-from .models import SP3D_Part, SP3D_Print, SP3D_Printer, SP3D_Image, SP3D_CAD, SP3D_AMF, SP3D_CONFIG, SP3D_Oem, SP3D_3MF, SP3D_STL, SP3D_CAD2D, SP3D_Status_Eng, SP3D_Status_Eng_History, SP3D_Status_Ord_History, SP3D_Bulk_Files, SP3D_Client, SP3D_Order, SP3D_Po_Revision, SP3D_Quote_Revision, SP3D_Contact
+from .models import SP3D_Part, SP3D_Print, SP3D_Printer, SP3D_Image, SP3D_CAD, SP3D_AMF, SP3D_CONFIG, SP3D_Oem, SP3D_3MF, SP3D_STL, SP3D_CAD2D, SP3D_Status_Eng, SP3D_Status_Ord, SP3D_Status_Eng_History, SP3D_Status_Ord_History, SP3D_Bulk_Files, SP3D_Client, SP3D_Order, SP3D_Po_Revision, SP3D_Quote_Revision, SP3D_Contact
 from django.contrib.auth.models import User
 from .forms import UploadFileForm
 from threading import Thread
@@ -74,32 +75,31 @@ def index(request, error=""):
     return render(request, 'parts/index.html', context)
 
 @login_required
-def orders(request, error=""):
+def orders(request):
     # if (request.user.id == 2):
     #     return HttpResponseRedirect("/parts/")
-    clients = SP3D_Client.objects.all().order_by('name')
-    users = User.objects.all()
-    orders = SP3D_Order.objects.filter(status_ord = 0).order_by("due_date")
-    context = {
-        'clients' :clients,
-        'orders':orders,
-        'users':users,
-        'closed':0,
-    }
-    return render(request, 'parts/orders.html', context)
 
-@login_required
-def orders_closed(request, error=""):
-    # if (request.user.id == 2):
-    #     return HttpResponseRedirect("/parts/")
+    filter_status = request.GET.get("status","")
+    if filter_status:
+        try:
+            filter_status = int(filter_status)
+        except:
+            return redirect('/parts/orders/?status=1')
+    else:
+        filter_status = 1
+
     clients = SP3D_Client.objects.all().order_by('name')
     users = User.objects.all()
-    orders = SP3D_Order.objects.filter(status_ord = 1).order_by("completion_date")
+    print "FILTER STATUS IS: %s"%filter_status
+    orders = SP3D_Order.objects.filter(status_ord = filter_status).order_by("due_date")
+
+    status_ord_list= SP3D_Status_Ord.objects.all()
     context = {
         'clients' :clients,
         'orders':orders,
         'users':users,
-        'closed':1,
+        'filter_status':filter_status,
+        'status_ord_list':status_ord_list,
     }
     return render(request, 'parts/orders.html', context)
 
@@ -117,27 +117,19 @@ def order_detail(request, id_order, error=""):
         latest_part_list[oem.id] = SP3D_Part.objects.filter(id_oem = oem.id).order_by('-creation_date')
     users = User.objects.all()
     order = SP3D_Order.objects.get(id=id_order)
+    print "ORDER STATUS IS: %s "%order.status_ord
     client = SP3D_Client.objects.get(id=order.id_client)
+    status_ord_list = SP3D_Status_Ord.objects.all()
     contacts = SP3D_Contact.objects.filter(id_client=order.id_client)
     permissions = map(int, filter( None , order.permissions.split("-")))
     if request.user.id in permissions:
         permission = 1
     else:
         permission=0
-    # oems=SP3D_Oem.objects.all()
-    status_eng_list = SP3D_Status_Eng.objects.all()
     parts_qtty = ast.literal_eval(order.parts)
     part_id_list = list(parts_qtty.keys())
 
     parts = SP3D_Part.objects.filter(id__in = part_id_list).order_by("id")
-
-    # oem_list = SP3D_Oem.objects.all()
-    # nb_opened = SP3D_Part.objects.filter(status_eng = 1 ).count()
-    # nb_geometry = SP3D_Part.objects.filter(status_eng = 2 ).count()
-    # nb_indus = SP3D_Part.objects.filter(status_eng = 3 ).count()
-    # nb_qc = SP3D_Part.objects.filter(status_eng = 4 ).count()
-    # nb_closed = SP3D_Part.objects.filter(status_eng = 5 ).count()
-    # nb_rework = SP3D_Part.objects.filter(status_eng = 6 ).count()
     context = {
         'client' :client,
         'contacts':contacts,
@@ -149,6 +141,7 @@ def order_detail(request, id_order, error=""):
         'parts':parts,
         'parts_qtty':parts_qtty,
         'status_eng_list':status_eng_list,
+        'status_ord_list':status_ord_list,
         'bulk_files':bulk_files,
         # 'error':error,
         # 'oem_list':oem_list,
@@ -465,7 +458,7 @@ def ajax_generate_quote_nb(request):
         print now.year, now.month, now.day, now.hour, now.minute, now.second
         id_client = request.GET.get('id_client', None)
 
-        quote_number = "QT-%s-%s%02d%02d"%(client.code, now.year, now.month, now.day )
+        quote_number = "QUO-%s%02d%02d-%s"%(now.year, now.month, now.day, client.code )
         data = {
             "result": quote_number,
         }
@@ -736,7 +729,7 @@ def change_status_order(request):
         order = SP3D_Order.objects.get(id=int(id_order))
         if not order : raise ValueError('order not found in mysql records')
         order.status_ord = int(id_status)
-        if int(id_status) == 1:
+        if int(id_status) == 3:
             order.completion_date = datetime.now()
             order.closed_by = userid
         order.save()
@@ -789,6 +782,7 @@ def ajax_print(request):
     userid = request.user.id
     user = User.objects.get(id=userid)
     # get all info
+    print "RAKESH: %s"%request.GET
     id_3mf=request.GET.get('id_3mf', None)
     z_offset=request.GET.get('z_offset', None)
     try:
@@ -808,6 +802,7 @@ def ajax_print(request):
     id_printer=request.GET.get('printer_id',None)
     _3mf = SP3D_3MF.objects.get(id=id_3mf)
     id_cad = _3mf.id_cad
+    print "ID CAD FOR RAKESH IS : %s"%id_cad
     cad = SP3D_CAD.objects.get(id=id_cad)
     id_part = cad.id_part
     part = SP3D_Part.objects.get(id=id_part)

@@ -37,7 +37,7 @@
     <div class="col-lg-4 col-sm-6">
         <div class="panel panel-default ">
             <div class="panel-heading clearfix">
-                {%if order.status_ord == 0 %}
+                {%if not order.status_ord == 3 %}
                 {%if permission == 1%}
                 {%include "utils/modals/update-order.html"%}
                 {%endif%}
@@ -93,7 +93,8 @@
                         <span> <b>PO #: </b><span id="order-po-number">{{order.po_number}}</span></span>
                     </div>
                     {%endif%}
-                    {%if order.status_ord == 1%}
+                    {%if order.status_ord == 3%}
+
                     <div class="list-group-item">
                         <i class="fa fa-fw fa-calendar-o"></i>
                         <span><b style="color:green">Closed Date:</b> <span id="order-completion-date">{{order.completion_date|timezone:"Asia/Singapore"|date:"M d, Y"}}</span></span>
@@ -251,14 +252,14 @@
                 <div class="panel-heading clearfix" >
                     <div class="row">
                         <div class="col-lg-1 col-sm-1">
-                            {%if order.status_ord == 0%}
+                            {%if not order.status_ord == 3%}
                             {%if permission == 1%}
                             {%include "utils/modals/part-to-order.html"%}
                             {%endif%}
                             {%endif%}
                         </div>
                         <div class="col-lg-1 col-sm-1">
-                            {%if order.status_ord == 0%}
+                            {%if not order.status_ord == 3%}
                             {%if permission == 1%}
                             <button id="add_part" type="button" class="btn btn-default btn-circle" style="margin-left:0px" data-toggle="modal" data-target="#modal-add-part"><i class="fa fa-fw fa-plus"></i></button>
                             {% include "utils/modals/add-part.html" %}

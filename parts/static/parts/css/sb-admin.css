@@ -490,6 +490,14 @@ ul.alert-dropdown {
 .custom-colors li .button-closed {
     color: #f45042 !important;
 }
+.custom-colors .active .button-followup,
+.custom-colors .active .button-followup:hover {
+    background-color: #e07f08 !important;
+    color: #ffffff !important;
+}
+.custom-colors li .button-followup {
+    color: #e07f08 !important;
+}
 .custom-colors .active .button-opened,
 .custom-colors .active .button-opened:hover {
     background-color: #44d69e !important;
@@ -530,12 +538,19 @@ ul.alert-dropdown {
 	background-color: #555;
 }
 
-.scrollbar-orange::-webkit-scrollbar-thumb, .theme-orange
+.scrollbar-green::-webkit-scrollbar-thumb, .theme-green
 {
     color: white !important;
     background-color: #44d69e;
     background-image: linear-gradient(to bottom, #44d69e 0, #2cba83 100%) !important;
     border-color: #27aa77;
+}
+.scrollbar-orange::-webkit-scrollbar-thumb, .theme-orange
+{
+    color: white !important;
+    background-color: #e07f08;
+    background-image: linear-gradient(to bottom, #e07f08 0, #c16d05 100%) !important;
+    border-color: #8e4e00;
 }
 .scrollbar-red::-webkit-scrollbar-thumb, .theme-red
 {

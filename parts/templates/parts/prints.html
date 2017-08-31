@@ -32,7 +32,8 @@
                   <tr>
                     <th data-field="id" class="col-xs-0">id</th>
                     <th data-field="part_id" data-sortable="true" class="col-xs-0">Part Id</th>
-                    <th data-field="part_name" data-sortable="true" class="col-xs-3">Part Name</th>
+                    <th data-field="part_name" data-sortable="true" class="col-xs-2">Part Name</th>
+                    <th data-field="amf_number" data-sortable="true" class="col-xs-1">AMF</th>
                     <th data-field="printer" data-sortable="true" class="col-xs-1">Printer</th>
                     <th data-field="location" data-sortable="false" class="col-xs-2">Location</th>
                     <th data-field="created_by" data-sortable="true" class="col-xs-1">created by</th>
@@ -56,6 +57,7 @@
                             <td class="align-middle">{{part.part_name}}</td>
                             {% endif %}
                             {% endfor %}
+                            <td class="align-middle">{{print.id_3mf}}</td>
                             {% for printer in printers %}
                             {% if printer.id == print.id_printer %}
                                 <td class="align-middle">{{printer.name}}</td>

@@ -8,11 +8,6 @@ from django.dispatch import receiver
 
 # Create your models here.
 
-class SP3D_Status_Eng(models.Model):
-    name = models.CharField(max_length=200, default = '')
-    def __str__(self):
-        return "Status id is " + str(self.id)
-
 class SP3D_Part(models.Model):
 
     creation_date = models.DateTimeField('date published')
@@ -50,7 +45,7 @@ class SP3D_Order(models.Model):
     id_contact = models.IntegerField(default=0)
     notes=models.CharField(max_length=1000, default = '')
     permissions=models.CharField(max_length=200, default = '')
-    status_ord = models.IntegerField(default=0)
+    status_ord = models.IntegerField(default=1)
     completion_date = models.DateTimeField('date published', null=True)
     closed_by = models.IntegerField(default=0)
 
@@ -94,6 +89,16 @@ class SP3D_Iteration(models.Model):
 
     def __str__(self):
         return "Iteration number " + str(self.iteration_id)
+
+class SP3D_Status_Eng(models.Model):
+    name = models.CharField(max_length=200, default = '')
+    def __str__(self):
+        return "Status id is " + str(self.id)
+
+class SP3D_Status_Ord(models.Model):
+    name = models.CharField(max_length=200, default = '')
+    def __str__(self):
+        return "Status id is " + str(self.id)
 
 class SP3D_Status_Eng_History(models.Model):
     part_id = models.IntegerField(default=0)

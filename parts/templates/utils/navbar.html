@@ -25,18 +25,14 @@
           <ul class="nav navbar-nav">
             <li><a href="/parts">Parts</a></li>
             <li><a href="/parts/prints">Print Log</a></li>
-            <li class="dropdown">
+            <li><a href="/parts/orders/?status=1">Orders</a></li>
+            <!-- <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Orders <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="/parts/orders/">Open Orders</a></li>
-                <li><a href="/parts/orders/closed/">Closed Orders</a></li>
-                <!-- <li><a href="#">Something else here</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#">Separated link</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#">One more separated link</a></li> -->
+                <li><a href="/parts/orders/?status=1,2">Open Orders</a></li>
+                <li><a href="/parts/orders/?status=3">Closed Orders</a></li>
               </ul>
-            </li>
+            </li> -->
           </ul>
 
 
@@ -88,36 +84,35 @@
                             <li class="dropdown dropdwon-status">
                               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" >
 
-                                  {% if order.status_ord == 0 %}
-                                  <span class="label label-default">opened</span>
-                                  {%else%}
-                                  <span class="label label-success">closed</span>
-                                  {% endif %}
+                                  {%for status in status_ord_list%}
+                                  {%if status.id == order.status_ord%}
+                                  <span class="label label-ord-status-{{status.id}}">{{status.name}}</span>
+                                  {%endif%}
+                                  {% endfor %}
 
 
                                   <span class="caret"></span>
                               </a>
 
                               <!-- get the username of the one who closed -->
-                              {% if order.status_ord == 1 %}
+                              {% if order.status_ord == 3 %}
                                   {%for user in users%}
-                                      {%if user.id == order.status_ord%}
+                                      {%if user.id == order.closed_by%}
                                           <li><a>Closed by {{user.username}}</a></li>
                                       {%endif%}
                                   {%endfor%}
                               {%endif%}
 
-                              {%if order.status_ord == 0%}
                               {% if permission == 1 %}
-                              <ul class="dropdown-menu" style="text-align:center; min-width:50px; width: 93px !important">
-                                  {% if order.status_ord == 0 %}
-                                  <li><a class="change-status-order" id="{{order.id}}-1" href="#" role="button"><span class="label label-success">closed</span></a></li>
-                                  {%else%}
-                                  <li><a class="change-status-order" id="{{order.id}}-0" href="#" role="button"><span class="label label-default">opened</span></a></li>
+                              <ul class="dropdown-menu" style="text-align:center; min-width:50px; width: 110px !important">
+                                  {%for status in status_ord_list%}
+                                  {%if status.id != order.status_ord%}
+                                  <li><a class="change-status-order" id="{{order.id}}-{{status.id}}" href="#" role="button"><span class="label label-ord-status-{{status.id}}">{{status.name}}</span></a></li>
                                   {%endif%}
+                                  {%endfor%}
                               </ul>
                               {% endif %}
-                              {% endif %}
+
                             </li>
 
 
