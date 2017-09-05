@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^prints/$', views.prints, name='prints'),
     url(r'^prints/download-log/(?P<id_print>[0-9]+)/$', views.download_log, name='download_log'),
     url(r'^ajax/print/$', views.ajax_print, name='ajax_print'),
+    url(r'^ajax/print-direct-gcode/$', views.ajax_print_direct_gcode, name='ajax_print_direct_gcode'),
     url(r'^ajax/update-notes/$', views.update_notes, name='update_notes'),
     url(r'^ajax/new-part-number/$', views.new_part_number, name='new_part_number'),
     url(r'^ajax/delete-image/$', views.delete_image, name='delete_image'),

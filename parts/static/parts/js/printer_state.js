@@ -9,6 +9,7 @@ $(document).ready(function(){
     var $printer_statusbar=$(".printer_statusbar");
     var socket=[];
     var _id_3mf = 0;
+    var _direct_print = false;
 
     var STATUS_COLOR = {
         1: "default",
@@ -83,9 +84,16 @@ $(document).ready(function(){
 
 /////////////////////////////////////////////////////////////REFRESH PRINTERS BUTTONS AND EVENT LISTENERS////////////////////////////////////////////
     $(".btn-print").click(function(){
+        _direct_print = false;
         _id_3mf = $(this).attr("id").split("-")[1];
         console.log(_id_3mf);
         $('.id_3mf').val(_id_3mf);
+    });
+    $(".btn-print-gcode").click(function(){
+        _direct_print = true;
+        _id_bulk_gcode = $(this).attr("id").split("-")[1];
+        console.log("BULK GCODE ID: "+_id_bulk_gcode);
+        $('._id_bulk_gcode').val(_id_bulk_gcode);
     });
 
     // launch at page load, and set timer for later
@@ -134,8 +142,14 @@ $(document).ready(function(){
                         button.off("click");
                         var id_printer=button.attr("id").split("-")[2];
 
-
-                        button.on("click", function(e){e.preventDefault();print_3mf(_id_3mf, id_printer);});
+                        button.on("click", function(e){
+                            e.preventDefault();
+                            if (_direct_print){
+                                print_gcode_direct(_id_bulk_gcode, id_printer);
+                            } else {
+                                print_3mf(_id_3mf, id_printer);
+                            };
+                        });
                     }
                     else if (state=="-1"){
                         button.removeClass("btn-danger").removeClass("btn-success").addClass("btn-warning");
@@ -162,6 +176,7 @@ $(document).ready(function(){
         return socket[id];
     };
 
+// PRINT FROM 3MF
     function print_3mf(id_3mf, id_printer){
         var z_offset= $("#z-offset-"+id_printer).val();
         console.log("ID 3MF is:" +id_3mf)
@@ -177,6 +192,41 @@ $(document).ready(function(){
                     'printer_id':id_printer,
                     'id_3mf':id_3mf,
                     'z_offset':z_offset,
+                },
+                dataType:'json',
+                success:function(data){
+                    if (data.gcode_sent){
+                        console.log(data.gcode_sent)
+                    };
+                    if (data.error){
+                        alert(data.error)
+                    };
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    alert("Status: " + textStatus); alert("Error: " + errorThrown);
+                }
+            });
+            // refresh printer status
+            // setTimeout(function(){socket[id_printer].emit('printer state request');console.log("refreshed");}, 2000);
+        };
+
+    };
+
+// PRINT FROM BULK GCODE
+    function print_gcode_direct(_id_bulk_gcode, id_printer){
+        var z_offset= $("#z-offset-"+id_printer).val();
+        console.log("ID BULK GCODE is:" +_id_bulk_gcode)
+        console.log("ID PRINTER is:" + id_printer);
+        console.log("Z offset is wqidhwid:" + z_offset);
+
+        if (isNaN(z_offset) || !$.isNumeric(z_offset)){
+            alert("z-offset is not valid");
+        } else {
+            $.ajax({
+                url: '/parts/ajax/print-direct-gcode/',
+                data:{
+                    'printer_id':id_printer,
+                    'id_bulk_gcode':_id_bulk_gcode,
                 },
                 dataType:'json',
                 success:function(data){

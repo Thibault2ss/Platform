@@ -881,6 +881,90 @@ def ajax_print(request):
     print "AJAX PRINT OVER"
     return JsonResponse(data)
 
+@login_required
+def ajax_print_direct_gcode(request):
+    # get user who printed
+
+    userid = request.user.id
+    user = User.objects.get(id=userid)
+    # get all info
+    print "RAKESH: %s"%request.GET
+    id_bulk_gcode=request.GET.get('id_bulk_gcode', None)
+    try:
+        id_bulk_gcode = int(id_bulk_gcode)
+    except:
+        return JsonResponse({'error': "ID BULK GCODE is wrong integer"})
+
+    print "GCODE BULK ID IS: %s"%id_bulk_gcode
+    id_printer=request.GET.get('printer_id',None)
+    _gcode = SP3D_Bulk_Files.objects.get(id=id_bulk_gcode)
+    id_part = _gcode.id_part
+    part = SP3D_Part.objects.get(id=id_part)
+    id_oem = part.id_oem
+    oem = SP3D_Oem.objects.get(id=id_oem)
+    printer= SP3D_Printer.objects.get(id=id_printer)
+
+    # check if printer is already printing or not:
+    # response = requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
+
+    # add print to database log
+    new_print=SP3D_Print.objects.create(creation_date=time.strftime('%Y-%m-%d %H:%M:%S'), id_printer=id_printer, id_bulk=id_bulk_gcode, id_part=id_part, id_creator=userid)
+    print_log_path = DATABASE_DIRECTORY_TRANSITION + "Print_Logs/print-%s/" % new_print.id
+    if not os.path.isdir(print_log_path):
+        os.makedirs(print_log_path)
+
+    # get necessary files
+    gcode_file = print_log_path + "gcode-%s.gcode"%new_print.id
+    with open(gcode_file, "wb+") as f:
+        for line in open(_gcode.root_path + _gcode.file_path,"rb"):
+            f.write(line)
+
+    local_ip=printer.local_ip
+
+    payload = {
+        'token': TOKEN_FLASK,
+        'id_print':new_print.id,
+        'id_3mf':0,
+        'id_cad' : 0,
+        'id_part':part.id,
+        'username':user.first_name,
+        'id_printer':printer.id,
+        'printer_name':printer.name,
+        'printer_location':printer.location,
+        'printer_ip':printer.local_ip,
+
+            }
+    with open(gcode_file) as f:
+        response = requests.post('http://'+local_ip+':5000/print', data=payload, files={'gcode_file':f})
+        # TRYING TO use threading not to wait before sending response
+        # t = Thread(target=send_to_printer, kwargs={'local_ip':local_ip, 'payload':payload, 'f':f})
+        # t.setDaemon(False)
+        # t.start()
+    print "ABOUT TO SEND AJAX ANSWER TO CLIENT"
+    if response.status_code == 350:
+        message = "print %s, part %s, 3mf %s: Printer is already printing something"%(new_print.id, part.id, _3mf.id)
+        print message
+        data = {'error': message}
+        remove_print(new_print.id)
+    elif response.status_code == 360:
+        header = "%s: An error happened during print  :cry:"%printer.name
+        message = "Something happened during print, was it stopped manually ?\n print %s, part %s - %s, 3mf %s: \n%s" % (new_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
+        print message
+        data = {'error': message}
+        # slack_message(header, message, "#f44242")
+    elif response.status_code == 200:
+        header = "%s: A print finished successfully :muscle:"%printer.name
+        message = "gcode successfully printed, dude\nprint %s, part %s - %s, 3mf %s\n%s"%(new_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
+        print "AJAX CONTAINS: 200"
+        data = {'gcode_sent': message}
+        # slack_message(header, message, "#e33a3a")
+    else:
+        message = "print %s, part %s - %s, 3mf %s: something unknown happened on printer server"%(new_print.id, part.id, part.part_name, _3mf.id)
+        print message
+        data = {'error': message}
+    print "AJAX PRINT OVER"
+    return JsonResponse(data)
+
 def remove_print(id_print):
     global DATABASE_DIRECTORY_TRANSITION
     _print = SP3D_Print.objects.get(id=id_print)

@@ -2,6 +2,7 @@
 <!-- https://github.com/BlackrockDigital/startbootstrap-sb-admin -->
 {% load static %}
 {% load tz %}
+{% load app_filters %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -369,6 +370,9 @@
                                         <a href="/parts/download_bulk/{{bulk_file.id}}/">
                                             <i class="fa fa-fw fa-cloud-download"></i> {{bulk_file.name}} -
                                         </a>
+                                        {% if bulk_file.name|extension_gcode %}
+                                            <button id="print-{{bulk_file.id}}" type="button" style="margin-right:10px" class="btn btn-info btn-sm btn-print-gcode" data-toggle="modal" data-target="#modal-printers"><i class="fa fa-print"></i></button>
+                                        {%endif%}
                                             <small>Notes: <span class="notes-editable" data-type="text" data-pk="{{bulk_file.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'bulk'}" data-url="/parts/ajax/update-notes/">{{bulk_file.notes}}</span></small>
 
                                     </div>

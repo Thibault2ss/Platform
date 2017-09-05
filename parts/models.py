@@ -126,6 +126,7 @@ class SP3D_Print(models.Model):
     id_part = models.IntegerField(default=0)
     id_cad = models.IntegerField(default=0)
     id_3mf = models.IntegerField(default=0)
+    id_bulk = models.IntegerField(default=0)
     id_printer=models.IntegerField(default=0)
     log_id = models.IntegerField(default=0)
     done = models.IntegerField(default=0)

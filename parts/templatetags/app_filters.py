@@ -32,3 +32,11 @@ def created_recently(value):
         return "list-group-item-success"
     else:
         return ""
+
+@register.filter(name='extension_gcode')
+def extension_gcode(value):
+    extension = value.rsplit(".",1)[1].lower()
+    if extension == "gcode":
+        return True
+    else:
+        return False
