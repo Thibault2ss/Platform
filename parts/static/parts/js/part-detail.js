@@ -308,7 +308,7 @@ for (var key in STATUS_COLOR){
 
     Dropzone.options.imageDropzone = {
         paramName: "file", // The name that will be used to transfer the file
-        maxFilesize: 2, // MB
+        maxFilesize: 5, // MB
         createImageThumbnails: false,
         paramName: "image",
         clickable: false,

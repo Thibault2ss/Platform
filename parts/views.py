@@ -44,6 +44,18 @@ LOCAL_APP = "http://localhost:5000"
 def index(request, error=""):
     print "TESTTTTT: %s"%error
     latest_part_list = SP3D_Part.objects.order_by('-creation_date')
+    p=[]
+    for part in latest_part_list:
+        p.append(part.id)
+
+
+    test1 = SP3D_Part.objects.get(id = 421 )
+    test2 = SP3D_Part.objects.get(id = 420 )
+    print "PART 421 CREATION DATE: %s"%type(test1.creation_date)
+    print "PART 420 CREATION DATE: %s"%type(test2.creation_date)
+    print "COMPARISON: %s"%(test2.creation_date>test1.creation_date)
+    print "LIST: %s"%p
+
     users = User.objects.all()
     oems=SP3D_Oem.objects.all()
     status_eng_list = SP3D_Status_Eng.objects.all()

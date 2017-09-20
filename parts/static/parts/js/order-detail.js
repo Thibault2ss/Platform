@@ -60,4 +60,16 @@ $(document).ready(function(){
 
         });
     }
+
+    ////////////////////////////////////////////////////////FILTERS///////////////////////////////////////////////////////////////
+    $(document).on('keyup','#filter-parts-to-order',function () {
+        console.log("search");
+        var rex = new RegExp($(this).val(), 'i');
+        $(".searchable-parts-to-order tr").hide();
+        $(".searchable-parts-to-order tr").filter(function () {
+            return rex.test($(this).text());
+        }).show();
+    });
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 });

@@ -77,10 +77,10 @@
                     </div>
                     {%endif%}
                     {%endfor%}
-                    <div class="list-group-item">
+                    <!-- <div class="list-group-item">
                         <i class="fa fa-fw fa-edit"></i>
                         <span><b>Notes: </b><span class="notes-editable" id="order-notes" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</span></span>
-                    </div>
+                    </div> -->
                     {%if order.type == "quote"%}
                     <div class="list-group-item">
                         <i class="fa fa-fw fa-asterisk"></i>
@@ -272,7 +272,13 @@
                     </div>
                 </div>
                     <div class="list-group">
-
+                        <div class="list-group-item" style="border: solid red">
+                            <div style="position:inline-block">
+                            <i class="fa fa-fw fa-edit"></i>
+                            <span><b>Notes: </b></span>
+                            </div>
+                            <span><span class="notes-editable" id="order-notes" data-type="textarea" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/parts/ajax/update-notes/">{{order.notes}}</span></span>
+                        </div>
                         {% if parts %}
                         {% for part in parts %}
 
