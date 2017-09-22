@@ -7,6 +7,7 @@ urlpatterns = [
 
     url(r'^$', views.index, name='index'),
     url(r'^test/$', views.test, name='test'),
+    url(r'^test-notif/$', views.test_notif, name='test_notif'),
     url(r'^orders/$', views.orders, name='orders'),
     url(r'^orders/ajax-save-quantity/$', views.ajax_save_quantity, name='ajax_save_quantity'),
     url(r'^orders/ajax-generate-po-nb/$', views.ajax_generate_po_nb, name='ajax_generate_po_nb'),
@@ -45,6 +46,7 @@ urlpatterns = [
     url(r'^ajax/delete-order/$', views.delete_order, name='delete_order'),
     url(r'^ajax/change-status-eng/$', views.change_status_eng, name='change_status_eng'),
     url(r'^ajax/change-status-order/$', views.change_status_order, name='change_status_order'),
+    url(r'^ajax/notification/mark-as-read/$', views.notif_read, name='notif_read'),
     url(r'^part-detail/(?P<id_part>[0-9]+)/push-cad/$', views.push_cad, name='push_cad'),
     url(r'^part-detail/(?P<id_part>[0-9]+)/upload-image/$', views.upload_image, name='upload_image'),
     url(r'^part-detail/(?P<id_part>[0-9]+)/upload-cad/$', views.upload_cad_direct, name='upload_cad_direct'),

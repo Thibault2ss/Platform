@@ -1,6 +1,7 @@
 part_management
 
 dependencies:
-- gevent
-- tzlocal
-- requests
+gevent
+tzlocal
+requests
+pip install django-notifications-hq

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'notifications',
     'parts',
 ]
 
@@ -134,3 +135,6 @@ STATIC_URL = '/static/'
 # )
 #
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+NOTIFICATIONS_USE_JSONFIELD=True
+NOTIFICATIONS_SOFT_DELETE=True

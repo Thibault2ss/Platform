@@ -558,3 +558,30 @@ ul.alert-dropdown {
     background-color: #f45042;
     background-image: linear-gradient(to bottom, #f45042 0, #e24234 100%) !important;
 }
+
+.notification-count{
+    border-radius:50%;
+    padding:4px 1px 0px 0px;
+    width:20px;
+    height:20px;
+    border:2px solid white;
+    position:absolute;
+    bottom:7px;
+    right:19px;
+}
+.notif-read-check{
+    position:absolute;
+    display:block;
+    font-size:1.5em;
+    right:15px;
+    top:50%;
+    transform: translateY(-50%);
+    color:#bababa;
+    transition: font-size 0.1s linear;
+    -moz-transition: font-size 0.1s linear;
+    -webkit-transition: font-size 0.1s linear; /* Safari */
+}
+.notif-read-check:hover{
+    font-size:2em;
+    color:#3c763d;
+}

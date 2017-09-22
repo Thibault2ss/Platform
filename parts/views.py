@@ -15,6 +15,8 @@ from random import randint
 from datetime import datetime, timedelta
 from tzlocal import get_localzone
 from configbundle import ConfigBundle
+from notifications.signals import notify
+from notifications.models import Notification
 
 
 import os
@@ -2330,3 +2332,42 @@ def upload_3mf(amf_file, config_file, configb_file, gcode_file, id_cad, userid, 
         print "3MF Uploading Failed"
         error = error + "3MF Uploading failed"
     return error
+
+@login_required
+def test_notif(request):
+    thibault = User.objects.get(id=1)
+    order = SP3D_Order.objects.get(id=30)
+    # notify.send(thibault, recipient=thibault, verb='you reached level 10')
+    notify.send(
+        thibault,
+        recipient = thibault,
+        verb = "ebay order",
+        action_object= order,
+        target = order,
+        level='info',
+        description="%s"%order.name,
+        public = True,
+        quantity=2
+        )
+    return redirect("parts:orders")
+
+@login_required
+def notif_read(request):
+    try:
+        id_part = request.GET.get('id_notif', None)
+        notif = Notification.objects.get(id=id_part)
+        print "notif: %s"%notif
+        notif.mark_as_read()
+
+        data = {
+            "success": "notification %s marked as read successfully"%notif.id
+        }
+    except ValueError as err:
+        data = {
+            "error": err
+        }
+    except Exception as e:
+        data = {
+            "error": "%s"%e
+        }
+    return JsonResponse(data)

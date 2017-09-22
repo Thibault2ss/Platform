@@ -1,4 +1,6 @@
 <!-- Navigation Bar -->
+{% load notifications_tags %}
+{% notifications_unread as unread_count %}
 {% block navbar %}
   <nav class="navbar navbar-fixed-top navbar-default " >
     {% if part %}
@@ -178,29 +180,32 @@
                   </ul>
                 </li>
                 <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
-                  <ul class="dropdown-menu alert-dropdown">
-                      <li>
-                          <a href="#">Alert Name <span class="label label-default">Alert Badge</span></a>
-                      </li>
-                      <li>
-                          <a href="#">Alert Name <span class="label label-primary">Alert Badge</span></a>
-                      </li>
-                      <li>
-                          <a href="#">Alert Name <span class="label label-success">Alert Badge</span></a>
-                      </li>
-                      <li>
-                          <a href="#">Alert Name <span class="label label-info">Alert Badge</span></a>
-                      </li>
-                      <li>
-                          <a href="#">Alert Name <span class="label label-warning">Alert Badge</span></a>
-                      </li>
-                      <li>
-                          <a href="#">Alert Name <span class="label label-danger">Alert Badge</span></a>
-                      </li>
-                      <li class="divider"></li>
-                      <li>
-                          <a href="#">View All</a>
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                      <i class="fa fa-bell" style="font-size:1.5em"></i>
+                      {% if unread_count %}
+                      <span class="label label-danger notification-count">{{ unread_count }}</span>
+
+                      {% endif %}
+                      <b class="caret"></b></a>
+
+                  <ul class="dropdown-menu alert-dropdown live_notify_list" style="width:400px">
+                      <li id="template-notif" class="notif-item" style="display:none">
+                          <a href="#" style="position:relative;">
+                              <div class="media">
+                                  <span class="pull-left">
+                                      <i class="fa fa-circle" style="color:#1d9d74"></i>
+                                  </span>
+                                  <div class="media-body">
+                                      <h5 class="media-heading" style="position:relative">
+                                          <strong class="notif-title">Title</strong>
+                                      </h5>
+                                      <p class="small text-muted"><i class="fa fa-clock-o"></i> <span class="notif-date">How long ago</span> | <i class="fa fa-car"></i> Order <span class="notif-order-id"></span></p>
+                                      <p class="notif-description">Small or big description depending on the case...</p>
+
+                                  </div>
+                              </div>
+                              <i class="fa fa-check-circle-o pull-right notif-read-check"></i>
+                          </a>
                       </li>
                   </ul>
                 </li>
@@ -210,7 +215,7 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> {{user.username}} <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+                            <a href="/parts/test-notif/"><i class="fa fa-fw fa-user"></i> Profile</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
