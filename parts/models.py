@@ -317,6 +317,7 @@ class SP3D_Oem(models.Model):
 class SP3D_Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     slack_name = models.TextField(max_length=200, default='')
+    slack_hook = models.TextField(max_length=200, default='')
 
 
 @receiver(post_save, sender=User)

@@ -330,7 +330,7 @@ for (var key in STATUS_COLOR){
 
     Dropzone.options.bulkDropzone = {
         paramName: "file", // The name that will be used to transfer the file
-        maxFilesize: 5, // MB
+        maxFilesize: 20, // MB
         createImageThumbnails: false,
         paramName: "bulk",
         clickable: false,

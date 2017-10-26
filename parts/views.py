@@ -35,7 +35,7 @@ import collections
 TOKEN_FLASK='123456789'
 
 SLACK_WEBHOOK_PRINTER = 'https://hooks.slack.com/services/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'
-
+SP3D_CLOUD_URL = "http://192.168.0.20:7000/"
 DATABASE_DIRECTORY = '/home/user01/SpareParts_Database/files/'
 DATABASE_DIRECTORY_TRANSITION = '/home/user01/SpareParts_Database/root/'
 SLIC3R_DIRECTORY= '/home/user01/Slic3r/slic3r_dev/'
@@ -87,6 +87,50 @@ def index(request, error=""):
     print "COOKIES"
     print request.COOKIES
     return render(request, 'parts/index.html', context)
+
+@login_required
+def network(request, error=""):
+    print "TESTTTTT: %s"%error
+    latest_part_list = SP3D_Part.objects.order_by('-creation_date')
+    p=[]
+    for part in latest_part_list:
+        p.append(part.id)
+
+
+    test1 = SP3D_Part.objects.get(id = 421 )
+    test2 = SP3D_Part.objects.get(id = 420 )
+    print "PART 421 CREATION DATE: %s"%type(test1.creation_date)
+    print "PART 420 CREATION DATE: %s"%type(test2.creation_date)
+    print "COMPARISON: %s"%(test2.creation_date>test1.creation_date)
+    print "LIST: %s"%p
+
+    users = User.objects.all()
+    oems=SP3D_Oem.objects.all()
+    status_eng_list = SP3D_Status_Eng.objects.all()
+    oem_list = SP3D_Oem.objects.all()
+    printers = SP3D_Printer.objects.all().order_by("name")
+    nb_opened = SP3D_Part.objects.filter(status_eng = 1 ).count()
+    nb_geometry = SP3D_Part.objects.filter(status_eng = 2 ).count()
+    nb_indus = SP3D_Part.objects.filter(status_eng = 3 ).count()
+    nb_qc = SP3D_Part.objects.filter(status_eng = 4 ).count()
+    nb_closed = SP3D_Part.objects.filter(status_eng = 5 ).count()
+    nb_rework = SP3D_Part.objects.filter(status_eng = 6 ).count()
+    context = {
+        'latest_part_list': latest_part_list,
+        'users':users,
+        'oems':oems,
+        'error':error,
+        'oem_list':oem_list,
+        'printers':printers,
+        'status_eng_list':status_eng_list,
+        'nb_opened':nb_opened,
+        'nb_geometry':nb_geometry,
+        'nb_indus':nb_indus,
+        'nb_qc':nb_qc,
+        'nb_closed':nb_closed,
+        'nb_rework':nb_rework,
+    }
+    return render(request, 'parts/network.html', context)
 
 @login_required
 def orders(request):
@@ -172,7 +216,7 @@ def order_detail(request, id_order, error=""):
 
 @login_required
 def prints(request):
-    latest_print_list = SP3D_Print.objects.order_by('-creation_date')
+    latest_print_list = SP3D_Print.objects.order_by('-creation_date')[:200]
     # list of all parts id related
     part_id_list = []
     for pr in latest_print_list:
@@ -199,9 +243,12 @@ def download_cad(request, id_part, id_cad):
     # oem = SP3D_Oem.objects.get(id = part.id_oem)
     cad = SP3D_CAD.objects.get(id = id_cad)
     filename = cad.root_path + cad.file_path
+    print "DEBUG1"
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    print "DEBUG2"
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
+    print "DEBUG3"
     return response
 
 @login_required
@@ -209,7 +256,7 @@ def download_bulk(request, id_bulk):
     bulk = SP3D_Bulk_Files.objects.get(id = id_bulk)
     filename = bulk.root_path + bulk.file_path
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
@@ -220,7 +267,7 @@ def download_amf(request, id_part, id_3mf):
     _3mf = SP3D_3MF.objects.get(id = id_3mf)
     filename = _3mf.root_path + _3mf.amf_path
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
@@ -231,7 +278,7 @@ def download_config(request, id_part, id_3mf):
     _3mf = SP3D_3MF.objects.get(id = id_3mf)
     filename = _3mf.root_path + _3mf.config_path
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
@@ -242,7 +289,7 @@ def download_configb(request, id_part, id_3mf):
     _3mf = SP3D_3MF.objects.get(id = id_3mf)
     filename = _3mf.root_path + _3mf.configb_path
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
@@ -253,7 +300,7 @@ def download_gcode(request, id_part, id_3mf):
     _3mf = SP3D_3MF.objects.get(id = id_3mf)
     filename = _3mf.root_path + _3mf.gcode_path
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
@@ -264,7 +311,7 @@ def download_cad2d(request, id_part, id_cad2d):
     cad2d = SP3D_CAD2D.objects.get(id = id_cad2d)
     filename = cad2d.root_path + cad2d.file_path
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
@@ -275,7 +322,7 @@ def download_stl(request, id_part, id_stl):
     stl = SP3D_STL.objects.get(id = id_stl)
     filename = stl.root_path + stl.file_path
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
@@ -292,7 +339,7 @@ def download_log(request, id_print):
          print "Print Log log-%s.txt is not in folder, cannot download" %id_print
          return HttpResponseRedirect("/parts/prints/")
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     return response
 
@@ -308,7 +355,7 @@ def slice_and_download(request,id):
         print "An error occured while slicing..."
     filename = gcode_file
     response = HttpResponse(file(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(filename)
+    response['Content-Disposition'] = "attachment; filename='%s'" % os.path.basename(filename)
     response['Content-Length'] = os.path.getsize(filename)
     # if we want to remove gcode created in database after:
     # if os.path.isfile(gcode_file):
@@ -881,13 +928,13 @@ def ajax_print(request):
         message = "Something happened during print, was it stopped manually ?\n print %s, part %s - %s, 3mf %s: \n%s" % (new_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
         print message
         data = {'error': message}
-        # slack_message(header, message, "#f44242")
+        # slack_message(SLACK_WEBHOOK_PRINTER, header, message, "#f44242")
     elif response.status_code == 200:
         header = "%s: A print finished successfully :muscle:"%printer.name
         message = "gcode successfully printed, dude\nprint %s, part %s - %s, 3mf %s\n%s"%(new_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
         print "AJAX CONTAINS: 200"
         data = {'gcode_sent': message}
-        # slack_message(header, message, "#e33a3a")
+        # slack_message(SLACK_WEBHOOK_PRINTER, header, message, "#e33a3a")
     else:
         message = "print %s, part %s - %s, 3mf %s: something unknown happened on printer server"%(new_print.id, part.id, part.part_name, _3mf.id)
         print message
@@ -965,13 +1012,13 @@ def ajax_print_direct_gcode(request):
         message = "Something happened during print, was it stopped manually ?\n print %s, part %s - %s, 3mf %s: \n%s" % (new_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
         print message
         data = {'error': message}
-        # slack_message(header, message, "#f44242")
+        # slack_message(SLACK_WEBHOOK_PRINTER, header, message, "#f44242")
     elif response.status_code == 200:
         header = "%s: A print finished successfully :muscle:"%printer.name
         message = "gcode successfully printed, dude\nprint %s, part %s - %s, 3mf %s\n%s"%(new_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
         print "AJAX CONTAINS: 200"
         data = {'gcode_sent': message}
-        # slack_message(header, message, "#e33a3a")
+        # slack_message(SLACK_WEBHOOK_PRINTER, header, message, "#e33a3a")
     else:
         message = "print %s, part %s - %s, 3mf %s: something unknown happened on printer server"%(new_print.id, part.id, part.part_name, _3mf.id)
         print message
@@ -987,8 +1034,7 @@ def remove_print(id_print):
     _print.delete()
     return True
 
-def slack_message(header, message, color):
-    global SLACK_WEBHOOK_PRINTER
+def slack_message(hook, header, message, color):
     slack_data = {
                         "text": header,
                         "attachments": [
@@ -1000,7 +1046,7 @@ def slack_message(header, message, color):
                         ]
                     }
     print "SENDING SLACK MESSAGE"
-    slack_res = requests.post(SLACK_WEBHOOK_PRINTER, data=json.dumps(slack_data), headers={'Content-Type': 'application/json'})
+    slack_res = requests.post(hook, data=json.dumps(slack_data), headers={'Content-Type': 'application/json'})
     print "SLACK MESSAGE SENT"
     return True
 
@@ -1329,12 +1375,12 @@ def print_finished(request):
                 header = "%s: An error happened during print  :cry::cry::cry::cry::cry::cry:"%printer.name
                 message = "from SP3D Cloud: %s\nSomething happened during print, was it stopped manually ?\n print %s, part %s - %s, 3mf %s: \n%s" % (error, _print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
                 print "GOTO SLACK MESSAGE"
-                slack_message(header, message, "#f44242")
+                slack_message(SLACK_WEBHOOK_PRINTER, header, message, "#f44242")
             else:
                 header = "%s: A print finished successfully :muscle::muscle:"%printer.name
                 message = "from SP3D cloud: \ngcode successfully printed, dude\nprint %s, part %s - %s, 3mf %s\n%s"%(_print.id, part.id, part.part_name, _3mf.id, user.sp3d_profile.slack_name)
                 print "GOTO SLACK MESSAGE"
-                slack_message(header, message, "#43db7b")
+                slack_message(SLACK_WEBHOOK_PRINTER, header, message, "#43db7b")
 
         except ValueError as err:
             print "DEBUG122:"
@@ -1736,6 +1782,28 @@ def add_order(request):
         else:
             raise ValueError("Error: Order folder already exists")
 
+        #send notification
+        user_notified = User.objects.get(id=assigned_to)
+        notify.send(
+            user_notified,
+            recipient = user_notified,
+            verb = order_type,
+            action_object= new_order,
+            target = new_order,
+            level='info',
+            description="%s"%new_order.name,
+            public = True,
+            target_path = "/parts/orders/order-detail/%s/"%new_order.id,
+            # quantity=2
+            )
+        #send slack message:
+        slack_message(
+            user_notified.sp3d_profile.slack_hook,
+            "a new Order was assigned to you: <%sparts/orders/order-detail/%s/|order %s>"%(SP3D_CLOUD_URL, new_order.id, new_order.id),
+            new_order.name,
+            "#4286f4"
+            )
+
     return HttpResponseRedirect('/parts/orders/')
 
 # update new order
@@ -1759,8 +1827,32 @@ def update_order(request):
         old_order.name = order_name
         old_order.quote_number = quote_number
         old_order.po_number = po_number
-        old_order.assigned_to = assigned_to
         old_order.notes = notes
+        if not old_order.assigned_to == int(assigned_to):
+            old_order.assigned_to = assigned_to
+            old_order.save()
+            # send slack message and notif
+            user_notified = User.objects.get(id=assigned_to)
+            notify.send(
+                user_notified,
+                recipient = user_notified,
+                verb = order_type,
+                action_object= old_order,
+                target = old_order,
+                level='info',
+                description="%s"%old_order.name,
+                public = True,
+                target_path = "/parts/orders/order-detail/%s/"%old_order.id,
+                # quantity=2
+                )
+            #send slack message:
+            slack_message(
+                user_notified.sp3d_profile.slack_hook,
+                "a new Order was assigned to you: <%sparts/orders/order-detail/%s/|order %s>"%(SP3D_CLOUD_URL, old_order.id, old_order.id),
+                old_order.name,
+                "#4286f4"
+                )
+
         old_order.save()
 
     return HttpResponseRedirect('/parts/orders/order-detail/%s'%id_order)

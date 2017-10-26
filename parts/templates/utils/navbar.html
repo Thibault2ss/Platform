@@ -28,6 +28,7 @@
             <li><a href="/parts">Parts</a></li>
             <li><a href="/parts/prints">Print Log</a></li>
             <li><a href="/parts/orders/?status=1">Orders</a></li>
+            <li><a href="/parts/network/">Network</a></li>
             <!-- <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Orders <span class="caret"></span></a>
               <ul class="dropdown-menu">
@@ -126,8 +127,8 @@
 
 
 
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope"></i> <b class="caret"></b></a>
+                <!-- <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope" style="font-size:1.5em"></i> <b class="caret"></b></a>
                   <ul class="dropdown-menu message-dropdown">
                       <li class="message-preview">
                           <a href="#">
@@ -178,7 +179,7 @@
                           <a href="#">Read All New Messages</a>
                       </li>
                   </ul>
-                </li>
+                </li> -->
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                       <i class="fa fa-bell" style="font-size:1.5em"></i>
@@ -212,7 +213,7 @@
 
             {% if user.is_authenticated %}
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> {{user.username}} <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user" style="font-size:1.5em"></i> {{user.username}} <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
                             <a href="/parts/test-notif/"><i class="fa fa-fw fa-user"></i> Profile</a>
@@ -236,4 +237,7 @@
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
   </nav>
+
+
+
 {% endblock navbar %}

@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^test/$', views.test, name='test'),
     url(r'^test-notif/$', views.test_notif, name='test_notif'),
+    url(r'^network/$', views.network, name='network'),
     url(r'^orders/$', views.orders, name='orders'),
     url(r'^orders/ajax-save-quantity/$', views.ajax_save_quantity, name='ajax_save_quantity'),
     url(r'^orders/ajax-generate-po-nb/$', views.ajax_generate_po_nb, name='ajax_generate_po_nb'),
