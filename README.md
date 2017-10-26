@@ -1,6 +1,7 @@
 part_management
 
 dependencies:
+Django
 gevent
 tzlocal
 requests

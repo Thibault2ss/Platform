@@ -25,7 +25,7 @@ SECRET_KEY = 'n^+xf77tb6$z2bp$)+nsng2in2#ummrfr)+&4agwf%#0f$xuz*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.20']
+ALLOWED_HOSTS = ['localhost','192.168.0.20']
 
 
 # Application definition
@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'part_management.urls'
+ROOT_URLCONF = 'sp3d.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'part_management.wsgi.application'
+WSGI_APPLICATION = 'sp3d.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'part_management.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'Django_test',
+        'NAME': 'SP3D_DB',
         'USER': 'user01',
         'PASSWORD': 'SpareParts3D#',
         'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
