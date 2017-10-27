@@ -22,8 +22,8 @@ import notifications.urls
 
 urlpatterns = [
     url(r'^login/$', auth_views.login, name='login'),
-    url(r'^logout/$', auth_views.logout,{'next_page': '/parts'}, name='logout'),
-    url(r'^parts/', include('parts.urls')),
+    url(r'^logout/$', auth_views.logout,{'next_page': '/jb'}, name='logout'),
+    url(r'^jb/', include('jb.urls')),
     url(r'^admin/', admin.site.urls),
     url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

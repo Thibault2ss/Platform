@@ -1,0 +1,84 @@
+
+          <!-- Trigger the modal with a button -->
+            <button id="add_contact" type="button" style="margin-right:0px" class="btn btn-sm btn-default btn-circle" data-toggle="modal" data-target="#modal-add-contact"><i class="fa fa-fw fa-plus"></i></button>
+
+            <!-- Modal -->
+            <div id="modal-add-contact" class="modal fade" role="dialog">
+              <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">New Contact</h4>
+                  </div>
+                  <div class="modal-body">
+
+                      <form action="/jb/add-contact/" method="post" enctype="multipart/form-data" class="clearfix">{% csrf_token %}
+
+
+                          <input type="hidden" class="form-control" name="client-id" value={{client.id}}>
+                          <input type="hidden" class="form-control" name="order-id" value={{order.id}}>
+
+                          <div class="form-group">
+                            <label for="type">Prefix</label>
+                            <select class="form-control" style="max-width:80px" name="contact-prefix" id="contact-prefix" required>
+                                      <option value="Mr.">Mr.</option>
+                                      <option value="Mrs.">Mrs.</option>
+                            </select>
+                          </div>
+
+                          <div class="form-group">
+                            <label for="contact-first-name">First Name *</label>
+                            <input type="text" class="form-control" name="contact-first-name" id="contact-first-name" aria-describedby="" placeholder="Enter contact first name" required>
+                            <small id="" class="form-text text-muted"></small>
+                          </div>
+
+                          <div class="form-group">
+                            <label for="contact-last-name">Last Name </label>
+                            <input type="text" class="form-control" name="contact-last-name" id="contact-last-name" aria-describedby="" placeholder="Enter contact last name">
+                            <small id="" class="form-text text-muted"></small>
+                          </div>
+
+
+                        <div class="form-group">
+                          <label for="contact-email">email </label>
+                          <input type="email" class="form-control" name="contact-email" id="contact-email" aria-describedby="" placeholder="Enter contact email">
+                          <small id="" class="form-text text-muted"></small>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="contact-position">Position </label>
+                          <input type="text" class="form-control" name="contact-position" id="contact-position" aria-describedby="" placeholder="Enter contact position">
+                          <small id="" class="form-text text-muted"></small>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="contact-phone-perso">Personal phone</label>
+                          <input type="text" class="form-control" name="contact-phone-perso" id="contact-phone-perso" aria-describedby="" placeholder="Enter contact personal phone number" >
+                          <small id="" class="form-text text-muted"></small>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="contact-phone-perso">Office phone</label>
+                          <input type="text" class="form-control" name="contact-phone-office" id="contact-phone-office" aria-describedby="" placeholder="Enter contact office phone number" >
+                          <small id="" class="form-text text-muted"></small>
+                        </div>
+
+
+                        <div class="form-group">
+                          <label for="notes">Notes</label>
+                          <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary pull-right">New Contact</button>
+                      </form>
+
+
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>

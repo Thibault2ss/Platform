@@ -1,0 +1,245 @@
+{% load static %}
+{% load tz %}
+{% load app_filters %}
+{% load notifications_tags %}
+<!DOCTYPE html>
+<html style = "overflow: hidden">
+<head>
+  <meta charset="UTF-8">
+  <!-- don't chnge title, linked to javascript -->
+  <title>SpareParts3D - Orders</title>
+  <!-- Bootstrap css and js -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+  {% load staticfiles %}
+  <link href="{% static 'jb/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'jb/css/style.css' %}" />
+  <link href="{% static 'jb/css/sb-admin.css' %}" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
+  <link rel="shortcut icon" type="image/png" href="{% static 'jb/favicon.ico' %}"/>
+  <link href="{% static 'jb/css/bootstrap-editable.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+
+</head>
+<body>
+  {% include "utils/navbar.html" %}
+
+  <div id="order-page">
+
+
+
+<div class="row" style="margin-bottom:10px">
+    <div class="col col-lg-3 col-sm-3">
+        <ul class="nav nav-pills nav-pills-status custom-colors">
+            {% if filter_status == 3 %}
+                <li><a  class="filter-status button-opened" href="/jb/orders/?status=1">Opened</a></li>
+                <li><a  class="filter-status button-followup" href="/jb/orders/?status=2">Follow up</a></li>
+                <li class="active"><a class="filter-status button-closed">Closed</a></li>
+            {% elif filter_status == 2 %}
+                <li><a  class="filter-status button-opened" href="/jb/orders/?status=1">Opened</a></li>
+                <li class="active"><a  class="filter-status button-followup">Follow up</a></li>
+                <li><a class="filter-status button-closed"  href="/jb/orders/?status=3">Closed</a></li>
+            {% elif filter_status == 1 %}
+                <li class="active"><a  class="filter-status button-opened">Opened</a></li>
+                <li><a  class="filter-status button-followup" href="/jb/orders/?status=2">Follow up</a></li>
+                <li><a class="filter-status button-closed"  href="/jb/orders/?status=3">Closed</a></li>
+            {% else %}
+                <li><a  class="filter-status button-opened" href="/jb/orders/?status=1">Opened</a></li>
+                <li><a  class="filter-status button-followup" href="/jb/orders/?status=2">Follow up</a></li>
+                <li><a class="filter-status button-closed"  href="/jb/orders/?status=3">Closed</a></li>
+            {%endif%}
+        </ul>
+    </div>
+    <div class="col-lg-7 col-sm-7">
+        <ul class="nav nav-pills nav-pills-users">
+            <li class="active"><a data-toggle="pill" class="filter-user-id" id="" href="">All</a></li>
+            {%for user in users%}
+            <li><a data-toggle="pill" class="filter-user-id" id="{{user.username}}" href="">{{user.username}}</a></li>
+            {%endfor%}
+        </ul>
+    </div>
+    <div class="col col-lg-2 col-sm-2">
+        {%include "utils/modals/add-client.html" %}
+        {%include "utils/modals/add-order.html" %}
+    </div>
+</div>
+
+
+<div class="row">
+    <!-- RFQ -->
+    <div class="col col-lg-4 col-sm-6">
+        <div class="panel panel-default ">
+            <div class="panel-heading clearfix {%if filter_status == 3%}theme-red{%elif filter_status == 2%}theme-orange{%elif filter_status == 1%}theme-green{%endif%}">
+                <div class="row">
+                    <div class="col-lg-4 col-sm-4">
+                        <h3 class="panel-title" style="margin-top:10px"><i class="fa fa-tasks fa-fw"></i> RFQ</h3>
+                    </div>
+                    <div class="col-lg-8 col-sm-8">
+                        <div class="input-group pull-right">
+                            <span class="input-group-addon {%if filter_status == 3%}btn-danger{%elif filter_status == 2%}theme-orange{%elif filter_status == 1%}theme-green{%endif%}"><i class="fa fa-fw fa-search" style="color:white"></i></span>
+                            <input id="filter-rfq" type="text" class="form-control filter" placeholder="Search...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="searchable-rfq scrollbar custom-scrollbar {%if filter_status == 3%}scrollbar-red{%elif filter_status == 2%}scrollbar-orange{%elif filter_status == 1%}scrollbar-green{%endif%}" style="max-height:75vh;">
+                <div class="list-group">
+                    {% if orders %}
+                    {% for order in orders %}
+                    {%if order.type == 'quote'%}
+                    <div href="" class="list-group-item {{order.creation_date|created_recently}}">
+                        {%if order.status_ord == 3%}
+                        <span class="badge badge-success completion_date">{{order.completion_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>closed by {%for user in users%}{%if user.id == order.closed_by%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%else%}
+                        <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%endif%}
+                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="{% url 'parts:order_detail' id_order=order.id %}"><i class="fa fa-fw fa-dollar"></i> {{order.id}} - {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                        <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/jb/ajax/update-notes/">{{order.notes}}</small>
+                        <small class="pull-right">{{order.quote_number}}</small>
+                        {% if request.user.id == 1 %}
+                        <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-order"><i class="glyphicon glyphicon-remove"></i></button>
+                        {%endif%}
+                    </div>
+
+                    {%endif%}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Production -->
+    <div class="col col-lg-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix {%if filter_status == 3%}theme-red{%elif filter_status == 2%}theme-orange{%elif filter_status == 1%}theme-green{%endif%}">
+                <div class="row">
+                    <div class="col-lg-4 col-sm-4">
+                        <h3 class="panel-title" style="margin-top:10px"><i class="fa fa-tasks fa-fw"></i> Prod</h3>
+                    </div>
+                    <div class="col-lg-8 col-sm-8">
+                        <div class="input-group pull-right">
+                            <span class="input-group-addon {%if filter_status == 3%}btn-danger{%elif filter_status == 2%}theme-orange{%elif filter_status == 1%}theme-green{%endif%}"><i class="fa fa-fw fa-search" style="color:white"></i></span>
+                            <input id="filter-prod" type="text" class="form-control filter" placeholder="Search...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="searchable-prod scrollbar custom-scrollbar {%if filter_status == 3%}scrollbar-red{%elif filter_status == 2%}scrollbar-orange{%elif filter_status == 1%}scrollbar-green{%endif%}" style="max-height:75vh;">
+                <div class="list-group">
+                    {% if orders %}
+                    {% for order in orders %}
+                    {%if order.type == 'prod' or order.type == 'sample'%}
+                    <div href="" class="list-group-item {{order.creation_date|created_recently}}">
+                        {%if order.status_ord == 3%}
+                        <span class="badge badge-success completion_date">{{order.completion_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>closed by {%for user in users%}{%if user.id == order.closed_by%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%else%}
+                        <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%endif%}
+                        <h5 style="margin-bottom:5px;margin-top:0px">
+                            <a href="{% url 'parts:order_detail' id_order=order.id %}">
+                                {%if order.type == 'sample'%}
+                                <i class="fa fa-fw fa-eye"></i>
+                                {%else%}
+                                <i class="fa fa-fw fa-cubes"></i>
+                                {%endif%}
+                                {{order.id}} - {{order.name}}
+                            </a>-
+                            <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small>
+                        </h5>
+                        <small class="notes-editable" style="margin-left:20px" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/jb/ajax/update-notes/">{{order.notes}}</small>
+                        <small class="pull-right">{{order.po_number}}</small>
+                        {% if request.user.id == 1 %}
+                        <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-order"><i class="glyphicon glyphicon-remove"></i></button>
+                        {%endif%}
+                    </div>
+                    {%endif%}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Indus -->
+    <div class="col col-lg-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix {%if filter_status == 3%}theme-red{%elif filter_status == 2%}theme-orange{%elif filter_status == 1%}theme-green{%endif%}">
+                <div class="row">
+                    <div class="col-lg-4 col-sm-4">
+                        <h3 class="panel-title" style="margin-top:10px"><i class="fa fa-tasks fa-fw"></i> Indus</h3>
+                    </div>
+                    <div class="col-lg-8 col-sm-8">
+                        <div class="input-group pull-right">
+                            <span class="input-group-addon {%if filter_status == 3%}btn-danger{%elif filter_status == 2%}theme-orange{%elif filter_status == 1%}theme-green{%endif%}"><i class="fa fa-fw fa-search" style="color:white"></i></span>
+                            <input id="filter-indus" type="text" class="form-control filter" placeholder="Search...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="searchable-indus scrollbar custom-scrollbar {%if filter_status == 3%}scrollbar-red{%elif filter_status == 2%}scrollbar-orange{%elif filter_status == 1%}scrollbar-green{%endif%}" style="max-height:75vh;">
+                <div class="list-group">
+                    {% if orders %}
+                    {% for order in orders %}
+                    {%if order.type == 'indus'%}
+                    <div href="" class="list-group-item {{order.creation_date|created_recently}}">
+                        {%if order.status_ord == 3%}
+                        <span class="badge badge-success completion_date">{{order.completion_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>closed by {%for user in users%}{%if user.id == order.closed_by%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%else%}
+                        <span class="badge badge-success due_date">{{order.due_date|timezone:"Asia/Singapore"|get_due_date_string}}</span>
+                        <small class="pull-right" style="margin-right:5px"><i>{%for user in users%}{%if user.id == order.assigned_to%}{{user.username}}{%endif%}{%endfor%}</i></small>
+                        {%endif%}
+                        <h5 style="margin-bottom:5px;margin-top:0px"><a href="{% url 'parts:order_detail' id_order=order.id %}"><i class="fa fa-fw fa-wrench"></i> {{order.id}} - {{order.name}} </a>- <small>{%for client in clients%}{%if client.id == order.id_client%}{{client.name}}{%endif%}{%endfor%}</small></h5>
+                        <small style="margin-left:20px" >Notes: <span class="notes-editable" data-type="text" data-pk="{{order.id}}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}', type:'order'}" data-url="/jb/ajax/update-notes/">{{order.notes}}</span></small>
+                        {% if request.user.id == 1 %}
+                        <button type="button" value="{{order.id}}" class="btn btn-danger btn-circle pull-right delete-order"><i class="glyphicon glyphicon-remove"></i></button>
+                        {%endif%}
+                    </div>
+
+                    {%endif%}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+
+    </script>
+    <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.7.2/jquery-ui.min.js" integrity="sha256-4h4SHCCUAKFl7xWF9JeZp9tnU8lmM5bt6G3kNK6E4ek=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!-- <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.9.1/jquery.tablesorter.min.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.widgets.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+
+    <script src="{% static 'jb/js/printer_state.js' %}"></script>
+    <script src="{% static 'jb/js/orders.js' %}"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+
+    <script src="{% static 'jb/js/bootstrap-editable.js' %}"></script>
+    {% if error %}
+        <script>
+        alert(error);
+        </script>
+    {% endif %}
+    <script src="{% static 'notifications/notify.js' %}" type="text/javascript"></script>
+    <script src="{% static 'jb/js/notifications.js' %}"></script>
+    {% register_notify_callbacks refresh_period=10 fetch=100 callbacks='fill_notification_list_custom,fill_notification_badge'   %}
+</body>
+</html>

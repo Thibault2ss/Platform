@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'notifications',
-    'parts',
+    # 'parts',
+    'jb',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = ['sp3d.authBackends.jbAuthBackend']
+# AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend', 'sp3d.authBackends.jbAuthBackend']
 
 ROOT_URLCONF = 'sp3d.urls'
 
@@ -71,18 +75,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sp3d.wsgi.application'
 
+# AUTH_USER_MODEL = 'jb.StaffUser'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
+DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
 DATABASES = {
-    'default': {
+    'default':{
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SP3D_DB',
         'USER': 'user01',
         'PASSWORD': 'SpareParts3D#',
         'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
-    }
+    },
+    'jb_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'SP3D_JB',
+        'USER': 'user01',
+        'PASSWORD': 'SpareParts3D#',
+        'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
+    },
 }
 
 
@@ -119,7 +132,7 @@ USE_L10N = True
 USE_TZ = True
 
 # login redirection
-LOGIN_REDIRECT_URL = '/parts/'
+LOGIN_REDIRECT_URL = '/jb/'
 LOGIN_URL = '/login/'
 
 MEDIA_ROOT='/home/user01/SpareParts_Database/root/'
@@ -128,7 +141,7 @@ MEDIA_URL='/media/'
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT='http://192.168.0.20:9000/static/parts/'
+# STATIC_ROOT='http://192.168.0.20:9000/static/jb/'
 # Add these new lines
 # STATICFILES_DIRS = (
 #     os.path.join(BASE_DIR, 'static'),
