@@ -6,7 +6,8 @@ from django.template import loader, RequestContext
 from django.shortcuts import render, render_to_response, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-from .models import Part, Print, Printer, Image, CAD, AMF, CONFIG, Oem, ThreeMF, STL, CAD2D, Status_Eng, Status_Ord, Status_Eng_History, Status_Ord_History, Bulk_Files, Client, Order, Po_Revision, Quote_Revision, Contact, StaffUser
+from jb.models import Part, Print, Printer, Image, CAD, AMF, CONFIG, Oem, ThreeMF, STL, CAD2D, Status_Eng, Status_Ord, Status_Eng_History, Status_Ord_History, Bulk_Files, Client, Order, Po_Revision, Quote_Revision, Contact
+from users.models import CustomUser
 # from django.contrib.auth.models import User
 from threading import Thread
 from django.forms.models import model_to_dict
@@ -44,13 +45,15 @@ LOCAL_APP = "http://localhost:5000"
 @login_required
 def index(request, error=""):
     print "TESTTTTT: %s"%error
+    print "USER"
+    print request.user.usertype
     latest_part_list = Part.objects.order_by('-creation_date')
     p=[]
     for part in latest_part_list:
         p.append(part.id)
 
 
-    users = StaffUser.objects.all()
+    users = CustomUser.objects.all()
     oems=Oem.objects.all()
     status_eng_list = Status_Eng.objects.all()
     oem_list = Oem.objects.all()
@@ -91,7 +94,7 @@ def network(request, error=""):
     for part in latest_part_list:
         p.append(part.id)
 
-    users = StaffUser.objects.all()
+    users = CustomUser.objects.all()
     oems=Oem.objects.all()
     status_eng_list = Status_Eng.objects.all()
     oem_list = Oem.objects.all()
@@ -134,7 +137,7 @@ def orders(request):
         filter_status = 1
 
     clients = Client.objects.all().order_by('name')
-    users = StaffUser.objects.all()
+    users = CustomUser.objects.all()
     print "FILTER STATUS IS: %s"%filter_status
     orders = Order.objects.filter(status_ord = filter_status).order_by("due_date")
 
@@ -160,7 +163,7 @@ def order_detail(request, id_order, error=""):
     latest_part_list = {}
     for oem in oems:
         latest_part_list[oem.id] = Part.objects.filter(id_oem = oem.id).order_by('-creation_date')
-    users = StaffUser.objects.all()
+    users = CustomUser.objects.all()
     order = Order.objects.get(id=id_order)
     print "ORDER STATUS IS: %s "%order.status_ord
     client = Client.objects.get(id=order.id_client)
@@ -214,7 +217,7 @@ def prints(request):
     # get all printers
     printers = Printer.objects.all()
     # get all printers
-    users = StaffUser.objects.all()
+    users = CustomUser.objects.all()
 
     context = {
         'latest_print_list': latest_print_list,
@@ -828,7 +831,7 @@ def ajax_print(request):
     # get user who printed
 
     userid = request.user.id
-    user = StaffUser.objects.get(id=userid)
+    user = CustomUser.objects.get(id=userid)
     # get all info
     print "RAKESH: %s"%request.GET
     id_3mf=request.GET.get('id_3mf', None)
@@ -934,7 +937,7 @@ def ajax_print_direct_gcode(request):
     # get user who printed
 
     userid = request.user.id
-    user = StaffUser.objects.get(id=userid)
+    user = CustomUser.objects.get(id=userid)
     # get all info
     print "RAKESH: %s"%request.GET
     id_bulk_gcode=request.GET.get('id_bulk_gcode', None)
@@ -1043,7 +1046,7 @@ def part_detail(request,id_part):
     part = Part.objects.get(id=id_part)
     image_list = Image.objects.filter(id_part=id_part)
     cad_list=CAD.objects.filter(id_part=id_part).order_by('creation_date')
-    users = StaffUser.objects.all()
+    users = CustomUser.objects.all()
     status_eng_list = Status_Eng.objects.all()
     printers=Printer.objects.all().order_by("name")
     permissions = map(int, filter( None , part.permissions.split("-")))
@@ -1324,7 +1327,7 @@ def print_finished(request):
         part = Part.objects.get(id=_print.id_part)
         printer = Printer.objects.get(id= _print.id_printer)
         _3mf = ThreeMF.objects.get(id = _print.id_3mf)
-        user = StaffUser.objects.get(id=_print.id_creator)
+        user = CustomUser.objects.get(id=_print.id_creator)
         print "USER"
         print "USER SLACK NAME: %s"%user.slack_name
         log_file = request.FILES.get('log_file')
@@ -1581,7 +1584,7 @@ def upload_config_direct(request,id_part):
 @login_required
 def add_part(request):
     userid = request.user.id
-    user = StaffUser.objects.get(id=userid)
+    user = CustomUser.objects.get(id=userid)
     print "USER id : %s"% userid
     print "USERNAME : %s"% user.username
 
@@ -1770,7 +1773,7 @@ def add_order(request):
             raise ValueError("Error: Order folder already exists")
 
         #send notification
-        user_notified = StaffUser.objects.get(id=assigned_to)
+        user_notified = CustomUser.objects.get(id=assigned_to)
         notify.send(
             user_notified,
             recipient = user_notified,
@@ -1819,7 +1822,7 @@ def update_order(request):
             old_order.assigned_to = assigned_to
             old_order.save()
             # send slack message and notif
-            user_notified = StaffUser.objects.get(id=assigned_to)
+            user_notified = CustomUser.objects.get(id=assigned_to)
             notify.send(
                 user_notified,
                 recipient = user_notified,
@@ -2414,7 +2417,7 @@ def upload_3mf(amf_file, config_file, configb_file, gcode_file, id_cad, userid, 
 
 @login_required
 def test_notif(request):
-    thibault = StaffUser.objects.get(id=1)
+    thibault = CustomUser.objects.get(id=1)
     order = Order.objects.get(id=30)
     # notify.send(thibault, recipient=thibault, verb='you reached level 10')
     notify.send(

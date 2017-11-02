@@ -1,0 +1,114 @@
+{% extends "account/base.html" %}
+{% load tz %}
+{% load static %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}SP3D Auth{% endblock %}
+{% block extra_head %}
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<link rel="stylesheet" href="{% static 'account/css/animate.min.css'%}" />
+<link rel="stylesheet" href="{% static 'account/css/login.css'%}" />
+<link rel="stylesheet" href="{% static 'account/css/checkbox.css'%}" />
+{% endblock %}
+
+
+{% block content %}
+<div class="wrapper">
+    <div class="container">
+
+
+        <h1>Welcome to <span class="fw-300">SP3D</span></h1>
+        <h2>
+            <span class="toggle-form" data-toggle-form="login_form">Login</span>
+            <span class="toggle-form" data-toggle-form="signup_form">Sign Up</span>
+        </h2>
+
+        {%comment%}
+        {% get_providers as socialaccount_providers %}
+
+            {% if socialaccount_providers %}
+            <div class="socialaccount_ballot">
+                {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+            </div>
+
+
+            {% include "socialaccount/snippets/login_extra.html" %}
+
+            {% else %}
+            <p>{% blocktrans %}If you have not created an account yet, then please
+            <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
+            {% endif %}
+            {%endcomment%}
+
+
+<!-- FORM LOGIN -->
+        <form class="login" id="login_form" method="POST" action="{% url 'account_login' %}">
+            <a href="{% provider_login_url 'linkedin_oauth2' process='login' %}" class="social-signin-button">
+                <i class="fa fa-linkedin"></i>Login with LinkedIn
+            </a>
+            <div style="margin-bottom:10px">or</div>
+          {% csrf_token %}
+          {{ form.login }}
+          {{ form.password }}
+          {%comment%}
+            <input class="styled-checkbox" type="checkbox" name="remember" id="id_remember">
+            <label for="id_remember">Remember me</label>
+        {%endcomment%}
+
+          {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+          {% endif %}
+
+          <button class="primaryAction" type="submit">{% trans "Sign In" %}</button>
+          {%comment%}<a class="button secondaryAction" href="{% url 'account_reset_password' %}">Forgot Password ?</a>{%endcomment%}
+
+        </form>
+
+<!-- FORM SIGNUP -->
+        <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+            <a href="{% provider_login_url 'linkedin_oauth2' process='login' %}" class="social-signin-button">
+                <i class="fa fa-linkedin"></i>Signup with LinkedIn
+            </a>
+            <div>or</div>
+            <div class="usertype-button" data-usertype = "CLIENT">Client</div>
+            <div class="usertype-button" data-usertype = "HUB">Hub</div>
+            <div class="signup-step2">
+                {{signupform.first_name}}
+                {{signupform.last_name}}
+                {{signupform.email}}
+                {{signupform.password1}}
+                {{signupform.password2}}
+                <input type="radio" style="display:none" name="usertype" value="CLIENT" required="" id="id_usertype_0">
+                <input type="radio" style="display:none" name="usertype" value="HUB" required="" id="id_usertype_1">
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                <button type="submit">{% trans "Sign Up" %}</button>
+            </div>
+        </form>
+
+
+
+    </div>
+
+    <ul class="bg-bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="{% static 'account/js/login.js'%}"></script>
+{% endblock %}

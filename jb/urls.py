@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from . import views
 
-app_name = 'parts'
+app_name = 'jb'
 urlpatterns = [
 
     url(r'^$', views.index, name='index'),

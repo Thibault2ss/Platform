@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
-from jb.models import StaffUser
+from jb.models import CustomUser
 
 class jbAuthBackend:
     """
@@ -13,14 +13,26 @@ class jbAuthBackend:
     ADMIN_PASSWORD = 'pbkdf2_sha256$30000$Vo0VlMnkR4Bk$qEvtdyZRWTcOsCnI/oQ7fVOu1XAURIZYoOZ3iq8Dr4M='
     """
 
-    def authenticate(self, request, username=None, password=None, token=None):
+    def authenticate(self, request, username=None, password=None):
         print "REQUEST MF IS:"
         print request.POST
         print username
-        print request.POST["token"]
+        print request.POST["email"]
+
         print password
         for key in request.session.keys():
             print "%s: %s"%(key, request.session.get(key))
+        try:
+            user = CustomUser.objects.get(email = request.POST["email"])
+        except CustomUser.DoesNotExist:
+            print "user does not exist"
+            return None
+        print "password is %s"%user.password
+        pwd_valid = check_password(password, user.password)
+        if pwd_valid:
+            return user
+        else:
+            print "wrong password"
         # login_valid = (settings.ADMIN_LOGIN == username)
         # pwd_valid = check_password(password, settings.ADMIN_PASSWORD)
         # if login_valid and pwd_valid:
@@ -38,6 +50,6 @@ class jbAuthBackend:
 
     def get_user(self, user_id):
         try:
-            return StaffUser.objects.get(pk=user_id)
+            return CustomUser.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None

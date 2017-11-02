@@ -33,14 +33,27 @@ ALLOWED_HOSTS = ['localhost','192.168.0.20']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.linkedin_oauth2',
+
+    'users',
     'notifications',
-    # 'parts',
     'jb',
 ]
+RESTRICTION_LIST = {
+            'STAFF':[],
+            'HUB':['/admin', '/jb', '/client', '/inbox'],
+            'CLIENT':['/admin', '/jb', '/hub', '/inbox']
+            }
+SITE_ID = 2
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -50,9 +63,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'users.middleware.RestrictionMiddleware'
 ]
 
-AUTHENTICATION_BACKENDS = ['sp3d.authBackends.jbAuthBackend']
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+    # 'sp3d.authBackends.jbAuthBackend'
+    ]
 # AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend', 'sp3d.authBackends.jbAuthBackend']
 
 ROOT_URLCONF = 'sp3d.urls'
@@ -60,7 +78,7 @@ ROOT_URLCONF = 'sp3d.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'users', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,14 +93,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sp3d.wsgi.application'
 
-# AUTH_USER_MODEL = 'jb.StaffUser'
+AUTH_USER_MODEL = 'users.CustomUser'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
 DATABASES = {
     'default':{
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'SP3D_DB',
+        'NAME': 'SP3D_USERS',
         'USER': 'user01',
         'PASSWORD': 'SpareParts3D#',
         'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
@@ -132,8 +150,11 @@ USE_L10N = True
 USE_TZ = True
 
 # login redirection
-LOGIN_REDIRECT_URL = '/jb/'
-LOGIN_URL = '/login/'
+# LOGIN_REDIRECT_URL = '/jb/'
+LOGOUT_REDIRECT_URL = '/account/login'
+LOGIN_REDIRECT_URL_LIST = {'STAFF':'/jb/', 'HUB':'/hub/', 'CLIENT':'/client/'}
+
+LOGIN_URL = '/account/login/'
 
 MEDIA_ROOT='/home/user01/SpareParts_Database/root/'
 MEDIA_URL='/media/'
@@ -144,10 +165,40 @@ STATIC_URL = '/static/'
 # STATIC_ROOT='http://192.168.0.20:9000/static/jb/'
 # Add these new lines
 # STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, 'static'),
+#     os.path.join(BASE_DIR, 'users', 'static'),
 # )
 #
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_FINDERS = (
+#     'django.contrib.staticfiles.finders.FileSystemFinder',
+#     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+# )
 
+# NOTIFICATION APP
 NOTIFICATIONS_USE_JSONFIELD=True
 NOTIFICATIONS_SOFT_DELETE=True
+
+# ALL AUTH APP
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True  # default already True
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True # default already True
+ACCOUNT_EMAIL_VERIFICATION = "optional" #default as "optional"
+ACCOUNT_ADAPTER = "users.adapter.AccountAdapter"
+ACCOUNT_FORMS = {'signup':'users.forms.SignupForm', 'login': 'users.forms.LoginForm'}
+# ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+# LOGIN_ON_EMAIL_CONFIRMATION = False
+# SOCIALACCOUNT_ADAPTER = "users.socialadapter.SocialAccountAdapter"
+SOCIALACCOUNT_FORMS = {'signup':'users.forms.SocialSignupForm'}
+SOCIALACCOUNT_AUTO_SIGNUP = False
+
+
+
+# email backend setup
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'thibault.de-saint-sernin@sp3d.co'
+EMAIL_HOST_PASSWORD = 'stekvekjieadiiqe'

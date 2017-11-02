@@ -42,5 +42,5 @@ class jbRouter(object):
         """
         if db == 'jb_db':
             return app_label == 'jb'
-            
+
         return None

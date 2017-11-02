@@ -19,11 +19,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 import notifications.urls
+import jb
+from users.views import JointLoginSignupView
+
 
 urlpatterns = [
-    url(r'^login/$', auth_views.login, name='login'),
-    url(r'^logout/$', auth_views.logout,{'next_page': '/jb'}, name='logout'),
+    # url(r'^login/$', auth_views.login, name='login'),
+    # url(r'^logout/$', auth_views.logout,{'next_page': '/jb'}, name='logout'),
     url(r'^jb/', include('jb.urls')),
+    url(r'^account/login/$', JointLoginSignupView.as_view(), name='login_page'),
+    url(r'^account/', include('allauth.urls')),
     url(r'^admin/', admin.site.urls),
     url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
