@@ -25,7 +25,7 @@ SECRET_KEY = 'n^+xf77tb6$z2bp$)+nsng2in2#ummrfr)+&4agwf%#0f$xuz*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','192.168.0.20']
+ALLOWED_HOSTS = ['localhost','192.168.0.112']
 
 
 # Application definition
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'users',
     'notifications',
     'jb',
+    'hub',
 ]
 RESTRICTION_LIST = {
             'STAFF':[],

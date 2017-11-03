@@ -15,18 +15,30 @@ $.fn.extend({
 $(document).ready(function(){
 
     // INITIAL ANIMATIONS/////////////////////////////////////////////////////////////////////
-    wordAppearance('.container h1');
-    setTimeout(function(){
-        $('.toggle-form').animateCss('fadeInUp', function(){$(this).css('opacity',1)});
-    },1500);
+    if(has_signin_error){
+        $('.container h1').css("opacity", 1);
+        $('.toggle-form').css("opacity",1);
+        $('#login_form').show().css("opacity",1);
+        console.log("1");
+    } else if(has_signup_error){
+        $('.container h1').css("opacity", 1);
+        $('.toggle-form').css("opacity",1);
+        $('#signup_form').show().css("opacity",1);
+        console.log("2");
+    } else {
+        console.log("3");
+        wordAppearance('.container h1');
+        setTimeout(function(){
+            $('.toggle-form').animateCss('fadeInUp', function(){$(this).css('opacity',1)});
+        },1000);
+    };
 ////////////////////////////////////////////////////////////////////////////////
 
-    $("#login-button").click(function(event){
-        event.preventDefault();
-        $('form').fadeOut(500);
-        $('.wrapper').addClass('form-success');
-    });
 
+
+
+
+// FORM AND USERTYPE TOGGLING////////////////////////////////////////////////////////////////////
 
     $(".toggle-form").click(function(){
         var id_form = $(this).data("toggle-form");
@@ -51,8 +63,30 @@ $(document).ready(function(){
             $(this).siblings('.signup-step2').show().animateCss('fadeIn');
         };
     });
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // function to animate bringing text word by word/////////////////////////////////////////////////////////
+
+
+
+
+
+//LAUCHNING SOCIAL ACCOUNTS LOGIN IN IFRAME MODAL/////////////////////////////////////////////////////////
+// DOESN't WORK BECAUSE OF LINKEDIN SAME ORIGIN PROTECTION
+    // $("#social-signup-modal").iziModal({
+    //     iframe: true,
+    //     iframeHeight: 800,
+    // });
+    // $(".social-signin-button").click(function (event) {
+    //     event.preventDefault();
+    //     $('#social-signup-modal').iziModal('open', event); // Use "event" to get URL href
+    // });
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+// function to animate bringing text word by word/////////////////////////////////////////////////////////
     function wordAppearance(selector){
         var list1 = splitIntoWords(document.querySelector(selector));
         var list2 = list1.map(function(string, index){
@@ -63,15 +97,12 @@ $(document).ready(function(){
         $(selector).html(list2.join(" "));
 
 
-            $(selector).show().css('opacity',1).find('.animate-order').each(function(index){
-                var $this = $(this);
-                console.log(index);
-                setTimeout(
-                    function(){$this.animateCss('fadeInLeft',function(){$this.css('opacity',1)});},
-                    index*500);
+        $(selector).show().css('opacity',1).find('.animate-order').each(function(index){
+            var $this = $(this);
+            setTimeout(
+                function(){$this.animateCss('fadeInLeft',function(){$this.css('opacity',1)});},
+                index*300);
         });
-
-        console.log(list2.join(" "));
     };
 
 
@@ -96,5 +127,8 @@ $(document).ready(function(){
       }
       return output;
     }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 });

@@ -1,0 +1,79 @@
+
+{% extends "account/base.html" %}
+{% load tz %}
+{% load static %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}SP3D Auth{% endblock %}
+{% block extra_head %}
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/css/iziModal.min.css" />
+<link rel="stylesheet" href="{% static 'account/css/animate.min.css'%}" />
+<link rel="stylesheet" href="{% static 'account/css/login.css'%}" />
+<link rel="stylesheet" href="{% static 'account/css/checkbox.css'%}" />
+{% endblock %}
+
+{% block content %}
+
+
+<!-- #####################simulate error variable to prevent starting animation and display correct form -->
+<!-- initialize variables -->
+<script>var has_signin_error = false;var has_signup_error = true;</script>
+<!-- ######################################### -->
+
+<div class="wrapper">
+    <div class="container">
+
+        <h1>Who are you ?</h1>
+        <div class="subcontainer">
+            <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
+                {% csrf_token %}
+                <div class="usertype-button" data-usertype = "CLIENT">Client</div>
+                <div class="usertype-button" data-usertype = "HUB">Hub</div>
+                <div class="signup-step2">
+                    <div class="errors">
+                        {%for error in form.non_field_errors %}
+                        <div class="error">{{error}}</div>
+                        {%endfor%}
+                        {%for error in form.email.errors %}
+                        <div class="error">{{error}}</div>
+                        {%endfor%}
+                    </div>
+                    <div style="display:none">{{form.email}}</div>
+                    <input type="radio" style="display:none" name="usertype" value="CLIENT" required="" id="id_usertype_0">
+                    <input type="radio" style="display:none" name="usertype" value="HUB" required="" id="id_usertype_1">
+                    {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                    {% endif %}
+                    <button type="submit">Done</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<div id="social-signup-modal">
+</div>
+
+<ul class="bg-bubbles">
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+</ul>
+
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script>
+<script src="{% static 'account/js/login.js'%}"></script>
+{% endblock %}

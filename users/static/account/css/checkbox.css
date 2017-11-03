@@ -10,12 +10,14 @@
 }
 .styled-checkbox + label:before {
   content: '';
-  margin-right: 10px;
+  margin-right: 17px;
   display: inline-block;
   vertical-align: text-top;
   width: 20px;
   height: 20px;
-  background: f5f7f9;
+  background: #f5f7f9;
+  -webkit-transition: all 0.2s linear 0s;
+  transition: all 0.2s linear 0s;
 }
 .styled-checkbox:hover + label:before {
   background: #2d6971;
@@ -39,10 +41,10 @@
   position: absolute;
   left: 5px;
   top: 9px;
-  background: f5f7f9;
+  background: #f5f7f9;
   width: 2px;
   height: 2px;
-  box-shadow: 2px 0 0 f5f7f9, 4px 0 0 f5f7f9, 4px -2px 0 f5f7f9, 4px -4px 0 f5f7f9, 4px -6px 0 f5f7f9, 4px -8px 0 f5f7f9;
+  box-shadow: 2px 0 0 #f5f7f9, 4px 0 0 #f5f7f9, 4px -2px 0 #f5f7f9, 4px -4px 0 #f5f7f9, 4px -6px 0 #f5f7f9, 4px -8px 0 #f5f7f9;
   transform: rotate(45deg);
 }
 

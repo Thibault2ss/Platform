@@ -158,7 +158,7 @@ class AccountAdapter(object):
         else:
             url = settings.LOGIN_REDIRECT_URL
         # return resolve_url(url)
-        return '/test/'
+        return url
 
     def get_logout_redirect_url(self, request):
         """

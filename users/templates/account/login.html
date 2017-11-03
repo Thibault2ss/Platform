@@ -7,6 +7,7 @@
 {% block head_title %}SP3D Auth{% endblock %}
 {% block extra_head %}
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/css/iziModal.min.css" />
 <link rel="stylesheet" href="{% static 'account/css/animate.min.css'%}" />
 <link rel="stylesheet" href="{% static 'account/css/login.css'%}" />
 <link rel="stylesheet" href="{% static 'account/css/checkbox.css'%}" />
@@ -14,15 +15,36 @@
 
 
 {% block content %}
+
+<!-- #####################add error variable -->
+<!-- initialize variables -->
+<script>var has_signin_error = false;var has_signup_error = false;</script>
+<!-- errors on signin -->
+{%if form.non_field_errors%}<script>var has_signin_error = true</script>{%endif%}
+{% for field in form %}
+    {%if field.errors%}
+    <script>var has_signin_error = true</script>
+    {%endif%}
+{%endfor%}
+<!-- errors on signup -->
+{%if signupform.non_field_errors%}<script>var has_signup_error = true</script>{%endif%}
+{% for field in signupform %}
+    {%if field.errors%}
+    <script>var has_signup_error = true</script>
+    {%endif%}
+{%endfor%}
+<!-- ######################################### -->
+
 <div class="wrapper">
     <div class="container">
 
-
-        <h1>Welcome to <span class="fw-300">SP3D</span></h1>
-        <h2>
-            <span class="toggle-form" data-toggle-form="login_form">Login</span>
-            <span class="toggle-form" data-toggle-form="signup_form">Sign Up</span>
-        </h2>
+        <!-- <div class="subcontainer"> -->
+            <h1>Welcome to <span class="fw-300">SP3D</span></h1>
+            <h2>
+                <span class="toggle-form" data-toggle-form="login_form">Login</span>
+                <span class="toggle-form" data-toggle-form="signup_form">Sign Up</span>
+            </h2>
+        <!-- </div> -->
 
         {%comment%}
         {% get_providers as socialaccount_providers %}
@@ -43,18 +65,30 @@
 
 
 <!-- FORM LOGIN -->
+    <div class="subcontainer">
         <form class="login" id="login_form" method="POST" action="{% url 'account_login' %}">
             <a href="{% provider_login_url 'linkedin_oauth2' process='login' %}" class="social-signin-button">
                 <i class="fa fa-linkedin"></i>Login with LinkedIn
             </a>
             <div style="margin-bottom:10px">or</div>
           {% csrf_token %}
+          <div class="errors">
+              {%for error in form.non_field_errors %}
+              <div class="error">{{error}}</div>
+              {%endfor%}
+              {%for error in form.login.errors %}
+              <div class="error">{{error}}</div>
+              {%endfor%}
+              {%for error in form.password.errors %}
+              <div class="error">{{error}}</div>
+              {%endfor%}
+          </div>
           {{ form.login }}
           {{ form.password }}
-          {%comment%}
+
             <input class="styled-checkbox" type="checkbox" name="remember" id="id_remember">
             <label for="id_remember">Remember me</label>
-        {%endcomment%}
+
 
           {% if redirect_field_value %}
           <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
@@ -75,6 +109,23 @@
             <div class="usertype-button" data-usertype = "CLIENT">Client</div>
             <div class="usertype-button" data-usertype = "HUB">Hub</div>
             <div class="signup-step2">
+                <div class="errors">
+                    {%for error in signupform.non_field_errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                    {%for error in signupform.first_name.errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                    {%for error in signupform.last_name.errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                    {%for error in signupform.email.errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                    {%for error in signupform.password.errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                </div>
                 {{signupform.first_name}}
                 {{signupform.last_name}}
                 {{signupform.email}}
@@ -90,7 +141,10 @@
         </form>
 
 
+    </div>
+    </div>
 
+    <div id="social-signup-modal">
     </div>
 
     <ul class="bg-bubbles">
@@ -110,5 +164,7 @@
 
 {% block extra_body %}
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script>
 <script src="{% static 'account/js/login.js'%}"></script>
+
 {% endblock %}
