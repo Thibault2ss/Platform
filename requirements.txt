@@ -29,7 +29,6 @@ nine==1.0.0
 numpy==1.11.0
 numpy-stl==2.3.2
 oauthlib==2.0.6
-PAM==0.4.2
 paramiko==1.16.0
 pathspec==0.5.0
 pexpect==4.0.1
