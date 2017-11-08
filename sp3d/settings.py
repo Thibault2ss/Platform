@@ -29,11 +29,11 @@ ALLOWED_HOSTS = [
     'localhost',
     '192.168.0.112',
     "spare-part-3d.com",
-    "www.spare-part-3d.com",
-    "hub.spare-part-3d.com",
-    "account.spare-part-3d.com",
-    "jb.spare-part-3d.com",
-    "client.spare-part-3d.com",
+    "www.spare-parts-3d.com",
+    "hub.spare-parts-3d.com",
+    "account.spare-parts-3d.com",
+    "jb.spare-parts-3d.com",
+    "client.spare-parts-3d.com",
 ]
 
 
