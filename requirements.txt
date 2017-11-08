@@ -40,7 +40,6 @@ pyodbc==3.0.7
 pyOpenSSL==0.15.1
 pyserial==3.0.1
 pysqlite==2.7.0
-Pyste==0.9.10
 python-dateutil==2.6.1
 python-openid==2.2.5
 python-utils==2.2.0
