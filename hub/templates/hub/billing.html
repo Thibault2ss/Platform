@@ -13,7 +13,7 @@
                         <p class="category">Here are summed up all the orders and associated costs</p>
                     </div>
                     <div class="content table-responsive table-full-width">
-                        <table class="table table-striped">
+                        <table class="table table-billing-per-order">
                             <thead>
                                 <th>ID</th>
                                 <th>Part</th>
@@ -22,16 +22,44 @@
                                 <th>Misc.</th>
                             </thead>
                             <tbody>
-                                <tr data-toggle="collapse" href="#order-1" aria-expanded="false" aria-controls="order">
+                                <tr data-toggle="collapse" href="#order-1" aria-expanded="false" class="clickable">
                                     <td>25</td>
                                     <td><strong>10</strong> Hinge Bearing</td>
                                     <td>$105.95</td>
                                     <td>$11.68</td>
                                     <td>$8.23</td>
                                 </tr>
-                                <div style="" class="collapse" id="order-1">
-                                    test
-                                </div>
+                                <tr>
+                                    <td colspan="5" style="padding:0;border:none;background-color:#F4F3EF">
+                                        <div id="order-1" class="collapse">
+                                            <div class="content">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <ul>
+                                                                <li>filament: 10 cm3</li>
+                                                                <li>post-proc. chemical: 1L</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <ul>
+                                                                <li>Tool change time: 10min</li>
+                                                                <li>Material change time: 5min</li>
+                                                                <li>post-proc.time: 15min</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <ul>
+                                                                <li>retrial: 2</li>
+                                                                <li>filament: 10 cm3</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>231</td>
                                     <td><strong>2</strong> Brner knob</td>

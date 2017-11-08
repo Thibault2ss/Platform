@@ -115,3 +115,15 @@
     margin-left: auto;
     margin-right: auto;
 }
+.table-billing-per-order tbody tr[data-toggle="collapse"]{
+    -webkit-transition: all .2s ease-in-out;
+    -o-transition: all .2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+    cursor:pointer;
+}
+.table-billing-per-order tbody tr[data-toggle="collapse"]:hover{
+    background-color: #F4F3EF;
+}
+.table-billing-per-order tbody tr[aria-expanded="true"]{
+    background-color: #F4F3EF;
+}
