@@ -85,6 +85,7 @@
     position:absolute;
     top:0;
     left:0;
+    opacity:0.5;
     font-size:2.5rem;
     cursor:pointer;
     padding:9px 10px 10px 12px;
@@ -99,9 +100,18 @@
 .button-back:hover{
     -webkit-box-shadow: 6px 6px 4px rgba(17, 16, 15, 0.1);
     box-shadow: 6px 6px 4px rgba(17, 16, 15, 0.1);
+    opacity:1;
 }
 .carousel-inner>.item{
     -webkit-transition: -webkit-transform .3s ease-in-out;
     -o-transition: -o-transform .3s ease-in-out;
     transition: transform 0.3s ease-in-out;
+}
+.stl-canvas{
+    width:100%;
+    max-width:300px;
+    border-radius:6px;
+    overflow:hidden;
+    margin-left: auto;
+    margin-right: auto;
 }

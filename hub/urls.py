@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^qualification/$', views.qualification, name='qualification'),
     url(r'^printers/$', views.printers, name='printers'),
     url(r'^orders/$', views.orders, name='orders'),
+    url(r'^billing/$', views.billing, name='billing'),
     url(r'^table/$', views.table, name='table'),
     url(r'^notifications/$', views.notifications, name='notifications'),
     url(r'^typography/$', views.typography, name='typography'),

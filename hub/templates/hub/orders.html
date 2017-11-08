@@ -120,28 +120,22 @@
             </div>
             <div class="content" style="position:relative;">
                 <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-lg-6 col-sm-12">
-                            <div class="tab-content">
-
-                            </div>
+                    <div class="row" style="margin-bottom:20px;">
+                        <div class="col-xs-4 text-center">
+                            <span class="label label-default" style="font-size:100%">Received</span><div><small>10 Sept 2017</small></div>
                         </div>
-                        <div class="col-lg-6 col-sm-12">
-
-                                <div class="content">
-                                    <div class="row">
-                                        <div class="col-sm-4 col-xs-12 text-center">
-                                            <span class="label label-default" style="font-size:100%">Received</span><div><small>10 Sept 2017</small></div>
-                                        </div>
-                                        <div class="col-sm-4 col-xs-12 text-center">
-                                            <span class="label label-info" style="font-size:100%">Produced</span><div><small>13 Sept 2017</small></div>
-                                        </div>
-                                        <div class="col-sm-4 col-xs-12 text-center">
-                                            <span class="text-muted" style="font-size:100%">Shipped</span><div><small></small></div>
-                                        </div>
-                                    </div>
-                                </div>
-
+                        <div class="col-xs-4 text-center">
+                            <span class="label label-info" style="font-size:100%">Produced</span><div><small>13 Sept 2017</small></div>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <span class="text-muted" style="font-size:100%">Shipped</span><div><small></small></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" id="canvas-container">
+                            <div id="stl-canvas" class="stl-canvas"></div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="card">
                                 <i class="fa fa-info-circle" style="font-size:3.5rem;position:absolute;top:-17px;left:-12px"></i>
                                 <div class="content">
@@ -170,6 +164,8 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="card">
                                 <i class="fa fa-truck" style="font-size:3.5rem;position:absolute;top:-17px;right:8px;color#3c3c3c;"></i>
                                 <div class="content">
@@ -208,5 +204,10 @@
 {%endblock content%}
 
 {%block extrascript%}
+<script src="{% static 'hub/js/three/three.min.js' %}"></script>
+<script src="{% static 'hub/js/three/loaders/STLLoader1.js' %}"></script>
+<script src="{% static 'hub/js/three/Detector.js' %}"></script>
+<script src="{% static 'hub/js/three/libs/stats.min.js' %}"></script>
+<script src="{% static 'hub/js/three/libs/TrackballControls.js' %}"></script>
 <script src="{% static 'hub/js/orders.js' %}"></script>
 {%endblock extrascript%}

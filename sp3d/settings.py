@@ -126,7 +126,7 @@ DATABASES = {
         'NAME': 'SP3D_CLOUD',
         'USER': 'sp3dadmin',
         'PASSWORD': 'SpareParts3D#',
-        'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
+        'HOST': 'sp3dclouddb.csgmjvodxypo.ap-southeast-1.rds.amazonaws.com',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     },
     'jb_db': {
