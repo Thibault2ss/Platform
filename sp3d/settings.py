@@ -23,9 +23,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'n^+xf77tb6$z2bp$)+nsng2in2#ummrfr)+&4agwf%#0f$xuz*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost','192.168.0.112']
+ALLOWED_HOSTS = [
+    'localhost',
+    '192.168.0.112',
+    "spare-part-3d.com",
+    "www.spare-part-3d.com",
+    "hub.spare-part-3d.com",
+    "account.spare-part-3d.com",
+    "jb.spare-part-3d.com",
+    "client.spare-part-3d.com",
+]
 
 
 # Application definition
@@ -97,12 +106,25 @@ WSGI_APPLICATION = 'sp3d.wsgi.application'
 AUTH_USER_MODEL = 'users.CustomUser'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
+
+
+# ACTIVATE DB ROUTERS FOR SPECIAL DB ROUTING
+# DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
 DATABASES = {
+# ACTIVATE THIS DEFAULT LOCALLY FOR DEV
+    # 'default':{
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'SP3D_USERS',
+    #     'USER': 'user01',
+    #     'PASSWORD': 'SpareParts3D#',
+    #     'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
+    #     'PORT': '3306',
+    # },
+# ACTIVATE THE DEFAULT DB BELOW FOR PROD
     'default':{
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'SP3D_USERS',
-        'USER': 'user01',
+        'NAME': 'SP3D_CLOUD',
+        'USER': 'sp3dadmin',
         'PASSWORD': 'SpareParts3D#',
         'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',

@@ -6,7 +6,10 @@ app_name = 'hub'
 urlpatterns = [
 
     url(r'^$', views.index, name='index'),
-    url(r'^user/$', views.user, name='user'),
+    url(r'^account/$', views.account, name='account'),
+    url(r'^qualification/$', views.qualification, name='qualification'),
+    url(r'^printers/$', views.printers, name='printers'),
+    url(r'^orders/$', views.orders, name='orders'),
     url(r'^table/$', views.table, name='table'),
     url(r'^notifications/$', views.notifications, name='notifications'),
     url(r'^typography/$', views.typography, name='typography'),

@@ -1,9 +1,10 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<link rel="apple-touch-icon" sizes="76x76" href="/static/hub/img/apple-icon.png">
-	<link rel="icon" type="image/png" sizes="96x96" href="/static/hub/img/favicon.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="{% static 'hub/img/apple-icon.png' %}">
+	<link rel="icon" type="image/png" sizes="96x96" href="{% static 'hub/img/favicon.ico' %}">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
 	<title>SP3D Hub Platform</title>
@@ -30,6 +31,8 @@
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="/static/hub/css/themify-icons.css" rel="stylesheet">
+    {%block extrahead%}
+    {%endblock extrahead%}
     <script>
         var csrftoken = '{{ csrf_token }}';
     </script>
@@ -52,43 +55,61 @@
             </div>
 
             <ul class="nav">
-                <li class="active">
+                <li class="{% if page == 'qualification' %}active{% endif %}">
+                    <a href="/hub/qualification/">
+                        <i class="ti-medall"></i>
+                        <p>Qualification</p>
+                    </a>
+                </li>
+                <li class="{% if page == 'index' %}active{% endif %}">
                     <a href="/hub/">
                         <i class="ti-panel"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li>
-                    <a href="/hub/user/">
+                <li class="{% if page == 'account' %}active{% endif %}">
+                    <a href="/hub/account/">
                         <i class="ti-user"></i>
-                        <p>User Profile</p>
+                        <p>Account</p>
                     </a>
                 </li>
-                <li>
+                <li class="{% if page == 'printers' %}active{% endif %}">
+                    <a href="/hub/printers/" style="display:flex;align-items:center;">
+                        <img style="height:35px;margin: 0 15px 0 3px;" src="{% static 'hub/img/extruder.png' %}"></i>
+                        <p>Printers</p>
+                    </a>
+                </li>
+                <li class="{% if page == 'orders' %}active{% endif %}">
+                    <a href="/hub/orders/">
+                        <i class="ti-shopping-cart"></i>
+                        <p>Orders</p>
+                    </a>
+                </li>
+                <li class="{% if page == 'table' %}active{% endif %}">
                     <a href="/hub/table/">
                         <i class="ti-view-list-alt"></i>
                         <p>Table List</p>
                     </a>
                 </li>
-                <li>
+                <li class="{% if page == 'typography' %}active{% endif %}">
                     <a href="/hub/typography/">
                         <i class="ti-text"></i>
                         <p>Typography</p>
                     </a>
                 </li>
-                <li>
+                <li class="{% if page == 'icons' %}active{% endif %}">
                     <a href="/hub/icons/">
                         <i class="ti-pencil-alt2"></i>
                         <p>Icons</p>
                     </a>
                 </li>
-                <li>
+                <li class="{% if page == 'maps' %}active{% endif %}">
                     <a href="/hub/maps/">
                         <i class="ti-map"></i>
                         <p>Maps</p>
                     </a>
                 </li>
-                <li>
+                <li class="{% if page == 'notifications' %}active{% endif %}">
                     <a href="/hub/notifications/">
                         <i class="ti-bell"></i>
                         <p>Notifications</p>

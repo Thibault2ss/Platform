@@ -176,8 +176,7 @@ class AccountAdapter(object):
         """
         if is_authenticated(request.user):
             if app_settings.EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL:
-                return  \
-                    app_settings.EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL
+                return  app_settings.EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL
             else:
                 return self.get_login_redirect_url(request)
         else:

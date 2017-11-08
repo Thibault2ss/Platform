@@ -1,17 +1,17 @@
 /*!
-    
+
  =========================================================
  * Paper Dashboard - v1.1.2
  =========================================================
- 
+
  * Product Page: http://www.spare-parts-3d.com/product/paper-dashboard
  * Copyright 2017 SP3D (http://www.spare-parts-3d.com)
  * Licensed under MIT (https://github.com/creativetimofficial/paper-dashboard/blob/master/LICENSE.md)
- 
+
  =========================================================
- 
+
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- 
+
  */
 /*      light colors - used for select dropdown         */
 .ct-blue {
@@ -87,7 +87,7 @@ blockquote small {
   font-style: normal; }
 
 .text-muted {
-  color: #DDDDDD; }
+  color: #949494; }
 
 .text-primary, .text-primary:hover {
   color: #427C89; }
@@ -222,7 +222,7 @@ hr {
     max-height: none;
     min-height: 100%;
     overflow: hidden;
-    width: 260px;
+    width: 100%;
     z-index: 4;
     box-shadow: inset -1px 0px 0px 0px #DDDDDD; }
   .sidebar .sidebar-background {
@@ -238,7 +238,7 @@ hr {
 
 .sidebar,
 .off-canvas-sidebar {
-  width: 260px;
+  width: 210px;
   display: block;
   font-weight: 200; }
   .sidebar .logo,
@@ -394,7 +394,7 @@ hr {
   position: relative;
   z-index: 2;
   float: right;
-  width: calc(100% - 260px);
+  width: calc(100% - 210px);
   min-height: 100%; }
   .main-panel > .content {
     padding: 30px 15px;
@@ -1471,7 +1471,26 @@ textarea.form-control {
   color: #252422;
   margin-bottom: 20px;
   position: relative;
-  z-index: 1; }
+  z-index: 1;
+  -webkit-transition: all 0.2s linear 0s;
+  transition: all 0.2s linear 0s; }
+  .card:hover {
+    box-shadow: 5px 5px 4px rgba(204, 197, 185, 0.5);
+}
+/*CARD QUALIF#############################################################*/
+.card-qualif{
+    cursor:pointer;
+}
+.card-qualif.active{
+    background-color: #de815e;
+}
+.card-qualif.active :not(.icon-nochange),.card-qualif.active .icon-big, .card-qualif.active .stats, .card-qualif.active strong{
+    color:white;
+}
+.card-qualif-detail{
+    min-height: 500px;
+}
+/*END CARD QUALIF#############################################################*/
   .card .image {
     width: 100%;
     overflow: hidden;
@@ -1483,7 +1502,7 @@ textarea.form-control {
     transform-style: preserve-3d; }
     .card .image img {
       width: 100%; }
-  .card .content {
+  .card .content, .content {
     padding: 15px 15px 10px 15px; }
   .card .header {
     padding: 20px 20px 0; }
@@ -1614,7 +1633,7 @@ textarea.form-control {
 
 .card-map .map {
   height: 500px;
-  padding-top: 20px; }
+  padding-top: 0px; }
   .card-map .map > div {
     height: 100%; }
 
@@ -2762,3 +2781,18 @@ textarea.form-control {
     overflow-y: hidden;
     -ms-overflow-style: -ms-autohiding-scrollbar;
     -webkit-overflow-scrolling: touch; } }
+
+
+/*ORDERS PART ROW################################*/
+.part-row{
+    cursor:pointer;
+}
+.part-row:hover{
+    background-color: #fbfbfb;
+}
+.part-row .row{
+    display:flex;
+    align-items:center;
+}
+
+/*END ORDERS PART ROW################################*/

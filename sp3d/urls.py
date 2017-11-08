@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 import notifications.urls
 from users.views import JointLoginSignupView
+from django.views.generic import RedirectView
 
 
 urlpatterns = [
@@ -31,4 +32,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^hub/', include('hub.urls')),
     url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
+    url(r'^', RedirectView.as_view(pattern_name='login_page', permanent=False)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

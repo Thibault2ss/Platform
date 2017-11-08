@@ -71,9 +71,37 @@
 
 .user-pic{
     border: 5px solid #FFFFFF;
-    width: 60px;
-    height: 60px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
     position: relative;
     margin-bottom: 0;
+}
+.button-back{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background-color: rgba(255,255,255,0.7);
+    position:absolute;
+    top:0;
+    left:0;
+    font-size:2.5rem;
+    cursor:pointer;
+    padding:9px 10px 10px 12px;
+    margin:20px;
+    z-index:10;
+    -webkit-box-shadow: 2px 2px 3px rgba(17, 16, 15, 0.1);
+    box-shadow: 2px 2px 3px rgba(17, 16, 15, 0.1);
+    -webkit-transition: all .2s ease-in-out;
+    -o-transition: all .2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+}
+.button-back:hover{
+    -webkit-box-shadow: 6px 6px 4px rgba(17, 16, 15, 0.1);
+    box-shadow: 6px 6px 4px rgba(17, 16, 15, 0.1);
+}
+.carousel-inner>.item{
+    -webkit-transition: -webkit-transform .3s ease-in-out;
+    -o-transition: -o-transform .3s ease-in-out;
+    transition: transform 0.3s ease-in-out;
 }

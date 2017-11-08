@@ -16,11 +16,7 @@ class RestrictionMiddleware(object):
         if request.user.is_authenticated():
             usertype = request.user.usertype.name
             restriction_list = settings.RESTRICTION_LIST[usertype]
-            print "RESTRICTION LIST IS: %s"%settings.RESTRICTION_LIST
-            print "USERTYPE LIST IS: %s"%request.user.id
             for url in restriction_list:
-                print "url to restrict: %s"%url
-                print "REQUEST PATH:%s"%request.path
                 if request.path.startswith(url):
                     # raise PermissionDenied
                     return HttpResponseRedirect('/account/login/')
