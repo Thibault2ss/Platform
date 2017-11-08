@@ -56,3 +56,6 @@ tabulate==0.7.5
 termcolor==1.1.0
 Twisted==16.0.0
 tzlocal==1.4
+wcwidth==0.1.7
+websocket-client==0.44.0
+zope.interface==4.1.3
