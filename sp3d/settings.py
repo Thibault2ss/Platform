@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [
     "account.spare-parts-3d.com",
     "jb.spare-parts-3d.com",
     "client.spare-parts-3d.com",
+    'sp3d-cloud-env.hrfhveptmc.ap-southeast-1.elasticbeanstalk.com',
 ]
 
 
@@ -112,23 +113,23 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
 DATABASES = {
 # ACTIVATE THIS DEFAULT LOCALLY FOR DEV
-    'default':{
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'SP3D_USERS',
-        'USER': 'user01',
-        'PASSWORD': 'SpareParts3D#',
-        'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
-    },
-# ACTIVATE THE DEFAULT DB BELOW FOR PROD
     # 'default':{
     #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'SP3D_CLOUD',
-    #     'USER': 'sp3dadmin',
+    #     'NAME': 'SP3D_USERS',
+    #     'USER': 'user01',
     #     'PASSWORD': 'SpareParts3D#',
-    #     'HOST': 'sp3dclouddb.csgmjvodxypo.ap-southeast-1.rds.amazonaws.com',   # Or an IP Address that your DB is hosted on
+    #     'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
     #     'PORT': '3306',
     # },
+# ACTIVATE THE DEFAULT DB BELOW FOR PROD
+    'default':{
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'SP3D_CLOUD',
+        'USER': 'sp3dadmin',
+        'PASSWORD': 'SpareParts3D#',
+        'HOST': 'sp3dclouddb.csgmjvodxypo.ap-southeast-1.rds.amazonaws.com',   # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
+    },
     'jb_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SP3D_JB',
