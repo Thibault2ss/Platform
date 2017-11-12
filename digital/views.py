@@ -134,7 +134,7 @@ def request_for_indus(request):
             { 'user': request.user, 'part':part },
             'SP3D: New Industrialisation Request',
             'contact@sp3d.co',
-            ['thibault.de-saint-sernin@sp3d.co'],
+            ['paul.de-misouard@sp3d.co','thibault.de-saint-sernin@sp3d.co'],
             )
     else:
         success=False
