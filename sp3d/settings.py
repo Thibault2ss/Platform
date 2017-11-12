@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
     "hub.spare-parts-3d.com",
     "account.spare-parts-3d.com",
     "jb.spare-parts-3d.com",
-    "client.spare-parts-3d.com",
+    "digital.spare-parts-3d.com",
     'sp3d-cloud-env.hrfhveptmc.ap-southeast-1.elasticbeanstalk.com',
 ]
 
