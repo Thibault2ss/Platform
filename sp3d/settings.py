@@ -179,7 +179,7 @@ USE_TZ = True
 
 # login redirection
 # LOGIN_REDIRECT_URL = '/jb/'
-LOGOUT_REDIRECT_URL = '/account/login'
+LOGOUT_REDIRECT_URL = 'http://spare-parts-3d.com'
 LOGIN_REDIRECT_URL_LIST = {'STAFF':'/jb/', 'HUB':'/hub/', 'CLIENT':'/digital/'}
 
 LOGIN_URL = '/account/login/'
