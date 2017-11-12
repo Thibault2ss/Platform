@@ -6,6 +6,7 @@ import os
 from os.path import join
 import numpy
 from stl import mesh
+from .forms import HubForm
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 # Create your views here.
@@ -15,6 +16,17 @@ def index(request):
     }
     return render(request, 'hub/dashboard.html', context)
 def account(request):
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = HubForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            return HttpResponseRedirect('/thanks/')
+    else:
+        form = HubForm(request.POST)
     context = {
         'page':"account",
     }

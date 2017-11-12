@@ -53,15 +53,18 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.linkedin_oauth2',
+    'address',
+    'storages',
 
     'users',
     'notifications',
     'jb',
     'hub',
+    'digital',
 ]
 RESTRICTION_LIST = {
             'STAFF':[],
-            'HUB':['/admin', '/jb', '/client', '/inbox'],
+            'HUB':['/admin', '/jb', '/digital', '/inbox'],
             'CLIENT':['/admin', '/jb', '/hub', '/inbox']
             }
 SITE_ID = 2
@@ -130,6 +133,7 @@ DATABASES = {
         'HOST': 'sp3dclouddb.csgmjvodxypo.ap-southeast-1.rds.amazonaws.com',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     },
+# ACTIVATE ONLY IF SEPARATES DB AND ACTIVATE THE DB ROUTER
     # 'jb_db': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'SP3D_JB',
@@ -176,7 +180,7 @@ USE_TZ = True
 # login redirection
 # LOGIN_REDIRECT_URL = '/jb/'
 LOGOUT_REDIRECT_URL = '/account/login'
-LOGIN_REDIRECT_URL_LIST = {'STAFF':'/jb/', 'HUB':'/hub/', 'CLIENT':'/client/'}
+LOGIN_REDIRECT_URL_LIST = {'STAFF':'/jb/', 'HUB':'/hub/', 'CLIENT':'/digital/'}
 
 LOGIN_URL = '/account/login/'
 
@@ -225,4 +229,45 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'thibault.de-saint-sernin@sp3d.co'
-EMAIL_HOST_PASSWORD = 'stekvekjieadiiqe'
+EMAIL_HOST_PASSWORD = 'nwqxbhbipjiuoetb'
+
+# GOOGLE MAPS
+GOOGLE_API_KEY = 'AIzaSyDyZ4782IXg8US1yrhugnzFLrB6IIBsXmo'
+
+############################################################################################################################################################
+# STORAGE TO S3
+# AWS S3 STORAGE
+AWS_ACCESS_KEY_ID = 'AKIAJQUVRVZZ4ZTEA5OQ' # OR os.environ['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'sp3d-default'
+AWS_S3_CUSTOM_DOMAIN = 's3-ap-southeast-1.amazonaws.com/%s' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+
+
+##################ACTIVATE THIS FOR PROD################
+#if you want static files on S3:
+# AWS_STATIC_LOCATION = 'static'
+# STATICFILES_STORAGE = 'sp3d.storage_backends.StaticStorage'
+# STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_STATIC_LOCATION)
+
+#############ACTIVATE THIS FOR PROD#####################
+AWS_PUBLIC_MEDIA_LOCATION = 'media/public'
+DEFAULT_FILE_STORAGE = 'sp3d.storage_backends.PublicMediaStorage'
+
+AWS_PRIVATE_MEDIA_LOCATION = 'media/private'
+PRIVATE_FILE_STORAGE = 'sp3d.storage_backends.PrivateMediaStorage'
+AWS_QUERYSTRING_EXPIRE = 259200 #in seconds. 72h
+#################################################################
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  #will raise suspicious error
+# 2.5MB - 2621440
+# 5MB - 5242880
+# 10MB - 10485760
+# 20MB - 20971520
+# 50MB - 5242880
+# 100MB 104857600
+# 250MB - 214958080
+# 500MB - 429916160
+############################################################################################################################################################

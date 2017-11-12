@@ -54,6 +54,7 @@ class CustomUser(AbstractBaseUser):
     first_name = models.CharField(max_length=200, default='')
     last_name = models.CharField(max_length=200, default='')
     date_joined = models.DateTimeField(auto_now_add=True)
+    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE, null=True)
 
     objects = CustomUserManager()
 
@@ -71,6 +72,9 @@ class CustomUser(AbstractBaseUser):
     def get_short_name(self):
         return self.first_name
 
+    def get_full_name(self):
+        return self.first_name + self.last_name
+
     def has_module_perms(self, app_label):
         "Does the user have permissions to view the app `app_label`?"
         # Simplest possible answer: Yes, always
@@ -85,3 +89,16 @@ class CustomUser(AbstractBaseUser):
             return False
         # Simplest possible answer: All admins are staff
         # return self.is_admin
+
+class Organisation(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=100, default = '', unique = True)
+
+    def __str__(self):
+        return "%s" % (self.name,)
+
+    def get_short_name(self):
+        return self.name
+
+    def natural_key(self):
+        return self.name

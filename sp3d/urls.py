@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^account/', include('allauth.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^hub/', include('hub.urls')),
+    url(r'^digital/', include('digital.urls')),
     url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
     url(r'^', RedirectView.as_view(pattern_name='login_page', permanent=False)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

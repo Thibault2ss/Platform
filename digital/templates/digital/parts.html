@@ -1,0 +1,285 @@
+{% extends 'digital/base.html' %}
+{% load static %}
+{% load digital_filters %}
+{% block extrahead %}
+<link href="{% static 'digital/css/slick.css' %}" rel="stylesheet" />
+<link href="{% static 'digital/css/slick-theme.css' %}" rel="stylesheet" />
+{% endblock extrahead %}
+{%block content%}
+
+<div id="ordersCarousel" class="carousel slide" data-ride="carousel" style="height: calc(100% - 74px);">
+    <div class="carousel-inner" style="height:100%;overflow-y:scroll;">
+        <div class="item active">
+            <div class="content" style="position:relative;">
+                <div class="container-fluid">
+                    <div class="row" style="text-align:center;margin-bottom:20px;">
+                        <div class="col-lg-12">
+                            <button class="btn btn-order-class btn-danger btn-fill"><span style="font-weight:bold;margin-right:10px;">3</span> New</button>
+                            <button class="btn btn-order-class btn-warning"><span style="font-weight:bold;margin-right:10px;">10</span> Pending</button>
+                            <button class="btn btn-order-class btn-info" ><span style="font-weight:bold;margin-right:10px;">2</span> Produced</button>
+                            <button class="btn btn-order-class btn-success"><span style="font-weight:bold;margin-right:10px;">5</span> Shipped</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+
+                            <div class="card">
+                                <div class="content">
+                                    <ul class="list-unstyled team-members">
+                                        {% for part in parts %}
+                                        <li class="part-row" href="#ordersCarousel" style="padding:5px 0px;"
+                                            data-part="{{part|model_to_dict}}"
+                                            data-part-id="{{part.id}}"
+                                            data-part-images="{{part.images|url_list}}"
+                                            data-part-bulk-files="{{part.bulk_files|dict_list}}"
+                                            data-slide="next">
+                                            <div class="row">
+                                                <div class="col-xs-4" style="display:flex;align-items:center;">
+                                                    <div class="avatar" style="margin-right:20px;">
+                                                        <img src="{%if part.images %}{{part.images.0.thumbnail.url}}{%else%}{% static 'digital/img/stl/stl1.jpg' %}{%endif%}" alt="Circle Image" class="img-circle img-no-padding img-responsive" style="height:100%;width:100%">
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-muted"><small>name: </small></span>{{part.name}}<br>
+                                                        <span class="text-muted"><small>ref: </small></span>{{part.reference}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-xs-5">
+
+                                                </div>
+
+                                                <div class="col-xs-3 text-right">
+                                                    <btn class="btn btn-sm btn-info btn-icon"><i class="fa ti-printer"></i></btn>
+                                                    <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {%endfor%}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="button-back" href="#ordersCarousel" data-slide="prev">
+                <i class="ti-arrow-left"></i>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 text-center">
+                    <div id="imageCarousel">
+                        <!-- <img src="https://news.nationalgeographic.com/content/dam/news/photos/000/755/75552.ngsversion.1422285553360.adapt.1900.1.jpg" alt="Los Angeles">
+                        <img src="https://static.pexels.com/photos/54632/cat-animal-eyes-grey-54632.jpeg" alt="Chicago">
+                        <img src="https://www.rd.com/wp-content/uploads/sites/2/2016/02/06-train-cat-shake-hands.jpg" alt="New York"> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content" id="part-detail-panel" data-part-id="" style="position:relative;">
+                <div class="container-fluid">
+                    <div class="row row-status" style="margin-bottom:20px;">
+                        <div class="col-xs-4 text-center">
+                            <span class="label label-default" data-status-id="1" style="font-size:100%">Created</span><div><small class="part-date part-date-created"></small></div>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <span class="label label-info" data-status-id="2" style="font-size:100%">Pending Indus</span><div><small class="part-date part-date-requested-indus"></small></div>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <span class="text-muted" data-status-id="3" style="font-size:100%">Digitalized</span><div><small class="part-date part-date-indus-result"></small></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-xs-12" id="canvas-container">
+                                    <div id="stl-canvas" class="stl-canvas" style="display:flex;align-items:center;">
+                                        <button id="stl-demo" class="btn btn-warning btn-fill btn-wd" style="margin-left:23%;font-weight:900;">3D DEMO</button>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12">
+                                    <form enctype="multipart/form-data" action="" method="post" id="partbulkfile_form" class="dropzone">
+                                        {%csrf_token%}
+                                        {%comment%}{{formPartBulkFile}}{%endcomment%}
+                                        <input type="hidden" name="part" required="" id="id_part">
+                                        <!-- <input type="submit" value="Save" name="_save"> -->
+                                        <div class="dz-default dz-message"><span></span></div>
+                                        <div class="card">
+                                            <i class="fa fa-cube" style="font-size:3.5rem;position:absolute;color:#7d7d7d;top:-17px;right:8px;"></i>
+                                            <div class="content">
+                                                <div class="row text-center">
+                                                    <h5>Bulk Files</h5>
+                                                    <div class="progressBar">
+                                                        <div class="progressBar-inner"></div>
+                                                    </div>
+                                                </div>
+                                                <div id="bulk-file-list" class="row">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="card">
+                                        <i class="fa fa-info-circle" style="font-size:3.5rem;position:absolute;color:#7d7d7d;top:-17px;right:8px;"></i>
+                                        <div class="content">
+                                            <div class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-12 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Ref</span><br>
+                                                    <div class="part-ref" style="margin-left:15px;"></div>
+                                                </div>
+                                                <div class="col-sm-12 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Name</span><br>
+                                                    <div class="part-name" style="margin-left:15px;"></div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="card">
+                                        <i class="ti-link" style="font-size:3.5rem;color:#7d7d7d;position:absolute;top:-17px;right:8px;"></i>
+                                        <div class="row text-center">
+                                            <h5>Fits Models:</h5>
+                                        </div>
+                                        <div id ="models-attached" class="content">
+                                            <div class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Model</span><br>
+                                                    <div class="part-model" style="margin-left:15px;"></div>
+                                                </div>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Family</span><br>
+                                                    <div class="part-family" style="margin-left:15px;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Dimensions</span><br>
+                                                    <div class="part-dimensions" style="margin-left:15px;"></div>
+                                                </div>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Material</span><br>
+                                                    <div class="part-material" style="margin-left:15px;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Color</span><br>
+                                                    <div class="part-color" style="margin-left:15px;"></div>
+                                                </div>
+                                                <div class="col-sm-6 col-xs-12">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-12 text-center" style="margin-bottom:20px;">
+                                    <button id="button-action-1" class="btn btn-default btn-fill btn-wd disabled" style="font-weight:900;"></button>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <i class="ti-settings" style="font-size:3.5rem;position:absolute;color:#7d7d7d;top:-17px;right:8px;"></i>
+                                        <div class="content">
+                                            <div class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Dimensions</span><br>
+                                                    <div class="part-dimensions" style="margin-left:15px;"></div>
+                                                </div>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Material</span><br>
+                                                    <div class="part-material" style="margin-left:15px;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Weight</span><br>
+                                                    <div class="part-weight" style="margin-left:15px;"></div>
+                                                </div>
+                                                <div class="col-sm-6 col-xs-12">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="card">
+                                        <i class="ti-link" style="font-size:3.5rem;color:#7d7d7d;position:absolute;top:-17px;right:8px;"></i>
+                                        <div class="row text-center">
+                                            <h5>Grades:</h5>
+                                        </div>
+                                        <div class="content">
+                                            <div id ="grades-attached" class="row text-center" style="margin-bottom:10px;">
+                                                <!-- <div class="col-sm-12 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Grade</span><br>
+                                                    <div class="part-grade" style="margin-left:15px;"></div>
+                                                </div> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="card">
+                                        <i class="ti-link" style="font-size:3.5rem;color:#7d7d7d;position:absolute;top:-17px;right:8px;"></i>
+                                        <div class="row text-center">
+                                            <h5>Environment:</h5>
+                                        </div>
+                                        <div class="content">
+                                            <div id ="environments-attached" class="row text-center" style="margin-bottom:10px;">
+                                                <!-- <div class="col-sm-12 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Grade</span><br>
+                                                    <div class="part-grade" style="margin-left:15px;"></div>
+                                                </div> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{%endblock content%}
+
+{%block extrascript%}
+<script src="{% static 'digital/js/three/three.min.js' %}"></script>
+<script src="{% static 'digital/js/three/loaders/STLLoader1.js' %}"></script>
+<script src="{% static 'digital/js/three/Detector.js' %}"></script>
+<script src="{% static 'digital/js/three/libs/stats.min.js' %}"></script>
+<script src="{% static 'digital/js/three/libs/TrackballControls.js' %}"></script>
+<script src="{% static 'digital/js/slick.min.js' %}"></script>
+<script src="{% static 'digital/js/dropzone.min.js' %}"></script>
+<script>
+$('#ordersCarousel').carousel({
+    interval: false
+});
+$('#imageCarousel').carousel({
+    interval: false
+});
+// prevent dropzones to initialize when loaded, so that we initialize them with our own options below
+Dropzone.autoDiscover = false;
+var csrftoken = '{{ csrf_token }}';
+</script>
+<script src="{% static 'digital/js/parts.js' %}"></script>
+{%endblock extrascript%}

@@ -7,6 +7,19 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime
 
+class Material(models.Model):
+    family= models.CharField(max_length=200, choices=[('metal','metal'), ('plastic','plastic')], null=True)
+    name = models.CharField(max_length=200, default = '')
+
+    def __str__(self):
+        return "%s" % (self.name,)
+
+    def natural_key(self):
+        return {'family':self.family, 'name':self.name}
+
+    class Meta:
+        unique_together = (('family', 'name'),)
+
 class Part(models.Model):
 
     creation_date = models.DateTimeField('date published')

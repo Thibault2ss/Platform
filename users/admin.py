@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from users.models import CustomUser
+from .models import CustomUser, Organisation
 # Register your models here.
 
 class CustomUserCreationForm(forms.ModelForm):
@@ -44,7 +44,7 @@ class CustomUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'password', 'is_active', 'is_admin', 'usertype', 'first_name', 'last_name')
+        fields = ('email', 'password', 'is_active', 'is_admin', 'usertype', 'first_name', 'last_name', 'organisation')
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -60,11 +60,11 @@ class CustomUserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'is_admin','usertype', 'first_name', 'last_name')
-    list_filter = ('is_admin',)
+    list_display = ('email', 'is_admin','usertype', 'first_name', 'last_name', 'organisation')
+    list_filter = ('is_admin','usertype','organisation')
     fieldsets = (
         (None, {'fields': ('email', 'password', 'usertype')}),
-        ('Personal info', {'fields': ('first_name', 'last_name')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'organisation')}),
         ('Permissions', {'fields': ('is_admin', )}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
@@ -85,3 +85,8 @@ admin.site.register(CustomUser, CustomUserAdmin)
 # ... and, since we're not using Django's built-in permissions,
 # unregister the Group model from admin.
 # admin.site.unregister(Group)
+
+@admin.register(Organisation)
+class Organisation_Admin(admin.ModelAdmin):
+    fields = ['name']
+    list_display = ('id','name',)
