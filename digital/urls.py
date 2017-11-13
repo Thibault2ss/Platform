@@ -5,7 +5,7 @@ from . import views
 app_name = 'digital_'
 urlpatterns = [
 
-    url(r'^$', views.index, name=app_name + 'index'),
+    url(r'^$', views.dashboard, name=app_name + 'dashboard'),
     url(r'^account/$', views.account, name=app_name+'account'),
     url(r'^qualification/$', views.qualification, name=app_name+'qualification'),
     url(r'^printers/$', views.printers, name=app_name+'printers'),

@@ -312,10 +312,13 @@ demo = {
         });
 
 // PIE CHART###################################################################################################
+        parts_plastic = parseInt(parts_plastic);
+        parts_metal = parseInt(parts_metal);
+        parts_total = parseInt(parts_total);
 
         var dataPreferences = {
-            series:[25, 30, 20, 25],
-            labels: ["25%", '30%', '20%', '25%']
+            series:[parts_plastic, parts_metal],
+            labels: [(parts_plastic*100.0)/parts_total + "%", (parts_metal*100.0)/parts_total +'%']
         };
 
         var optionsPreferences = {
@@ -323,7 +326,7 @@ demo = {
             showLabel: false,
             donutWidth: 60,
             startAngle: 0,
-            total: 100,
+            total: parts_total,
             showLabel: true,
         };
 
@@ -366,18 +369,20 @@ demo = {
             // See http://gionkunz.github.io/chartist-js/api-documentation.html#chartistsvg-function-animate
             data.element.animate(animationDefinition, false);
         } else if (data.type == "label"){
-
+            var to_opacity = 1;
+            if (data.text == "0%"){to_opacity=0};
+            console.log(data.text);
             // If the drawn element is an area we do a simple opacity fade in. This could also be achieved using CSS3 animations.
             data.element.animate({
               opacity: {
                 // The delay when we like to start the animation
-                begin: 1400,
+                begin: 1200,
                 // Duration of the animation
                 dur: 200,
                 // The value where the animation should start
                 from: 0,
                 // The value where it should end
-                to: 1
+                to: to_opacity
               }
             });
         }

@@ -53,7 +53,8 @@ def model_to_dict(instance):
 def url_list(image_instance_list):
     url_list=[]
     for image in image_instance_list:
-        url_list.append(image.image.url)
+        if image.image.url:
+            url_list.append(image.image.url)
     return json.dumps(url_list)
 
 @register.filter(name='dict_list')

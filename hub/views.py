@@ -7,9 +7,10 @@ from os.path import join
 import numpy
 from stl import mesh
 from .forms import HubForm
-
+from django.contrib.auth.decorators import login_required
 dir_path = os.path.dirname(os.path.realpath(__file__))
 # Create your views here.
+@login_required
 def index(request):
     context = {
         'page':"index",
@@ -31,11 +32,13 @@ def account(request):
         'page':"account",
     }
     return render(request, 'hub/account.html', context)
+@login_required
 def printers(request):
     context = {
         'page':"printers",
     }
     return render(request, 'hub/printers.html', context)
+@login_required
 def orders(request):
     stl_mesh = mesh.Mesh.from_file(join(dir_path, 'static', 'hub', 'stl', 'assemb6.STL'))
     volume, cog, inertia = stl_mesh.get_mass_properties()
@@ -48,37 +51,44 @@ def orders(request):
         'page':"orders",
     }
     return render(request, 'hub/orders.html', context)
+@login_required
 def billing(request):
     context = {
         'page':"billing",
     }
     print "YES"
     return render(request, 'hub/billing.html', context)
+@login_required
 def table(request):
     context = {
         'page':"table",
     }
     return render(request, 'hub/table.html', context)
+@login_required
 def typography(request):
     context = {
         'page':"typography",
     }
     return render(request, 'hub/typography.html', context)
+@login_required
 def icons(request):
     context = {
         'page':"icons",
     }
     return render(request, 'hub/icons.html', context)
+@login_required
 def maps(request):
     context = {
         'page':"maps",
     }
     return render(request, 'hub/maps.html', context)
+@login_required
 def notifications(request):
     context = {
         'page':"notifications",
     }
     return render(request, 'hub/notifications.html', context)
+@login_required
 def qualification(request):
     context = {
         'page':"qualification",

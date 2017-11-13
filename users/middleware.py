@@ -4,7 +4,7 @@ from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-
+from django.shortcuts import render
 class RestrictionMiddleware(object):
     """
     Middleware to limit access to the user groups to certain apps.

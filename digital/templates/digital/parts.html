@@ -14,10 +14,10 @@
                 <div class="container-fluid">
                     <div class="row" style="text-align:center;margin-bottom:20px;">
                         <div class="col-lg-12">
-                            <button class="btn btn-order-class btn-danger btn-fill"><span style="font-weight:bold;margin-right:10px;">3</span> New</button>
-                            <button class="btn btn-order-class btn-warning"><span style="font-weight:bold;margin-right:10px;">10</span> Pending</button>
-                            <button class="btn btn-order-class btn-info" ><span style="font-weight:bold;margin-right:10px;">2</span> Produced</button>
-                            <button class="btn btn-order-class btn-success"><span style="font-weight:bold;margin-right:10px;">5</span> Shipped</button>
+                            <button class="btn btn-order-class btn-danger btn-fill"><span style="font-weight:bold;margin-right:10px;"></span> New</button>
+                            <button class="btn btn-order-class btn-warning"><span style="font-weight:bold;margin-right:10px;"></span> Pending</button>
+                            <button class="btn btn-order-class btn-info" ><span style="font-weight:bold;margin-right:10px;"></span> Produced</button>
+                            <button class="btn btn-order-class btn-success"><span style="font-weight:bold;margin-right:10px;"></span> Shipped</button>
                         </div>
                     </div>
                     <div class="row">
@@ -97,29 +97,6 @@
                                         <button id="stl-demo" class="btn btn-warning btn-fill btn-wd" style="margin-left:23%;font-weight:900;">3D DEMO</button>
                                     </div>
                                 </div>
-                                <div class="col-xs-12">
-                                    <form enctype="multipart/form-data" action="" method="post" id="partbulkfile_form" class="dropzone">
-                                        {%csrf_token%}
-                                        {%comment%}{{formPartBulkFile}}{%endcomment%}
-                                        <input type="hidden" name="part" required="" id="id_part">
-                                        <!-- <input type="submit" value="Save" name="_save"> -->
-                                        <div class="dz-default dz-message"><span></span></div>
-                                        <div class="card">
-                                            <i class="fa fa-cube" style="font-size:3.5rem;position:absolute;color:#7d7d7d;top:-17px;right:8px;"></i>
-                                            <div class="content">
-                                                <div class="row text-center">
-                                                    <h5>Bulk Files</h5>
-                                                    <div class="progressBar">
-                                                        <div class="progressBar-inner"></div>
-                                                    </div>
-                                                </div>
-                                                <div id="bulk-file-list" class="row">
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
                             </div>
 
 
@@ -140,49 +117,32 @@
                                                     <span class="text-muted" style="float:left;font-size:70%;">Name</span><br>
                                                     <div class="part-name" style="margin-left:15px;"></div>
                                                 </div>
-
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-xs-12">
-                                    <div class="card">
-                                        <i class="ti-link" style="font-size:3.5rem;color:#7d7d7d;position:absolute;top:-17px;right:8px;"></i>
-                                        <div class="row text-center">
-                                            <h5>Fits Models:</h5>
-                                        </div>
-                                        <div id ="models-attached" class="content">
-                                            <div class="row text-center" style="margin-bottom:10px;">
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Model</span><br>
-                                                    <div class="part-model" style="margin-left:15px;"></div>
+                                    <form enctype="multipart/form-data" action="" method="post" id="partbulkfile_form" class="dropzone">
+                                        {%csrf_token%}
+                                        {%comment%}{{formPartBulkFile}}{%endcomment%}
+                                        <input type="hidden" name="part" required="" id="id_part">
+                                        <!-- <input type="submit" value="Save" name="_save"> -->
+                                        <div class="dz-default dz-message"><span></span></div>
+                                        <div class="card">
+                                            <i class="ti-link" style="font-size:3.5rem;position:absolute;color:#7d7d7d;top:-17px;right:8px;"></i>
+                                            <div class="content">
+                                                <div class="row text-center">
+                                                    <h5>Bulk Files</h5>
+                                                    <div class="progressBar">
+                                                        <div class="progressBar-inner"></div>
+                                                    </div>
                                                 </div>
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Family</span><br>
-                                                    <div class="part-family" style="margin-left:15px;"></div>
-                                                </div>
-                                            </div>
-                                            <div class="row text-center" style="margin-bottom:10px;">
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Dimensions</span><br>
-                                                    <div class="part-dimensions" style="margin-left:15px;"></div>
-                                                </div>
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Material</span><br>
-                                                    <div class="part-material" style="margin-left:15px;"></div>
-                                                </div>
-                                            </div>
-                                            <div class="row text-center" style="margin-bottom:10px;">
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Color</span><br>
-                                                    <div class="part-color" style="margin-left:15px;"></div>
-                                                </div>
-                                                <div class="col-sm-6 col-xs-12">
+                                                <div id="bulk-file-list" class="row">
 
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -211,40 +171,43 @@
                                                     <div class="part-weight" style="margin-left:15px;"></div>
                                                 </div>
                                                 <div class="col-sm-6 col-xs-12">
-
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Color</span><br>
+                                                    <div class="part-color" style="margin-left:15px;"></div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-12">
-                                    <div class="card">
-                                        <i class="ti-link" style="font-size:3.5rem;color:#7d7d7d;position:absolute;top:-17px;right:8px;"></i>
-                                        <div class="row text-center">
-                                            <h5>Grades:</h5>
-                                        </div>
-                                        <div class="content">
-                                            <div id ="grades-attached" class="row text-center" style="margin-bottom:10px;">
-                                                <!-- <div class="col-sm-12 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Grade</span><br>
-                                                    <div class="part-grade" style="margin-left:15px;"></div>
-                                                </div> -->
+
+                                            <div class="row" style="margin-bottom:10px;">
+                                                <h5 style="color:#e28d00;"><i class="ti-arrow-right" style="margin:0 15px 0 25px;font-size:1.2rem;"></i>Fits Models:</h5>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-12">
-                                    <div class="card">
-                                        <i class="ti-link" style="font-size:3.5rem;color:#7d7d7d;position:absolute;top:-17px;right:8px;"></i>
-                                        <div class="row text-center">
-                                            <h5>Environment:</h5>
-                                        </div>
-                                        <div class="content">
-                                            <div id ="environments-attached" class="row text-center" style="margin-bottom:10px;">
-                                                <!-- <div class="col-sm-12 col-xs-12">
+                                            <div id ="models-attached" class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Model</span><br>
+                                                    <div class="part-model" style="margin-left:15px;"></div>
+                                                </div>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Family</span><br>
+                                                    <div class="part-family" style="margin-left:15px;"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row" style="margin-bottom:10px;">
+                                                <h5 style="color:#e28d00;"><i class="ti-arrow-right" style="margin:0 15px 0 25px;font-size:1.2rem;"></i>Grades:</h5>
+                                            </div>
+                                            <div id ="grades-attached" class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-12 col-xs-12">
                                                     <span class="text-muted" style="float:left;font-size:70%;">Grade</span><br>
                                                     <div class="part-grade" style="margin-left:15px;"></div>
-                                                </div> -->
+                                                </div>
+                                            </div>
+
+                                            <div class="row" style="margin-bottom:10px;">
+                                                <h5 style="color:#e28d00;"><i class="ti-arrow-right" style="margin:0 15px 0 25px;font-size:1.2rem;"></i>Environments:</h5>
+                                            </div>
+                                            <div id ="environments-attached" class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-12 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Environment</span><br>
+                                                    <div class="part-grade" style="margin-left:15px;"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

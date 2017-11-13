@@ -91,16 +91,14 @@ $(document).ready(function(){
         $("#id_part").val(part.pk);
         $("#models-attached").empty();
         for (var i = 0; i < model.length; i++){
-            var html = "<div class='row text-center' style='margin-bottom:10px;'>\
-                        <div class='col-sm-6 col-xs-12'>\
+            var html = "<div class='col-sm-6 col-xs-12'>\
                             <span class='text-muted' style='float:left;font-size:70%;'>Model</span><br>\
                             <div class='part-model' style='margin-left:15px;'>" + model[i].name + "</div>\
                         </div>\
                         <div class='col-sm-6 col-xs-12'>\
                             <span class='text-muted' style='float:left;font-size:70%;'>Family</span><br>\
                             <div class='part-family' style='margin-left:15px;'>" + model[i].family + "</div>\
-                        </div>\
-                    </div>";
+                        </div>";
             $("#models-attached").append(html);
         };
         $("#grades-attached").empty();
@@ -111,13 +109,13 @@ $(document).ready(function(){
                         </div>";
             $("#grades-attached").append(html);
         };
-        $("#environment-attached").empty();
+        $("#environments-attached").empty();
         for (var i = 0; i < environment_list.length; i++){
             var html = "<div class='col-sm-12 col-xs-12'>\
-                            <span class='text-muted' style='float:left;font-size:70%;'>Grade</span><br>\
+                            <span class='text-muted' style='float:left;font-size:70%;'>Environment</span><br>\
                             <div class='part-grade' style='margin-left:15px;'>" + environment_list[i].name + "</div>\
                         </div>";
-            $("#environment-attached").append(html);
+            $("#environments-attached").append(html);
         };
         $("#bulk-file-list").empty();
         for (var i = 0; i < bulk_files.length; i++){

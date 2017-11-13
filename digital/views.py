@@ -10,30 +10,37 @@ from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus
 from django.core import serializers
 from digital.forms import PartBulkFileForm
 from django.core.files.uploadedfile import UploadedFile
-from digital.utils import getPartsClean, send_email
-
+from digital.utils import getPartsClean, send_email, getPartSumUp
+from django.contrib.auth.decorators import login_required
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 # Create your views here.
-def index(request):
+@login_required
+def dashboard(request):
+    parts_sumup = getPartSumUp(request.user.organisation)
+    print parts_sumup
     context = {
-        'page':"index",
-    }
+        'page':"dashboard",
+        'parts_sumup':parts_sumup,
+        }
+    # total_parts_indus = Parts.objects.filter()
     return render(request, 'digital/dashboard.html', context)
+@login_required
 def account(request):
     context = {
         'page':"account",
     }
     return render(request, 'digital/account.html', context)
+@login_required
 def printers(request):
     context = {
         'page':"printers",
     }
     return render(request, 'digital/printers.html', context)
+@login_required
 def parts(request):
     # query parts, and add all images to a _image attribute in Part object for more query efficiency in template
-    parts = getPartsClean(request)
-    print serializers.serialize("json", parts, use_natural_foreign_keys=True)
+    parts = getPartsClean(request.user.organisation)
     stl_mesh = mesh.Mesh.from_file(join(dir_path, 'static', 'digital', 'stl', 'assemb6.STL'))
     volume, cog, inertia = stl_mesh.get_mass_properties()
     # print("Volume                                  = {0}".format(volume))
@@ -47,43 +54,50 @@ def parts(request):
         'formPartBulkFile': PartBulkFileForm(),
     }
     return render(request, 'digital/parts.html', context)
+@login_required
 def billing(request):
     context = {
         'page':"billing",
     }
     print "YES"
     return render(request, 'digital/billing.html', context)
+@login_required
 def table(request):
     context = {
         'page':"table",
     }
     return render(request, 'digital/table.html', context)
+@login_required
 def typography(request):
     context = {
         'page':"typography",
     }
     return render(request, 'digital/typography.html', context)
+@login_required
 def icons(request):
     context = {
         'page':"icons",
     }
     return render(request, 'digital/icons.html', context)
+@login_required
 def maps(request):
     context = {
         'page':"maps",
     }
     return render(request, 'digital/maps.html', context)
+@login_required
 def notifications(request):
     context = {
         'page':"notifications",
     }
     return render(request, 'digital/notifications.html', context)
+@login_required
 def qualification(request):
     context = {
         'page':"qualification",
     }
     return render(request, 'digital/qualification.html', context)
-
+@login_required
 def upload_part_bulk_file(request):
     if request.method == 'POST':
         # initialize default values
@@ -119,7 +133,7 @@ def upload_part_bulk_file(request):
         return JsonResponse(data)
 
     return HttpResponseRedirect("/digital/parts/")
-
+@login_required
 def request_for_indus(request):
     success=True
     errors=[]

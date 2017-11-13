@@ -28,7 +28,7 @@
 
 
     <!--  Fonts and icons     -->
-    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="{% static 'digital/css/themify-icons.css' %}" rel="stylesheet">
     {%block extrahead%}
@@ -50,7 +50,8 @@
     	<div class="sidebar-wrapper">
             <div class="logo">
                 <a href="/digital/" class="simple-text">
-                    <img src="{% static 'digital/icons/3donly.png' %}" style="width:40%"></img>
+                    <img src="{% static 'digital/icons/3donly.png' %}" style="width:20%"></img>
+                    <img src="{% static 'digital/icons/vestel.png' %}" style="width:60%"></img>
                 </a>
             </div>
 
@@ -61,7 +62,7 @@
                         <p>Qualification</p>
                     </a>
                 </li> -->
-                <li class="{% if page == 'index' %}active{% endif %}">
+                <li class="{% if page == 'dashboard' %}active{% endif %}">
                     <a href="/digital/">
                         <i class="ti-panel"></i>
                         <p>Dashboard</p>
@@ -145,12 +146,12 @@
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
-                        <li>
+                        <!-- <li>
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <i class="ti-panel"></i>
 								<p>Stats</p>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="dropdown">
                               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     <i class="ti-bell"></i>

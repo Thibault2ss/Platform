@@ -72,7 +72,7 @@ class Part(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
     organisation = models.ForeignKey('users.Organisation', on_delete=models.CASCADE, null=True)
-    model = models.ManyToManyField(Model)
+    model = models.ManyToManyField(Model, blank=True)
     reference = models.CharField(max_length=200, null = True, unique = True)
     name = models.CharField(max_length=200, default = '')
     material = models.ForeignKey('jb.Material', on_delete=models.CASCADE, null=True, blank=True)

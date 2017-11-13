@@ -4,9 +4,11 @@ from digital.models import Part, PartImage, PartBulkFile
 from digital.decorators import postpone
 from django.template.loader import get_template
 from django.core.mail import send_mail, EmailMultiAlternatives, EmailMessage
+from digital.models import Part, PartImage, PartBulkFile
+from django.db.models import Case, IntegerField, Sum, When, Q
 
-def getPartsClean(request):
-    parts = Part.objects.filter(organisation__id = request.user.organisation.id).select_related('material')
+def getPartsClean(organisation):
+    parts = Part.objects.filter(organisation = organisation)
     parts_dict = dict([(part.id, part) for part in parts])
 
     # inject pictures directly in
@@ -36,3 +38,18 @@ def send_email(html_path, context, subject, from_email, to):
     msg.content_subtype = 'html'
     msg.send()
     return True
+
+
+def getPartSumUp(organisation):
+    parts_sumup = Part.objects.filter(organisation = organisation).aggregate(
+        parts_total = Sum(Case(When(~Q(pk=None), then=1),default = 0, output_field=IntegerField())),
+        parts_pending_indus = Sum(Case(When(status__id=2, then=1), default = 0, output_field=IntegerField())),
+        parts_disqualified = Sum(Case(When(status__id=3, then=1),default = 0,output_field=IntegerField())),
+        parts_industrialized = Sum(Case(When(status__id=4, then=1),default = 0,output_field=IntegerField())),
+        parts_metal = Sum(Case(When(material__family="metal", then=1),default = 0,output_field=IntegerField())),
+        parts_plastic = Sum(Case(When(material__family="plastic", then=1),default = 0,output_field=IntegerField())),
+    )
+    return parts_sumup
+
+def getOrganisationCapacity(organisation):
+    images = PartImage.objects.filter
