@@ -315,7 +315,10 @@ demo = {
         parts_plastic = parseInt(parts_plastic);
         parts_metal = parseInt(parts_metal);
         parts_total = parseInt(parts_total);
-
+        if (parts_total == 0){parts_total=1};//safety
+        console.log(parts_plastic);
+        console.log(parts_metal);
+        console.log(parts_plastic);
         var dataPreferences = {
             series:[parts_plastic, parts_metal],
             labels: [(parts_plastic*100.0)/parts_total + "%", (parts_metal*100.0)/parts_total +'%']
@@ -387,6 +390,42 @@ demo = {
             });
         }
         });
+
+
+        //      bar chart
+            var dataViews = {
+              labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+              series: [
+                [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895],
+                [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895]
+              ]
+            };
+
+            var optionsViews = {
+              seriesBarDistance: 10,
+              classNames: {
+                bar: 'ct-bar'
+              },
+              axisX: {
+                showGrid: false,
+
+              },
+              height: "250px"
+
+            };
+
+            var responsiveOptionsViews = [
+              ['screen and (max-width: 640px)', {
+                seriesBarDistance: 5,
+                axisX: {
+                  labelInterpolationFnc: function (value) {
+                    return value[0];
+                  }
+                }
+              }]
+            ];
+
+            Chartist.Bar('#materialBarChart', dataViews, optionsViews, responsiveOptionsViews);
 
     },
 	showNotification: function(from, align){
@@ -537,7 +576,7 @@ demo = {
           }]
         ];
 
-        Chartist.Bar('#chartViews', dataViews, optionsViews, responsiveOptionsViews);
+        Chartist.Bar('#materialBarChart', dataViews, optionsViews, responsiveOptionsViews);
 
     //     multiple bars chart
         var data = {

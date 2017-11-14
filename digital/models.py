@@ -53,7 +53,28 @@ class ClientPartStatus(models.Model):
         return "%s" % (self.name,)
 
     def natural_key(self):
-        return self.id
+        return {'id':self.id,'name':self.name}
+
+class PartEvent(models.Model):
+    EVENT_TYPE_CHOICES = (
+        ("INFO", "info"),
+        ("REQUEST", "request"),
+        ("STATUS_CHANGE", "status change"),
+    )
+    date = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
+    part = models.ForeignKey('Part', on_delete=models.CASCADE, null=True)
+    type = models.CharField(max_length=20, null=True, choices=[('mm','mm'), ('inch','inch')], default="INFO")
+    status = models.ForeignKey('ClientPartStatus', on_delete=models.CASCADE, null=True)
+    short_description = models.CharField(max_length=100, default = '')
+    long_description = models.TextField(default = '')
+
+    def __str__(self):
+        return "%s" % (self.short_description,)
+
+    def natural_key(self):
+        return {'id':self.id, 'type':type, 'short_description':short_description}
+
 
 class Environment(models.Model):
     name = models.CharField(max_length=50, default = '')

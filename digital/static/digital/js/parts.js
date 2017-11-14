@@ -4,6 +4,16 @@ $(document).ready(function(){
     $(".btn-order-class").click(function(){
         $(".btn-order-class").removeClass("btn-fill");
         $(this).addClass("btn-fill");
+        // for rfq
+        search_string = '"status": {"id": ' + $(this).val();
+        console.log(search_string);
+        var rex = new RegExp(search_string, 'i');
+        $(".part-row").hide();
+        $(".part-row").filter(function () {
+            console.log(rex.test($(this).attr('data-part')));
+            return rex.test($(this).attr('data-part'));
+        }).show();
+
     });
 // end ORDER TYPE TOGGLING ######################################
 
@@ -56,36 +66,35 @@ $(document).ready(function(){
         length = part.fields.length, width = part.fields.width, height = part.fields.height, weight = part.fields.weight;
         dimension_unit = part.fields.dimension_unit, weight_unit = part.fields.weight_unit;
         date_created = new Date(part.fields.date_created);
+        date_created = date_created.getDate() + " " + monthNames[date_created.getMonth()] + " " + date_created.getFullYear();
         model = part.fields.model;
         color = part.fields.color;
         grade_list = part.fields.grade;
-        status = parseInt(part.fields.status);
+        status = part.fields.status;
         environment_list = part.fields.environment;
         bulk_files = $(this).data("part-bulk-files");
         $("#part-detail-panel").data("part-id",part.pk);
-        $(".part-date").text("");
-        $(".part-date-created").text(date_created.getDate() + " " + monthNames[date_created.getMonth()] + " " + date_created.getFullYear());
         $(".part-dimensions").text(length + "x" + width + "x" + height + " " + dimension_unit);
         $(".part-weight").text(weight + " " + weight_unit);
         $(".part-name").text(name);
         $(".part-material").text(material);
         $(".part-ref").text(ref);
         $(".part-color").text(color);
-        $(".row-status").find("span").removeClass();
-        if (status>=1){
-            $("span[data-status-id='1']").addClass("label label-default");
+        $(".part-status").removeClass().addClass("label part-status").text(status.name);
+        if (status.id>=1){
+            $(".part-status").addClass("label-default");
             $("#button-action-1").removeClass().addClass("btn btn-warning btn-fill btn-wd request-for-indus-button order-part-button").text("Request Indus");
         };
-        if (status>=2){
-            $("span[data-status-id='2']").addClass("label label-warning");
+        if (status.id>=2){
+            $(".part-status").addClass("label-warning");
             $("#button-action-1").removeClass().addClass("btn btn-default btn-fill btn-wd disabled").text("Indus Pending");
         };
-        if (status>=3){
-            $("span[data-status-id='3']").addClass("label label-danger").text("Not Printable");
+        if (status.id>=3){
+            $(".part-status").addClass("label-danger");
             $("#button-action-1").removeClass().addClass("btn btn-danger btn-fill btn-wd disabled").text("Not Printable");
         };
-        if (status>=4){
-            $("span[data-status-id='3']").removeClass().addClass("label label-success").text("Digitalized");
+        if (status.id>=4){
+            $(".part-status").addClass("label-success");
             $("#button-action-1").removeClass().addClass("btn btn-success btn-fill btn-wd print-request-button").text("Print");
         };
         $("#id_part").val(part.pk);
@@ -124,6 +133,12 @@ $(document).ready(function(){
 
         // refresh buttons listeners
         refreshButtons();
+        //get Part HISTORY and scroll to bottom of history
+        getPartHistory(part.pk, date_created);
+        setTimeout(function(){
+            $("#timeline-card").animate({ scrollTop: $('#timeline-card').prop("scrollHeight")}, 1000);
+        },500);
+
         // to resize the stl canvas
         setTimeout(function(){
             onWindowResize();
@@ -270,7 +285,7 @@ $(document).ready(function(){
                         $("span[data-status-id='2']").removeClass().addClass("label label-warning");
                         $(".part-date-requested-indus").text(date_now.getDate() + " " + monthNames[date_now.getMonth()] + " " + date_now.getFullYear());
                         var updated_part = $(".part-row[data-part-id='" + id_part + "']").data("part");
-                        updated_part.fields.status = 2;
+                        updated_part.fields.status.id = 2;
                         $(".part-row[data-part-id='" + id_part + "']").data("part", updated_part);
                     };
                     if (data.error){
@@ -285,6 +300,102 @@ $(document).ready(function(){
     };
     refreshButtons();
 // END REQUEST FOR INDUSTRIALIZATION######################################################################
+
+
+
+
+// GET PART HISTORY######################################################################
+
+    function getPartHistory(id_part, date_created){
+        $.ajax({
+            url: '/digital/parts/get-part-history/',
+            data:{
+                'id_part':id_part,
+            },
+            dataType:'json',
+            success:function(data){
+                if (data.success){
+                    console.log(JSON.parse(data.events));
+                    fillTimeline(date_created, JSON.parse(data.events));
+                };
+                if (data.error){
+                    console.log(data.error);
+                };
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+            }
+        });
+    };
+
+    function fillTimeline(date_created, events){
+        $("#timeline-card").empty();
+        $("#timeline-card").append(get_HTML_Timeline(date_created, "label", "default", "Created", "Part was created"));
+        for (var i = 0; i < events.length; i++){
+            var event = events[i].fields;
+            var date = new Date(event.date);
+            date = date.getDate() + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
+            var short_description = event.short_description;
+            var label_type, label_class, label_text, last, warning;
+            warning = false;
+            if (events[i].fields.type == "STATUS_CHANGE"){
+                label_type = "label";
+                if (event.status.id == 2){
+                    label_class = "warning";
+                } else if(event.status.id == 3){
+                    label_class = "danger";
+                } else if(event.status.id == 4){
+                    label_class = "success";
+                };
+                label_text = event.status.name;
+            } else if (event.type == "REQUEST"){
+                label_type = "text";
+                label_class = "danger";
+                label_text = "Request";
+                warning = true;
+            } else if (event.type == "INFO"){
+                label_type ="text";
+                label_class = "default";
+                label_text = 'Info'
+            };
+            if (i == events.length - 1){last = true}else{last = false};
+            $("#timeline-card").append(get_HTML_Timeline(date, label_type, label_class, label_text, event.short_description, last = last, warning = warning));
+
+        };
+
+    };
+
+    function get_HTML_Timeline(date, label_type, label_class, label_text, description, last = false, warning = false){
+        var label, icon_warning;
+        var icon = "circle-o";
+        if(last){icon = "circle"};
+        if (warning){icon_warning = "<i class='fa fa-warning' style='color:red'></i>"}else{icon_warning=""};
+        if (label_type == "label"){
+            label = "<span class='label label-" + label_class + "' style='font-size:100%'>" + label_text + "</span>";
+        } else if (label_type == "text"){
+            label = "<span class='text-" + label_class + "' style='font-size:100%;font-weight:900;'>" + label_text + "</span>";
+        };
+        var html = "\
+        <div class='row equal-height'>\
+            <div class='col-xs-4 timeline-date'>\
+                <span class='text-muted' style='font-size:80%;'>" + date + "</span>\
+            </div>\
+            <div class='col-xs-1 timeline-circles no-padding'>\
+                <div class='border-right'><i class='fa fa-" + icon + "'></i></div>\
+                <div class='border-right'></div>\
+            </div>\
+            <div class='col-xs-8 timeline-description'>\
+                <div>" + icon_warning + label + "</div>\
+                <div>" + description + "</div>\
+            </div>\
+        </div>"
+        return html;
+    };
+
+
+// END GET PART HISTORY######################################################################
+
+
 
 
 // FUNCTION TO INIT A STL CANVAS########################################

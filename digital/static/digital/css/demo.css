@@ -163,3 +163,77 @@
 .dz-drag-hover .card{
     background-color:#72d4f1;
 }
+.row.equal-height{
+    display: flex;
+    display: -webkit-flex;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+.no-padding{
+    padding:0px;
+}
+.no-padding-left{
+    padding-left:0px;
+}
+.timeline-date{
+    text-align:right;
+}
+.timeline-description div{
+    margin-bottom: 10px;
+}
+.timeline-circles{
+    font-size:1.8rem;
+    width:0px;
+}
+.timeline-circles .border-right{
+    width:100%;
+}
+.timeline-circles .border-right:nth-child(1){
+    height:1.6rem;
+}
+.timeline-circles .border-right:nth-child(2){
+    height:calc(100% - 1.6rem + 16px);
+    border-right:solid #c5c5c5 1px;
+}
+.timeline-circles i{
+    position:absolute;
+    right:0;
+    margin-right:-1.15rem;
+    color: #949494;
+}
+#timeline-card{
+    max-height:500px;
+    overflow-y:scroll;
+}
+#timeline-card:after {
+    content:'';
+    width:100%;
+    height:100%;
+    border-radius: 3px;
+    position:absolute;
+    left:0;
+    top:0;
+    /* Safari 5.1 to 6.0 */
+    background: -webkit-linear-gradient(white 0%, transparent 10%,transparent 85%, white 100%);
+    /* Opera 11.1 to 12.0 */
+    background: -o-linear-gradient(white 0%, transparent 10%,transparent 85%, white 100%);
+    /* Firefox 3.6 to 15 */
+    background: -moz-linear-gradient(white 0%, transparent 10%,transparent 85%, white 100%);
+    /* Standard syntax */
+    /*background: linear-gradient(red, yellow 10%, green 20%);*/
+    background:linear-gradient(white 0%, transparent 10%,transparent 85%, white 100%);
+}
+.file-row{
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    word-break: break-word;
+}
+.card-top-icon{
+    font-size:2.8rem !important;
+    position:absolute;
+    color:#7d7d7d;
+    top:-17px;
+    right:8px;
+    z-index:2;
+}

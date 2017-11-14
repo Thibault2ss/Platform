@@ -49,6 +49,9 @@ def getPartSumUp(organisation):
         parts_metal = Sum(Case(When(material__family="metal", then=1),default = 0,output_field=IntegerField())),
         parts_plastic = Sum(Case(When(material__family="plastic", then=1),default = 0,output_field=IntegerField())),
     )
+    for key, item in parts_sumup.iteritems():
+        if item is None:
+            parts_sumup[key]=0
     return parts_sumup
 
 def getOrganisationCapacity(organisation):

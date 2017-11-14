@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^parts/$', views.parts, name=app_name+'parts'),
     url(r'^parts/upload-part-bulk-file/$', views.upload_part_bulk_file, name=app_name+'upload_part_bulk_file'),
     url(r'^parts/request-for-indus/$', views.request_for_indus, name=app_name+'request_for_indus'),
+    url(r'^parts/get-part-history/$', views.get_part_history, name=app_name+'get_part_history'),
     url(r'^billing/$', views.billing, name=app_name+'billing'),
     url(r'^table/$', views.table, name=app_name+'table'),
     url(r'^notifications/$', views.notifications, name=app_name+'notifications'),

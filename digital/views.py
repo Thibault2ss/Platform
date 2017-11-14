@@ -6,13 +6,14 @@ import os
 from os.path import join
 import numpy
 from stl import mesh
-from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus
 from django.core import serializers
 from digital.forms import PartBulkFileForm
 from django.core.files.uploadedfile import UploadedFile
 from digital.utils import getPartsClean, send_email, getPartSumUp
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
+from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent
 dir_path = os.path.dirname(os.path.realpath(__file__))
 # Create your views here.
 @login_required
@@ -22,7 +23,7 @@ def dashboard(request):
     context = {
         'page':"dashboard",
         'parts_sumup':parts_sumup,
-        }
+    }
     # total_parts_indus = Parts.objects.filter()
     return render(request, 'digital/dashboard.html', context)
 @login_required
@@ -41,6 +42,7 @@ def printers(request):
 def parts(request):
     # query parts, and add all images to a _image attribute in Part object for more query efficiency in template
     parts = getPartsClean(request.user.organisation)
+    parts_sumup = getPartSumUp(request.user.organisation)
     stl_mesh = mesh.Mesh.from_file(join(dir_path, 'static', 'digital', 'stl', 'assemb6.STL'))
     volume, cog, inertia = stl_mesh.get_mass_properties()
     # print("Volume                                  = {0}".format(volume))
@@ -51,6 +53,7 @@ def parts(request):
     context = {
         'page':"parts",
         'parts':parts,
+        'parts_sumup':parts_sumup,
         'formPartBulkFile': PartBulkFileForm(),
     }
     return render(request, 'digital/parts.html', context)
@@ -143,17 +146,48 @@ def request_for_indus(request):
         pendingStatus = ClientPartStatus.objects.get(id=2)
         part.status = pendingStatus
         part.save()
-        send_email(
-            'digital/mail_templates/rfi.html',
-            { 'user': request.user, 'part':part },
-            'SP3D: New Industrialisation Request',
-            'contact@sp3d.co',
-            ['paul.de-misouard@sp3d.co','thibault.de-saint-sernin@sp3d.co'],
-            )
+        if not settings.DEBUG:
+            send_email(
+                'digital/mail_templates/rfi.html',
+                { 'user': request.user, 'part':part },
+                'SP3D: New Industrialisation Request',
+                'contact@sp3d.co',
+                ['paul.de-misouard@sp3d.co','thibault.de-saint-sernin@sp3d.co'],
+                )
+        new_event = PartEvent.objects.create(
+            part=part,
+            created_by = request.user,
+            type="STATUS_CHANGE",
+            status = part.status,
+            short_description = "status changed to %s"%part.status.name,
+            long_description = "The part has been changed to status: %s, and will be reviewed by our team. We will get back to you ASAP"%part.status.name
+        )
     else:
         success=False
+        errors.append("this part does not belong to your organisation")
     data={
         "success":success,
         "errors":errors,
+        }
+    return JsonResponse(data)
+
+@login_required
+def get_part_history(request):
+    success=True
+    errors=[]
+    id_part = request.GET.get("id_part")
+    part = Part.objects.get(id=id_part)
+    if part.organisation == request.user.organisation:
+        events = PartEvent.objects.filter(part = part).order_by('date')
+        print events
+        for event in events:
+            print "EVENT: %s"%event.short_description
+    else:
+        success=False
+        errors.append("this part does not belong to your organisation")
+    data={
+        "success":success,
+        "errors":errors,
+        "events":serializers.serialize('json', events, use_natural_foreign_keys=True),
         }
     return JsonResponse(data)

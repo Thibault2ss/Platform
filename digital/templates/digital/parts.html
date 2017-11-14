@@ -14,10 +14,10 @@
                 <div class="container-fluid">
                     <div class="row" style="text-align:center;margin-bottom:20px;">
                         <div class="col-lg-12">
-                            <button class="btn btn-order-class btn-danger btn-fill"><span style="font-weight:bold;margin-right:10px;"></span> New</button>
-                            <button class="btn btn-order-class btn-warning"><span style="font-weight:bold;margin-right:10px;"></span> Pending</button>
-                            <button class="btn btn-order-class btn-info" ><span style="font-weight:bold;margin-right:10px;"></span> Produced</button>
-                            <button class="btn btn-order-class btn-success"><span style="font-weight:bold;margin-right:10px;"></span> Shipped</button>
+                            <button class="btn btn-order-class btn-info btn-fill" value=""><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_total}}</span> All</button>
+                            <button class="btn btn-order-class btn-warning" value="2"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_pending_indus}}</span> Pending</button>
+                            <button class="btn btn-order-class btn-danger" value="3"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_disqualified}}</span> Disqualified</button>
+                            <button class="btn btn-order-class btn-success" value="4"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_industrialized}}</span> Digitalized</button>
                         </div>
                     </div>
                     <div class="row">
@@ -78,7 +78,7 @@
             </div>
             <div class="content" id="part-detail-panel" data-part-id="" style="position:relative;">
                 <div class="container-fluid">
-                    <div class="row row-status" style="margin-bottom:20px;">
+                    <!-- <div class="row row-status" style="margin-bottom:20px;">
                         <div class="col-xs-4 text-center">
                             <span class="label label-default" data-status-id="1" style="font-size:100%">Created</span><div><small class="part-date part-date-created"></small></div>
                         </div>
@@ -88,37 +88,13 @@
                         <div class="col-xs-4 text-center">
                             <span class="text-muted" data-status-id="3" style="font-size:100%">Digitalized</span><div><small class="part-date part-date-indus-result"></small></div>
                         </div>
-                    </div>
+                    </div> -->
                     <div class="row">
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-xs-12" id="canvas-container">
                                     <div id="stl-canvas" class="stl-canvas" style="display:flex;align-items:center;">
                                         <button id="stl-demo" class="btn btn-warning btn-fill btn-wd" style="margin-left:23%;font-weight:900;">3D DEMO</button>
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-                        </div>
-                        <div class="col-md-4">
-                            <div class="row">
-                                <div class="col-xs-12">
-                                    <div class="card">
-                                        <i class="fa fa-info-circle" style="font-size:3.5rem;position:absolute;color:#7d7d7d;top:-17px;right:8px;"></i>
-                                        <div class="content">
-                                            <div class="row text-center" style="margin-bottom:10px;">
-                                                <div class="col-sm-12 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Ref</span><br>
-                                                    <div class="part-ref" style="margin-left:15px;"></div>
-                                                </div>
-                                                <div class="col-sm-12 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Name</span><br>
-                                                    <div class="part-name" style="margin-left:15px;"></div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-xs-12">
@@ -129,7 +105,7 @@
                                         <!-- <input type="submit" value="Save" name="_save"> -->
                                         <div class="dz-default dz-message"><span></span></div>
                                         <div class="card">
-                                            <i class="ti-link" style="font-size:3.5rem;position:absolute;color:#7d7d7d;top:-17px;right:8px;"></i>
+                                            <i class="card-top-icon ti-link"></i>
                                             <div class="content">
                                                 <div class="row text-center">
                                                     <h5>Bulk Files</h5>
@@ -148,12 +124,30 @@
                         </div>
                         <div class="col-md-4">
                             <div class="row">
-                                <div class="col-md-12 text-center" style="margin-bottom:20px;">
-                                    <button id="button-action-1" class="btn btn-default btn-fill btn-wd disabled" style="font-weight:900;"></button>
+                                <div class="col-xs-12">
+                                    <div class="card">
+                                        <i class="fa fa-info-circle card-top-icon"></i>
+                                        <div class="content">
+                                            <div class="row text-center" style="margin-bottom:10px;">
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Name</span><br>
+                                                    <div class="part-name" style="margin-left:15px;"></div>
+                                                </div>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Status</span><br>
+                                                    <span class="label part-status label-default" style="font-size:100%;margin-left:15px;">Created</span>
+                                                </div>
+                                                <div class="col-sm-12 col-xs-12">
+                                                    <span class="text-muted" style="float:left;font-size:70%;">Ref</span><br>
+                                                    <div class="part-ref" style="margin-left:15px;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="card">
-                                        <i class="ti-settings" style="font-size:3.5rem;position:absolute;color:#7d7d7d;top:-17px;right:8px;"></i>
+                                        <i class="card-top-icon ti-settings"></i>
                                         <div class="content">
                                             <div class="row text-center" style="margin-bottom:10px;">
                                                 <div class="col-sm-6 col-xs-12">
@@ -207,6 +201,33 @@
                                                 <div class="col-sm-12 col-xs-12">
                                                     <span class="text-muted" style="float:left;font-size:70%;">Environment</span><br>
                                                     <div class="part-grade" style="margin-left:15px;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-12 text-center" style="margin-bottom:20px;">
+                                    <button id="button-action-1" class="btn btn-default btn-fill btn-wd disabled" style="font-weight:900;"></button>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <i class="card-top-icon ti-calendar"></i>
+                                        <div id="timeline-card" class="content">
+                                            <div class="row equal-height">
+                                                <div class="col-xs-4 timeline-date">
+                                                    <span class="text-muted" style="font-size:80%;">12 Dec 2017</span>
+                                                </div>
+                                                <div class="col-xs-1 timeline-circles no-padding">
+                                                    <div class="border-right"><i class="fa fa-circle-o"></i></div>
+                                                    <div class="border-right"></div>
+                                                </div>
+                                                <div class="col-xs-8 timeline-description">
+                                                    <div><span class="label label-default" style="font-size:100%">Created</span></div>
+                                                    <div>fefewfwef</div>
                                                 </div>
                                             </div>
                                         </div>
