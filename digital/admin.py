@@ -48,7 +48,7 @@ class Part_Admin(admin.ModelAdmin):
     fieldsets = (
         (None, {'fields': ('created_by','organisation','model', 'reference', 'name')}),
         ('Dimensions & Weight', {'fields': ('material','length', 'width', 'height','dimension_unit', 'weight','weight_unit')}),
-        ('Other Characteristics', {'fields': ('color','grade')}),
+        ('Other Characteristics', {'fields': ('color','grade', 'environment')}),
     )
     inlines=[PartImage_Inline, PartBulkFile_Inline]
 

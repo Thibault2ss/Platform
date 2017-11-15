@@ -34,7 +34,6 @@
     {%endif%}
 {%endfor%}
 <!-- ######################################### -->
-
 <div class="wrapper">
     <div class="container">
 
@@ -146,25 +145,20 @@
 
     <div id="social-signup-modal">
     </div>
-
-    <ul class="bg-bubbles">
+    <ul id="particles-container" class="bg-bubbles">
+        <!-- <li></li>
         <li></li>
         <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
+        <li></li> -->
     </ul>
+
 </div>
 {% endblock %}
 
 {% block extra_body %}
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script> -->
+<script src="{% static 'account/js/particles.min.js'%}"></script>
 <script src="{% static 'account/js/login.js'%}"></script>
 
 {% endblock %}

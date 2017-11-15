@@ -61,20 +61,21 @@ body :-ms-input-placeholder {
   color: white;
   font-weight: 300;
 }
-
+/*original gradient: linear-gradient(to bottom right, #50a3a2 0%, #53e3a6 100%);*/
+/*sp3d colors: blue #1B3C74, orange #F47835*/
 .wrapper {
     display:table;
-  background: #50a3a2;
-  background: -webkit-linear-gradient(top left, #50a3a2 0%, #53e3a6 100%);
-  background: -moz-linear-gradient(top left, #50a3a2 0%, #53e3a6 100%);
-  background: -o-linear-gradient(top left, #50a3a2 0%, #53e3a6 100%);
-  background: linear-gradient(to bottom right, #50a3a2 0%, #53e3a6 100%);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  min-height:600px;
+    background: #50a3a2;
+    background: -webkit-linear-gradient(top left,  #1B3C74 0%, #F47835 100%);
+    background: -moz-linear-gradient(top left,  #1B3C74 0%, #F47835 100%);
+    background: -o-linear-gradient(top left,  #1B3C74 0%, #F47835 100%);
+    background: linear-gradient(to bottom right, #1B3C74 0%, #F47835 100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    min-height:600px;
 }
 .wrapper.form-success .container h1 {
   transform: translateY(85px);
@@ -89,6 +90,7 @@ body :-ms-input-placeholder {
     /*padding: 80px 0;*/
     /*height: 400px;*/
     text-align: center;
+    pointer-events: none;
 }
 .container h1{
   font-size: 40px;
@@ -111,6 +113,7 @@ body :-ms-input-placeholder {
 .subcontainer{
     display:inline-block;
     height:457px;
+    pointer-events: auto;
 }
 
 /*-------------------------------FORMS----------------------------------------*/
@@ -122,12 +125,15 @@ body :-ms-input-placeholder {
     transition: color 0.2s linear 0s;
     cursor: pointer;
     opacity:0;
+    pointer-events: auto;
 }
 .toggle-form:hover{
-    color:#266362;
+    /*color:#266362;*/
+    color: #F47835;
 }
 .toggle-form.active{
-    color:#266362;
+    /*color:#266362;*/
+    color: #F47835;
 }
 
 form {
@@ -164,24 +170,26 @@ form input:hover {
 form input:focus {
   background-color: white;
   width: 300px;
-  color: #53e3a6;
+  /*color: #53e3a6;*/
+  color: #1B3C74;
 }
 form button {
     padding: 10px 15px;
     margin: 10px auto 10px auto;
     display: block;
-  appearance: none;
-  outline: 0;
-  background-color: white;
-  border: 0;
-  padding: 10px 15px;
-  color: #53e3a6;
-  border-radius: 2px;
-  width: 250px;
-  cursor: pointer;
-  font-size: 18px;
-  -webkit-transition: all 0.2s linear 0s;
-  transition: all 0.2s linear 0s;
+    appearance: none;
+    outline: 0;
+    background-color: white;
+    border: 0;
+    padding: 10px 15px;
+    /*color: #53e3a6;*/
+    color: #F47835;
+    border-radius: 2px;
+    width: 250px;
+    cursor: pointer;
+    font-size: 18px;
+    -webkit-transition: all 0.2s linear 0s;
+    transition: all 0.2s linear 0s;
 }
 form button:hover {
   background-color: #f5f7f9;
@@ -197,7 +205,7 @@ form button:hover {
   background-color: white;
   border: 0;
   padding: 10px 15px;
-  color: #53e3a6;
+  color: #F47835;
   border-radius: 2px;
   cursor: pointer;
   font-size: 18px;
@@ -414,4 +422,7 @@ form button:hover {
   to {
     -webkit-filter: hue-rotate(-360deg);
   }
+}
+#particles-container{
+    opacity:0;
 }

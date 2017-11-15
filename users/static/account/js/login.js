@@ -1,6 +1,6 @@
-
 $.fn.extend({
-    animateCss: function (animationName, callback=null) {
+    animateCss: function (animationName, callback) {
+        callback =  callback || null;
         var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
         this.addClass('animated ' + animationName).one(animationEnd, function() {
             $(this).removeClass('animated ' + animationName);
@@ -13,24 +13,35 @@ $.fn.extend({
 });
 
 $(document).ready(function(){
+// LOAD PARTICLES//////////////////////////////////////////////////////////////////////
+    particlesJS.load('particles-container', '/static/account/json/particles.json', function() {
+      console.log('callback - particles.js config loaded');
+    });
+// END LOAD PARTICLES//////////////////////////////////////////////////////////////////////
+
+
 
     // INITIAL ANIMATIONS/////////////////////////////////////////////////////////////////////
     if(has_signin_error){
         $('.container h1').css("opacity", 1);
         $('.toggle-form').css("opacity",1);
         $('#login_form').show().css("opacity",1);
+        $("#particles-container").css("opacity",1);
         console.log("1");
     } else if(has_signup_error){
         $('.container h1').css("opacity", 1);
         $('.toggle-form').css("opacity",1);
         $('#signup_form').show().css("opacity",1);
+        $("#particles-container").css("opacity",1);
         console.log("2");
     } else {
-        console.log("3");
         wordAppearance('.container h1');
         setTimeout(function(){
             $('.toggle-form').animateCss('fadeInUp', function(){$(this).css('opacity',1)});
         },1000);
+        setTimeout(function(){
+            $("#particles-container").css("opacity",1).animateCss('zoomIn');
+        }, 1200);
     };
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -114,25 +114,28 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 # ACTIVATE DB ROUTERS FOR SPECIAL DB ROUTING
 # DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
-DATABASES = {
-# ACTIVATE THIS DEFAULT LOCALLY FOR DEV
-    # 'default':{
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'SP3D_USERS',
-    #     'USER': 'user01',
-    #     'PASSWORD': 'SpareParts3D#',
-    #     'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
-    #     'PORT': '3306',
-    # },
-# ACTIVATE THE DEFAULT DB BELOW FOR PROD
-    'default':{
+if DEBUG:
+    default_db = {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'SP3D_USERS',
+        'USER': 'user01',
+        'PASSWORD': 'SpareParts3D#',
+        'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
+    }
+else:
+    default_db = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SP3D_CLOUD',
         'USER': 'sp3dadmin',
         'PASSWORD': 'SpareParts3D#',
         'HOST': 'sp3dclouddb.csgmjvodxypo.ap-southeast-1.rds.amazonaws.com',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
-    },
+    }
+
+DATABASES = {
+# ACTIVATE THE DEFAULT DB BELOW FOR PROD
+    'default':default_db,
 # ACTIVATE ONLY IF SEPARATES DB AND ACTIVATE THE DB ROUTER
     # 'jb_db': {
     #     'ENGINE': 'django.db.backends.mysql',
