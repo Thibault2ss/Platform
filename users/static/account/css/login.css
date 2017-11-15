@@ -232,7 +232,7 @@ form button:hover {
     width:250px;
     height:41px;
     line-height: 41px;
-    background-color: #007BB6;
+    background-color: #1B3C76;
     border-radius:2px;
     color:#f5f7f9;
     font-size:1.1rem;
@@ -244,7 +244,7 @@ form button:hover {
     margin:0 0 0 13px;
 }
 .social-signin-button:hover{
-    background-color: #008bce;
+    background-color: #2451a0;
 }
 .errors{
     margin-bottom: 10px;
@@ -335,6 +335,7 @@ form button:hover {
   height: 160px;
   animation-delay: 11s;
 }
+
 
 
 

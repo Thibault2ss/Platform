@@ -1,3 +1,4 @@
+// EXTEND JQUERY FOR ANIMATION##################################################
 $.fn.extend({
     animateCss: function (animationName, callback) {
         callback =  callback || null;
@@ -12,12 +13,78 @@ $.fn.extend({
     }
 });
 
+
+// logo animation///////////////////////////////////////////////////////////////////
+var logoAnimation = (function() {
+    var logoSVG = document.querySelector('#logoDrawingAnimation');
+    logoSVG.style.transform = 'translateY(100px)'
+    var logoTimeline = anime.timeline({ autoplay: false });
+    var pathEls = document.querySelectorAll('#logoDrawingAnimation path');
+    for (var i = 0; i < pathEls.length; i++) {
+      var el = pathEls[i];
+      el.setAttribute('stroke-dashoffset', anime.setDashoffset(el));
+    }
+
+    logoTimeline
+      .add({
+        targets: '#logoDrawingAnimation path',
+        strokeDashoffset: {
+          value: [anime.setDashoffset, 0],
+          duration: 700,
+          delay: function(el, i, t) { return i * 50 },
+          easing: 'easeInOutSine'
+        },
+        fill: {
+          value: function(el){ return anime.getValue(el.parentNode, 'fill') },
+          duration: 1400,
+          delay: function(el, i, t) { return 600 + (i * 50) },
+          easing: 'easeInOutSine',
+          begin: function(a) {},
+          update: function(a) {},
+          complete: function(a) {},
+        },
+        offset:350
+    }).add({
+        targets: '#logoDrawingAnimation',
+        translateY: [100, 0],
+        duration: 500,
+        // opacity: { value: [0, 1], duration: 100, easing: 'linear' },
+        // delay: function(el, i, t) { return 4200 + ( i * 20 ); },
+        offset: 2500
+    }).add({
+        targets: '.container h1',
+        opacity: [1, 0],
+        duration: 2000,
+        offset: 2500
+    }).add({
+        targets: '.toggle-form',
+        opacity: [0, 1],
+        duration: 200,
+        offset: 2500
+    }).add({
+        targets: '#particles-container',
+        opacity: { value: [0, 1], duration: 5000, easing: 'linear' },
+        offset: 3000
+    });
+
+    function init() {
+      document.body.classList.add('ready');
+      // logoTimeline.seek(4700);
+      logoTimeline.play();
+    }
+    return {
+      init: init
+    }
+})();
+// END LOGO ANIMATION FUNCTION DEFINITION########################################################
+
 $(document).ready(function(){
 // LOAD PARTICLES//////////////////////////////////////////////////////////////////////
     particlesJS.load('particles-container', '/static/account/json/particles.json', function() {
       console.log('callback - particles.js config loaded');
     });
 // END LOAD PARTICLES//////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -36,12 +103,10 @@ $(document).ready(function(){
         console.log("2");
     } else {
         wordAppearance('.container h1');
-        setTimeout(function(){
-            $('.toggle-form').animateCss('fadeInUp', function(){$(this).css('opacity',1)});
-        },1000);
-        setTimeout(function(){
-            $("#particles-container").css("opacity",1).animateCss('zoomIn');
-        }, 1200);
+        // setTimeout(function(){
+        //     $("#particles-container").css("opacity",1).animateCss('zoomIn');
+        // }, 3500);
+        logoAnimation.init();
     };
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -143,3 +208,6 @@ $(document).ready(function(){
 
 
 });
+
+
+// END JQUERY READY######################################################################################

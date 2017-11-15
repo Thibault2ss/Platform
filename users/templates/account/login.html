@@ -38,7 +38,10 @@
     <div class="container">
 
         <!-- <div class="subcontainer"> -->
-            <h1>Welcome to <span class="fw-300">SP3D</span></h1>
+            <h1>Welcome to <span class="fw-300"></span></h1>
+            <div id="logoDrawingAnimation" style="max-width:500px;margin-left:auto;margin-right:auto;">
+                {% include 'account/svg/spareparts3d-1.svg' %}
+            </div>
             <h2>
                 <span class="toggle-form" data-toggle-form="login_form">Login</span>
                 <span class="toggle-form" data-toggle-form="signup_form">Sign Up</span>
@@ -159,6 +162,7 @@
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script> -->
 <script src="{% static 'account/js/particles.min.js'%}"></script>
+<script src="{% static 'account/js/anime.min.js'%}"></script>
 <script src="{% static 'account/js/login.js'%}"></script>
 
 {% endblock %}
