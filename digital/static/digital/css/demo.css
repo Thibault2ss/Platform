@@ -1,6 +1,6 @@
 ::-webkit-scrollbar {
-    width: 0px;
-    background: transparent; /* make scrollbar transparent */
+    /*width: 0px;
+    /*background: transparent; /* make scrollbar transparent */
 }
 @media (min-width: 992px){
     .typo-line{

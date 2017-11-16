@@ -211,7 +211,8 @@
                                     <form enctype="multipart/form-data" action="" method="post" id="partbulkfile_form" class="dropzone">
                                         {%csrf_token%}
                                         {%comment%}{{formPartBulkFile}}{%endcomment%}
-                                        <input type="hidden" name="part" required="" id="id_part">
+                                        <input type="hidden" class="id_part" name="part" required="">
+                                        <input type="hidden" name="type" required="" value="BULK">
                                         <!-- <input type="submit" value="Save" name="_save"> -->
                                         <div class="dz-default dz-message"><span></span></div>
                                         <div class="card">
@@ -226,7 +227,38 @@
                                                         <div class="progressBar-inner"></div>
                                                     </div>
                                                 </div>
-                                                <div id="bulk-file-list" class="row">
+                                                <div class="file-list" class="row">
+                                                    <div class='file-row' data-id=""><a href='' target='_blank'>
+                                                        <i class='ti-download'></i></href>test bulk file</a>
+                                                        <div class="remove-file remove-icon"><i class="ti-close"></i></div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-xs-12">
+                                    <form enctype="multipart/form-data" action="" method="post" id="part3dfile_form" class="dropzone">
+                                        {%csrf_token%}
+                                        {%comment%}{{formPartBulkFile}}{%endcomment%}
+                                        <input type="hidden" name="part" class="id_part" required="">
+                                        <input type="hidden" name="type" required="" value="3D">
+                                        <!-- <input type="submit" value="Save" name="_save"> -->
+                                        <div class="dz-default dz-message"><span></span></div>
+                                        <div class="card">
+                                            <i class="card-top-icon ti-link"></i>
+                                            <i class="remove-icon allow-remove ti-close"></i>
+                                            <i class="card-plus-icon ti-plus"></i>
+
+                                            <div class="content" style="overflow:hidden;">
+                                                <div class="row text-center">
+                                                    <h5>3D Files</h5>
+                                                    <div class="progressBar">
+                                                        <div class="progressBar-inner"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="file-list" class="row">
                                                     <div class='file-row' data-id=""><a href='' target='_blank'>
                                                         <i class='ti-download'></i></href>test bulk file</a>
                                                         <div class="remove-file remove-icon"><i class="ti-close"></i></div>
@@ -259,11 +291,13 @@
 <script src="{% static 'digital/js/slick.min.js' %}"></script>
 <script src="{% static 'digital/js/dropzone.min.js' %}"></script>
 <script>
-$('#ordersCarousel').carousel({
-    interval: false
-});
-$('#imageCarousel').carousel({
-    interval: false
+$(document).ready(function(){
+    $('#ordersCarousel').carousel({
+        interval: false
+    });
+    $('#imageCarousel').carousel({
+        interval: false
+    });
 });
 // prevent dropzones to initialize when loaded, so that we initialize them with our own options below
 Dropzone.autoDiscover = false;

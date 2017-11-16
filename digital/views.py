@@ -120,7 +120,7 @@ def upload_part_bulk_file(request):
                 if form.is_valid():
                     print "FORM IS VALID"
                     _new_file = form.save()
-                    files_success.append({"name":(_new_file.file.name).rsplit("/",1)[1], "url":_new_file.file.url, 'id':_new_file.id})
+                    files_success.append({"name":(_new_file.file.name).rsplit("/",1)[1], "url":_new_file.file.url, 'id':_new_file.id, 'type':_new_file.type})
                 else:
                     print "FORM IS NOT VALID"
                     files_failure.append({"name":_file})
@@ -197,9 +197,6 @@ def get_part_history(request):
     part = Part.objects.get(id=id_part)
     if part.organisation == request.user.organisation:
         events = PartEvent.objects.filter(part = part).order_by('date')
-        print events
-        for event in events:
-            print "EVENT: %s"%event.short_description
     else:
         success=False
         errors.append("this part does not belong to your organisation")

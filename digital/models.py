@@ -64,7 +64,7 @@ class PartEvent(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
     part = models.ForeignKey('Part', on_delete=models.CASCADE, null=True)
-    type = models.CharField(max_length=20, null=True, choices=[('mm','mm'), ('inch','inch')], default="INFO")
+    type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES, default="INFO")
     status = models.ForeignKey('ClientPartStatus', on_delete=models.CASCADE, null=True)
     short_description = models.CharField(max_length=100, default = '')
     long_description = models.TextField(default = '')
@@ -200,20 +200,39 @@ def partimage_delete(sender, instance, **kwargs):
 
 
 def get_bulk_path(instance, filename):
+    path = '{0}/parts/{1}/'.format(instance.part.organisation.name, instance.part.reference)
+    if instance.type == "BULK":
+        path = path + 'bulk_files/{0}'.format(filename)
+    elif instance.type == "MATERIAL":
+        path = path + 'bulk_files/{0}'.format(filename)
+    elif instance.type == "2D":
+        path = path + '2d_files/{0}'.format(filename)
+    elif instance.type == "3D":
+        path = path + '3d_files/{0}'.format(filename)
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    return '{0}/parts/{1}/bulk_files/{2}'.format(instance.part.organisation.name, instance.part.reference, filename)
+    return path
 
 class PartBulkFile(models.Model):
+    FILE_TYPE_CHOICES = (
+        ("BULK", "bulk files"),
+        ("MATERIAL", "material files"),
+        ("3D", "3d model"),
+        ("2D", "2d drawings"),
+    )
     date_created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
     part = models.ForeignKey('Part', on_delete=models.CASCADE, null=True)
+    type = models.CharField(max_length=20, choices=FILE_TYPE_CHOICES, default="BULK")
     file = models.FileField(storage = PrivateMediaStorage(bucket='sp3d-clients'), upload_to = get_bulk_path, blank=True)
 
     def __str__(self):
         return "%s" % (self.file.name,)
 
+    def getTypeChoices(self):
+        return self.FILE_TYPE_CHOICES
+
     def natural_key(self):
-        return {"name":self.file.name, "url":self.file.url, 'id':self.id}
+        return {"name":self.file.name, "url":self.file.url, 'id':self.id, 'type':self.type}
 
 # delete image file on bucket on delete instance if not in  production:
 @receiver(pre_delete, sender=PartBulkFile)

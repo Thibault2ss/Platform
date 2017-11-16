@@ -4,9 +4,10 @@ from digital.models import PartBulkFile, Part
 class PartBulkFileForm(forms.ModelForm):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))
     part = forms.ModelChoiceField(queryset=Part.objects.none(),widget=forms.HiddenInput(attrs={'required': True}))
+    type = forms.ChoiceField(choices=PartBulkFile().getTypeChoices,widget=forms.HiddenInput(attrs={'required': True}))
     class Meta:
         model = PartBulkFile
-        fields = ['part', 'file']
+        fields = ['part', 'file', 'type']
 
     def __init__(self, *args, **kwargs):
         created_by = None

@@ -57,7 +57,7 @@ $(document).ready(function(){
         for (var i = 0; i < part_images.length; i++){
             $('#imageCarousel').slick('slickAdd','<img src="' + part_images[i] + '">');
         };
-        setTimeout(function(){$('#imageCarousel').slick('setPosition');},150);
+        setTimeout(function(){$('#imageCarousel').slick('setPosition');},250);
 
         // populate info
         var name, ref, material, length, dimension_unit, weight_unit, date_created, model, bulk_files, color, grade_list, environment_list, status
@@ -98,7 +98,7 @@ $(document).ready(function(){
             $(".part-status").addClass("label-success");
             $("#button-action-1").removeClass().addClass("btn btn-success btn-fill btn-wd print-request-button").text("Print");
         };
-        $("#id_part").val(part.pk);
+        $(".id_part").val(part.pk);
         $("#models-attached").empty();
         for (var i = 0; i < model.length; i++){
             var html = "<div class='col-sm-6 col-xs-12'>\
@@ -127,13 +127,18 @@ $(document).ready(function(){
                         </div>";
             $("#environments-attached").append(html);
         };
-        $("#bulk-file-list").empty();
+        $(".file-list").empty();
         for (var i = 0; i < bulk_files.length; i++){
-            $("#bulk-file-list").append("\
-                <div class='file-row' data-id='" +  bulk_files[i].id + "'><a href='" + bulk_files[i].url + "' target='_blank'>\
-                    <i class='ti-download'></i>" + bulk_files[i].name + "</a>\
-                    <div class='remove-file remove-icon'><i class='ti-close'></i></div>\
-                </div>");
+            var html = "\
+                        <div class='file-row' data-id='" +  bulk_files[i].id + "'><a href='" + bulk_files[i].url + "' target='_blank'>\
+                            <i class='ti-download'></i>" + bulk_files[i].name + "</a>\
+                            <div class='remove-file remove-icon'><i class='ti-close'></i></div>\
+                        </div>"
+            if (bulk_files[i].type == "3D" || bulk_files[i].type == "2D"){
+                $("#part3dfile_form").find(".file-list").append(html);
+            } else {
+                $("#partbulkfile_form").find(".file-list").append(html);
+            }
         };
 
         // refresh buttons listeners
@@ -220,60 +225,70 @@ $(document).ready(function(){
         }
     }
 // END NOW I USE DROPZONE INSTEAD OF THIS##################################################################################
+    function dropzoneConfig(id_form){
+        var config = {
+            url: "/digital/parts/upload-part-bulk-file/",
+            paramName: "file", // The name that will be used to transfer the file
+            maxFilesize: 5, // MB
+            createImageThumbnails: false,
+            clickable: true,
+            // acceptedFiles:".stl,.sldprt,.step,.ico",
+            accept: function(file, done) {
+                if (file.name == "justin.jpg") {
+                  done("Naha, you don't.");
+                }
+                else { done(); }
+            },
+            init: function () {
+                var $form = $(id_form);
+                this.on("sending", function(file, xhr, formData) {
+                //    formData.append("csrfmiddlewaretoken", csrftoken);
+                    $form.find(".progressBar-inner").css("background-color","#6dbad8");
+                    $form.find(".progressBar").css("opacity",1);
+                    $form.find(".remove-file").removeClass("visible");
+                });
+                this.on('uploadprogress',function(file, progress, bytesSent){
+                    $form.find(".progressBar-inner").css("width", progress + "%");
+                });
+                this.on('complete', function () {
+                    setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                    setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+                });
+                this.on("success", function(file, response) {
+                    console.log(response);
+                    if (response.success=true){
+                        $form.find(".progressBar-inner").css("background-color","green");
+                    } else {
+                        $form.find(".progressBar-inner").css("background-color","red");
+                    };
+                    // update part-row:
+                    for (var i = 0; i < response.files_success.length; i++){
+                        console.log("it pushed");
+                        $(".part-row[data-part-id='" + response.id_part + "']").data("part-bulk-files").push(response.files_success[i]);
+                        $form.find(".file-list").append("\
+                            <div class='file-row' data-id='" + response.files_success[i].id + "'><a href='" + response.files_success[i].url + "' target='_blank'>\
+                                <i class='ti-download'></i>" + response.files_success[i].name + "</a>\
+                                <div class='remove-file remove-icon'><i class='ti-close'></i></div>\
+                            </div>");
+                    };
+                    refreshButtons();
+                });
+            },
+            error:function(file, response){
+                console.log(response.message);
+                $("#partbulkfile_form").find(".progressBar-inner").css("background-color","red");
+            },
+        }
+        return config;
+    };
 
-    $("#partbulkfile_form").dropzone({
-        url: "/digital/parts/upload-part-bulk-file/",
-        paramName: "file", // The name that will be used to transfer the file
-        maxFilesize: 5, // MB
-        createImageThumbnails: false,
-        clickable: true,
-        // acceptedFiles:".stl,.sldprt,.step,.ico",
-        accept: function(file, done) {
-            if (file.name == "justin.jpg") {
-              done("Naha, you don't.");
-            }
-            else { done(); }
-        },
-        init: function () {
-            var $form = $("#partbulkfile_form");
-            this.on("sending", function(file, xhr, formData) {
-            //    formData.append("csrfmiddlewaretoken", csrftoken);
-                $form.find(".progressBar-inner").css("background-color","#6dbad8");
-                $form.find(".progressBar").css("opacity",1);
-            });
-            this.on('uploadprogress',function(file, progress, bytesSent){
-                $(".progressBar-inner").css("width", progress + "%");
-            });
-            this.on('complete', function () {
-                setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
-                setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
-            });
-            this.on("success", function(file, response) {
-                console.log(response);
-                if (response.success=true){
-                    $form.find(".progressBar-inner").css("background-color","green");
-                } else {
-                    $form.find(".progressBar-inner").css("background-color","red");
-                };
-                // update part-row:
-                for (var i = 0; i < response.files_success.length; i++){
-                    console.log("it pushed");
-                    $(".part-row[data-part-id='" + response.id_part + "']").data("part-bulk-files").push(response.files_success[i]);
-                    $("#bulk-file-list").append("\
-                        <div class='file-row' data-id='" + response.files_success[i].id + "'><a href='" + response.files_success[i].url + "' target='_blank'>\
-                            <i class='ti-download'></i>" + response.files_success[i].name + "</a>\
-                            <div class='remove-file remove-icon'><i class='ti-close'></i></div>\
-                        </div>");
-                };
-            });
-        },
-        error:function(file, response){
-            console.log(response.message);
-            $("#partbulkfile_form").find(".progressBar-inner").css("background-color","red");
-        },
-    });
+    $("#partbulkfile_form").dropzone(dropzoneConfig("#partbulkfile_form"));
+    $("#part3dfile_form").dropzone(dropzoneConfig("#part3dfile_form"));
 
     $(".card-plus-icon").click(function(){
+        $(this).closest(".dropzone").click();
+    });
+    $("form").click(function(){
         $(this).closest(".dropzone").click();
     });
 // END SENDING BULK FILES ASYNCHRONOUSLY#############################################
@@ -317,6 +332,7 @@ $(document).ready(function(){
                             }
                         };
                         $(".part-row[data-part-id='" + id_part + "']").data("part-bulk-files",new_data);
+                        setTimeout(function(){refreshButtons();},200);
                         refreshButtons();
                     };
                     if (data.error){
@@ -338,6 +354,7 @@ $(document).ready(function(){
 
 // REQUEST FOR INDUSTRIALIZATION######################################################################
     function refreshButtons(){
+        $('.request-for-indus-button').off();
         $('.request-for-indus-button').click(function(){
             var id_part = $("#part-detail-panel").data("part-id");
             $.ajax({
@@ -366,7 +383,7 @@ $(document).ready(function(){
                 }
             });
         });
-
+        $('.remove-file').off();
         $(".remove-file").click(function(){
             removeFile($(this).closest(".file-row").data("id"));
         });
