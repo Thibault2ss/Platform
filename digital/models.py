@@ -213,7 +213,7 @@ class PartBulkFile(models.Model):
         return "%s" % (self.file.name,)
 
     def natural_key(self):
-        return {"name":self.file.name, "url":self.file.url}
+        return {"name":self.file.name, "url":self.file.url, 'id':self.id}
 
 # delete image file on bucket on delete instance if not in  production:
 @receiver(pre_delete, sender=PartBulkFile)

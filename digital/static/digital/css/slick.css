@@ -21,7 +21,7 @@
 .slick-list
 {
     position: relative;
-
+    border-radius:3px;
     display: block;
     overflow: hidden;
 
@@ -119,5 +119,5 @@
 }
 
 #imageCarousel img{
-    height:200px;
+    height:300px;
 }

@@ -37,7 +37,8 @@ $(document).ready(function(){
                 speed: 300,
                 slidesToShow: 1,
                 centerMode: true,
-                variableWidth: true
+                variableWidth: true,
+                focusOnSelect:false,
             });
 // end INITIALIZE SLICK /########################################
 
@@ -128,7 +129,11 @@ $(document).ready(function(){
         };
         $("#bulk-file-list").empty();
         for (var i = 0; i < bulk_files.length; i++){
-                $("#bulk-file-list").append("<div class='file-row'><a href='" + bulk_files[i].url + "' target='_blank'><i class='ti-download'></i></href> " + bulk_files[i].name + "</a></div>");
+            $("#bulk-file-list").append("\
+                <div class='file-row' data-id='" +  bulk_files[i].id + "'><a href='" + bulk_files[i].url + "' target='_blank'>\
+                    <i class='ti-download'></i>" + bulk_files[i].name + "</a>\
+                    <div class='remove-file remove-icon'><i class='ti-close'></i></div>\
+                </div>");
         };
 
         // refresh buttons listeners
@@ -221,7 +226,7 @@ $(document).ready(function(){
         paramName: "file", // The name that will be used to transfer the file
         maxFilesize: 5, // MB
         createImageThumbnails: false,
-        // clickable: true,
+        clickable: true,
         // acceptedFiles:".stl,.sldprt,.step,.ico",
         accept: function(file, done) {
             if (file.name == "justin.jpg") {
@@ -254,7 +259,11 @@ $(document).ready(function(){
                 for (var i = 0; i < response.files_success.length; i++){
                     console.log("it pushed");
                     $(".part-row[data-part-id='" + response.id_part + "']").data("part-bulk-files").push(response.files_success[i]);
-                    $("#bulk-file-list").append("<div class='file-row'><a href='" + response.files_success[i].url + "' target='_blank'><i class='ti-download'></i></href> " + response.files_success[i].name + "</a></div>");
+                    $("#bulk-file-list").append("\
+                        <div class='file-row' data-id='" + response.files_success[i].id + "'><a href='" + response.files_success[i].url + "' target='_blank'>\
+                            <i class='ti-download'></i>" + response.files_success[i].name + "</a>\
+                            <div class='remove-file remove-icon'><i class='ti-close'></i></div>\
+                        </div>");
                 };
             });
         },
@@ -263,7 +272,67 @@ $(document).ready(function(){
             $("#partbulkfile_form").find(".progressBar-inner").css("background-color","red");
         },
     });
+
+    $(".card-plus-icon").click(function(){
+        $(this).closest(".dropzone").click();
+    });
 // END SENDING BULK FILES ASYNCHRONOUSLY#############################################
+
+
+
+
+// DELETING BULK FILES###############################################################
+    $(".allow-remove").click(function(){
+        $(this).closest(".card").find(".remove-file").each(function(i){
+            var $this = $(this);
+            setTimeout(function(){
+                $this.toggleClass("visible");
+                console.log("yes");
+            },50*i);
+        });
+
+        $(this).toggleClass("allowed");
+    });
+
+    function removeFile(id_file){
+        console.log(id_file);
+        if (id_file){
+            $.ajax({
+                url: '/digital/parts/delete-bulk-file/',
+                data:{
+                    'id_file':id_file,
+                },
+                dataType:'json',
+                success:function(data){
+                    if (data.success){
+                        console.log(data.success);
+                        $(".file-row[data-id='" + id_file + "']").css("padding", "0px").css("height", "0px");
+                        setTimeout(function(){$(".file-row[data-id='" + id_file + "']").remove()}, 200);
+                        var id_part = $("#part-detail-panel").data("part-id");
+                        var old_data = $(".part-row[data-part-id='" + id_part + "']").data("part-bulk-files");
+                        var new_data = [];
+                        for (var i=0; i < old_data.length; i++){
+                            if(old_data[i].id != id_file){
+                                new_data.push(old_data[i]);
+                            }
+                        };
+                        $(".part-row[data-part-id='" + id_part + "']").data("part-bulk-files",new_data);
+                        refreshButtons();
+                    };
+                    if (data.error){
+                        console.log(data.error);
+                    };
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+                }
+            });
+        };
+    };
+
+
+// END DELETING BULK FILES###############################################################
+
 
 
 
@@ -297,6 +366,12 @@ $(document).ready(function(){
                 }
             });
         });
+
+        $(".remove-file").click(function(){
+            removeFile($(this).closest(".file-row").data("id"));
+        });
+
+
     };
     refreshButtons();
 // END REQUEST FOR INDUSTRIALIZATION######################################################################
@@ -394,7 +469,6 @@ $(document).ready(function(){
 
 
 // END GET PART HISTORY######################################################################
-
 
 
 

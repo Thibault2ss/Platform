@@ -120,7 +120,7 @@ def upload_part_bulk_file(request):
                 if form.is_valid():
                     print "FORM IS VALID"
                     _new_file = form.save()
-                    files_success.append({"name":(_new_file.file.name).rsplit("/",1)[1], "url":_new_file.file.url})
+                    files_success.append({"name":(_new_file.file.name).rsplit("/",1)[1], "url":_new_file.file.url, 'id':_new_file.id})
                 else:
                     print "FORM IS NOT VALID"
                     files_failure.append({"name":_file})
@@ -136,6 +136,24 @@ def upload_part_bulk_file(request):
         return JsonResponse(data)
 
     return HttpResponseRedirect("/digital/parts/")
+
+@login_required
+def delete_bulk_file(request):
+        success=True
+        errors=[]
+        id_file = request.GET.get("id_file")
+        file = PartBulkFile.objects.get(id=id_file)
+        if file.part.organisation == request.user.organisation:
+            file.delete()
+        else:
+            success=False
+            errors.append("this file does not belong to your organisation")
+        data={
+            "success":success,
+            "errors":errors,
+            }
+        return JsonResponse(data)
+
 @login_required
 def request_for_indus(request):
     success=True

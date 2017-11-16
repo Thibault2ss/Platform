@@ -67,15 +67,7 @@
             <div class="button-back" href="#ordersCarousel" data-slide="prev">
                 <i class="ti-arrow-left"></i>
             </div>
-            <div class="row">
-                <div class="col-xs-12 text-center">
-                    <div id="imageCarousel">
-                        <!-- <img src="https://news.nationalgeographic.com/content/dam/news/photos/000/755/75552.ngsversion.1422285553360.adapt.1900.1.jpg" alt="Los Angeles">
-                        <img src="https://static.pexels.com/photos/54632/cat-animal-eyes-grey-54632.jpeg" alt="Chicago">
-                        <img src="https://www.rd.com/wp-content/uploads/sites/2/2016/02/06-train-cat-shake-hands.jpg" alt="New York"> -->
-                    </div>
-                </div>
-            </div>
+
             <div class="content" id="part-detail-panel" data-part-id="" style="position:relative;">
                 <div class="container-fluid">
                     <!-- <div class="row row-status" style="margin-bottom:20px;">
@@ -93,40 +85,28 @@
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-xs-12" id="canvas-container">
-                                    <div id="stl-canvas" class="stl-canvas" style="display:flex;align-items:center;">
+                                    <div id="stl-canvas" class="stl-canvas" style="display:flex;align-items:center;margin-bottom:15px;">
                                         <button id="stl-demo" class="btn btn-warning btn-fill btn-wd" style="margin-left:23%;font-weight:900;">3D DEMO</button>
                                     </div>
                                 </div>
                                 <div class="col-xs-12">
-                                    <form enctype="multipart/form-data" action="" method="post" id="partbulkfile_form" class="dropzone">
-                                        {%csrf_token%}
-                                        {%comment%}{{formPartBulkFile}}{%endcomment%}
-                                        <input type="hidden" name="part" required="" id="id_part">
-                                        <!-- <input type="submit" value="Save" name="_save"> -->
-                                        <div class="dz-default dz-message"><span></span></div>
-                                        <div class="card">
-                                            <i class="card-top-icon ti-link"></i>
-                                            <div class="content">
-                                                <div class="row text-center">
-                                                    <h5>Bulk Files</h5>
-                                                    <div class="progressBar">
-                                                        <div class="progressBar-inner"></div>
-                                                    </div>
-                                                </div>
-                                                <div id="bulk-file-list" class="row">
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
+                                    <div id="imageCarousel" style="margin-bottom:15px;">
+                                        <!-- <img src="https://news.nationalgeographic.com/content/dam/news/photos/000/755/75552.ngsversion.1422285553360.adapt.1900.1.jpg" alt="Los Angeles">
+                                        <img src="https://static.pexels.com/photos/54632/cat-animal-eyes-grey-54632.jpeg" alt="Chicago">
+                                        <img src="https://www.rd.com/wp-content/uploads/sites/2/2016/02/06-train-cat-shake-hands.jpg" alt="New York"> -->
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="row">
-                                <div class="col-xs-12">
+                                <div class="col-md-12 text-center" style="margin-bottom:20px;">
+                                    <button class="btn btn-default btn-fill btn-wd disabled" style="font-weight:900;opacity:0;cursor:auto;">empty</button>
+                                </div>
+                                <div class="col-md-12">
                                     <div class="card">
-                                        <i class="fa fa-info-circle card-top-icon"></i>
+                                        <i class="card-top-icon ti-settings"></i>
                                         <div class="content">
                                             <div class="row text-center" style="margin-bottom:10px;">
                                                 <div class="col-sm-6 col-xs-12">
@@ -137,19 +117,16 @@
                                                     <span class="text-muted" style="float:left;font-size:70%;">Status</span><br>
                                                     <span class="label part-status label-default" style="font-size:100%;margin-left:15px;">Created</span>
                                                 </div>
+
+                                            </div>
+                                            <div class="row subcategory" data-toggle="collapse" href="#specs-attached">
+                                                <h5><i class="ti-arrow-right"></i>Specs</h5>
+                                            </div>
+                                            <div id="specs-attached" class="row text-center collapse" aria-expanded="false" style="margin-bottom:10px;">
                                                 <div class="col-sm-12 col-xs-12">
                                                     <span class="text-muted" style="float:left;font-size:70%;">Ref</span><br>
                                                     <div class="part-ref" style="margin-left:15px;"></div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="card">
-                                        <i class="card-top-icon ti-settings"></i>
-                                        <div class="content">
-                                            <div class="row text-center" style="margin-bottom:10px;">
                                                 <div class="col-sm-6 col-xs-12">
                                                     <span class="text-muted" style="float:left;font-size:70%;">Dimensions</span><br>
                                                     <div class="part-dimensions" style="margin-left:15px;"></div>
@@ -158,8 +135,6 @@
                                                     <span class="text-muted" style="float:left;font-size:70%;">Material</span><br>
                                                     <div class="part-material" style="margin-left:15px;"></div>
                                                 </div>
-                                            </div>
-                                            <div class="row text-center" style="margin-bottom:10px;">
                                                 <div class="col-sm-6 col-xs-12">
                                                     <span class="text-muted" style="float:left;font-size:70%;">Weight</span><br>
                                                     <div class="part-weight" style="margin-left:15px;"></div>
@@ -169,11 +144,10 @@
                                                     <div class="part-color" style="margin-left:15px;"></div>
                                                 </div>
                                             </div>
-
-                                            <div class="row" style="margin-bottom:10px;">
-                                                <h5 style="color:#e28d00;"><i class="ti-arrow-right" style="margin:0 15px 0 25px;font-size:1.2rem;"></i>Fits Models:</h5>
+                                            <div class="row subcategory" data-toggle="collapse" href="#models-attached">
+                                                <h5><i class="ti-arrow-right"></i>Fits Models</h5>
                                             </div>
-                                            <div id ="models-attached" class="row text-center" style="margin-bottom:10px;">
+                                            <div id ="models-attached" class="row text-center collapse" aria-expanded="false">
                                                 <div class="col-sm-6 col-xs-12">
                                                     <span class="text-muted" style="float:left;font-size:70%;">Model</span><br>
                                                     <div class="part-model" style="margin-left:15px;"></div>
@@ -184,20 +158,20 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row" style="margin-bottom:10px;">
-                                                <h5 style="color:#e28d00;"><i class="ti-arrow-right" style="margin:0 15px 0 25px;font-size:1.2rem;"></i>Grades:</h5>
+                                            <div class="row subcategory" data-toggle="collapse" href="#grades-attached">
+                                                <h5><i class="ti-arrow-right"></i>Grades</h5>
                                             </div>
-                                            <div id ="grades-attached" class="row text-center" style="margin-bottom:10px;">
+                                            <div id ="grades-attached" class="row text-center collapse" aria-expanded="false">
                                                 <div class="col-sm-12 col-xs-12">
                                                     <span class="text-muted" style="float:left;font-size:70%;">Grade</span><br>
                                                     <div class="part-grade" style="margin-left:15px;"></div>
                                                 </div>
                                             </div>
 
-                                            <div class="row" style="margin-bottom:10px;">
-                                                <h5 style="color:#e28d00;"><i class="ti-arrow-right" style="margin:0 15px 0 25px;font-size:1.2rem;"></i>Environments:</h5>
+                                            <div class="row subcategory" data-toggle="collapse" href="#environments-attached">
+                                                <h5><i class="ti-arrow-right"></i>Environments</h5>
                                             </div>
-                                            <div id ="environments-attached" class="row text-center" style="margin-bottom:10px;">
+                                            <div id ="environments-attached" class="row text-center collapse" aria-expanded="false">
                                                 <div class="col-sm-12 col-xs-12">
                                                     <span class="text-muted" style="float:left;font-size:70%;">Environment</span><br>
                                                     <div class="part-grade" style="margin-left:15px;"></div>
@@ -232,6 +206,36 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="col-xs-12">
+                                    <form enctype="multipart/form-data" action="" method="post" id="partbulkfile_form" class="dropzone">
+                                        {%csrf_token%}
+                                        {%comment%}{{formPartBulkFile}}{%endcomment%}
+                                        <input type="hidden" name="part" required="" id="id_part">
+                                        <!-- <input type="submit" value="Save" name="_save"> -->
+                                        <div class="dz-default dz-message"><span></span></div>
+                                        <div class="card">
+                                            <i class="card-top-icon ti-link"></i>
+                                            <i class="remove-icon allow-remove ti-close"></i>
+                                            <i class="card-plus-icon ti-plus"></i>
+
+                                            <div class="content" style="overflow:hidden;">
+                                                <div class="row text-center">
+                                                    <h5>Bulk Files</h5>
+                                                    <div class="progressBar">
+                                                        <div class="progressBar-inner"></div>
+                                                    </div>
+                                                </div>
+                                                <div id="bulk-file-list" class="row">
+                                                    <div class='file-row' data-id=""><a href='' target='_blank'>
+                                                        <i class='ti-download'></i></href>test bulk file</a>
+                                                        <div class="remove-file remove-icon"><i class="ti-close"></i></div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
