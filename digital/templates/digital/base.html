@@ -1,4 +1,5 @@
 {% load static %}
+{% load digital_filters %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -20,11 +21,11 @@
     <link href="{% static 'digital/css/animate.min.css' %}" rel="stylesheet"/>
 
     <!--  Paper Dashboard core CSS    -->
-    <link href="{% static 'digital/css/paper-dashboard.css' %}" rel="stylesheet"/>
+    <link href="{% static 'digital/css/paper-dashboard.css' %}?dev={% random_int %}" rel="stylesheet"/>
 
 
     <!--  CSS for Demo Purpose, don't include it in your project     -->
-    <link href="{% static 'digital/css/demo.css' %}" rel="stylesheet" />
+    <link href="{% static 'digital/css/demo.css' %}?dev={% random_int %}" rel="stylesheet" />
 
 
     <!--  Fonts and icons     -->
@@ -238,10 +239,10 @@
     <script src="{% static 'digital/js/bootstrap-notify.js' %}"></script>
 
     <!-- Paper Dashboard Core javascript and methods for Demo purpose -->
-	<script src="{% static 'digital/js/paper-dashboard.js' %}"></script>
+	<script src="{% static 'digital/js/paper-dashboard.js' %}?dev={% random_int %}"></script>
 
 	<!-- Paper Dashboard DEMO methods, don't include it in your project! -->
-	<script src="{% static 'digital/js/demo.js' %}"></script>
+	<script src="{% static 'digital/js/demo.js' %}?dev={% random_int %}"></script>
 
     <!--  Google Maps Plugin    -->
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyZ4782IXg8US1yrhugnzFLrB6IIBsXmo"></script>

@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from digital.models import PartImage, Part
 from django.core import serializers
 import json
-
+import random
 
 register = template.Library()
 
@@ -63,3 +63,7 @@ def dict_list(file_instance_list):
     for file in file_instance_list:
         dict_list.append({"id":file.id,"type":file.type, "url":file.file.url,"name":(file.file.name).rsplit("/",1)[1]})
     return json.dumps(dict_list)
+
+@register.simple_tag
+def random_int():
+    return random.randint(1, 1000)

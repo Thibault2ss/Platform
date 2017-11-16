@@ -2,8 +2,8 @@
 {% load static %}
 {% load digital_filters %}
 {% block extrahead %}
-<link href="{% static 'digital/css/slick.css' %}" rel="stylesheet" />
-<link href="{% static 'digital/css/slick-theme.css' %}" rel="stylesheet" />
+<link href="{% static 'digital/css/slick.css' %}?dev={% random_int %}" rel="stylesheet" />
+<link href="{% static 'digital/css/slick-theme.css' %}?dev={% random_int %}" rel="stylesheet" />
 {% endblock extrahead %}
 {%block content%}
 
@@ -283,13 +283,13 @@
 {%endblock content%}
 
 {%block extrascript%}
-<script src="{% static 'digital/js/three/three.min.js' %}"></script>
-<script src="{% static 'digital/js/three/loaders/STLLoader1.js' %}"></script>
-<script src="{% static 'digital/js/three/Detector.js' %}"></script>
-<script src="{% static 'digital/js/three/libs/stats.min.js' %}"></script>
-<script src="{% static 'digital/js/three/libs/TrackballControls.js' %}"></script>
-<script src="{% static 'digital/js/slick.min.js' %}"></script>
-<script src="{% static 'digital/js/dropzone.min.js' %}"></script>
+<script src="{% static 'digital/js/three/three.min.js' %}?dev={% random_int %}"></script>
+<script src="{% static 'digital/js/three/loaders/STLLoader1.js' %}?dev={% random_int %}"></script>
+<script src="{% static 'digital/js/three/Detector.js' %}?dev={% random_int %}"></script>
+<script src="{% static 'digital/js/three/libs/stats.min.js' %}?dev={% random_int %}"></script>
+<script src="{% static 'digital/js/three/libs/TrackballControls.js' %}?dev={% random_int %}"></script>
+<script src="{% static 'digital/js/slick.min.js' %}?dev={% random_int %}"></script>
+<script src="{% static 'digital/js/dropzone.min.js' %}?dev={% random_int %}"></script>
 <script>
 $(document).ready(function(){
     $('#ordersCarousel').carousel({
