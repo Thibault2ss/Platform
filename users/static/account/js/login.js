@@ -90,13 +90,13 @@ $(document).ready(function(){
 
     // INITIAL ANIMATIONS/////////////////////////////////////////////////////////////////////
     if(has_signin_error){
-        $('.container h1').css("opacity", 1);
+        // $('.container h1').css("opacity", 1);
         $('.toggle-form').css("opacity",1);
         $('#login_form').show().css("opacity",1);
         $("#particles-container").css("opacity",1);
         console.log("1");
     } else if(has_signup_error){
-        $('.container h1').css("opacity", 1);
+        // $('.container h1').css("opacity", 1);
         $('.toggle-form').css("opacity",1);
         $('#signup_form').show().css("opacity",1);
         $("#particles-container").css("opacity",1);

@@ -288,9 +288,7 @@ $(document).ready(function(){
     $(".card-plus-icon").click(function(){
         $(this).closest(".dropzone").click();
     });
-    $("form").click(function(){
-        $(this).closest(".dropzone").click();
-    });
+
 // END SENDING BULK FILES ASYNCHRONOUSLY#############################################
 
 
