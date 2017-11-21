@@ -4,15 +4,15 @@ from __future__ import unicode_literals
 from django.contrib import admin
 
 # Register your models here.
-from .models import PartFamily, Model, Part, PartImage, PartBulkFile, Grade, Environment, ClientPartStatus
+from .models import ApplianceFamily, Appliance, Part, PartImage, PartBulkFile, Grade, Environment, ClientPartStatus
 # Register your models here.
-@admin.register(PartFamily)
-class PartFamily_Admin(admin.ModelAdmin):
+@admin.register(ApplianceFamily)
+class ApplianceFamily_Admin(admin.ModelAdmin):
     fields = ['name', 'industry']
     list_display = ('id','name','industry')
 
-@admin.register(Model)
-class Model_Admin(admin.ModelAdmin):
+@admin.register(Appliance)
+class Appliance_Admin(admin.ModelAdmin):
     fields = ['name','organisation', 'reference','family']
     list_display = ('id', 'name', 'organisation', 'reference','family')
 
@@ -43,10 +43,10 @@ class PartBulkFile_Inline(admin.TabularInline):
 
 @admin.register(Part)
 class Part_Admin(admin.ModelAdmin):
-    # fields = ['created_by','organisation','model', 'reference', 'name']
-    list_display = ('id', 'reference', 'name', 'model', 'created_by','organisation')
+    # fields = ['created_by','organisation','appliance', 'reference', 'name']
+    list_display = ('id', 'reference', 'name', 'created_by','organisation')
     fieldsets = (
-        (None, {'fields': ('created_by','organisation','model', 'reference', 'name')}),
+        (None, {'fields': ('created_by','organisation','appliance', 'reference', 'name')}),
         ('Dimensions & Weight', {'fields': ('material','length', 'width', 'height','dimension_unit', 'weight','weight_unit')}),
         ('Other Characteristics', {'fields': ('color','grade', 'environment')}),
     )

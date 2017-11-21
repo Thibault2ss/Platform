@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core import serializers
 # Create your models here.
 
-class PartFamily(models.Model):
+class ApplianceFamily(models.Model):
     name = models.CharField(max_length=100, default = '', unique = True)
     industry = models.ForeignKey('users.Industry', on_delete=models.CASCADE, default=1)
 
@@ -20,11 +20,11 @@ class PartFamily(models.Model):
         return {'name':self.name, 'industry':self.industry}
 
 
-class Model(models.Model):
+class Appliance(models.Model):
     name = models.CharField(max_length=200, default = '')
     reference = models.CharField(max_length=200, null = True, unique = True)
     organisation = models.ForeignKey('users.Organisation', on_delete=models.CASCADE, null=True)
-    family = models.ForeignKey('PartFamily', on_delete=models.CASCADE, null=True)
+    family = models.ForeignKey('ApplianceFamily', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return "%s" % (self.name,)
@@ -95,7 +95,7 @@ class Part(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
     organisation = models.ForeignKey('users.Organisation', on_delete=models.CASCADE, null=True)
-    model = models.ManyToManyField(Model, blank=True)
+    appliance = models.ManyToManyField(Appliance, blank=True)
     reference = models.CharField(max_length=200, null = True, unique = True)
     name = models.CharField(max_length=200, default = '')
     material = models.ForeignKey('jb.Material', on_delete=models.CASCADE, null=True, blank=True)

@@ -1,5 +1,5 @@
 from django import forms
-from digital.models import PartBulkFile, Part, Model
+from digital.models import PartBulkFile, Part, Appliance
 
 class PartBulkFileForm(forms.ModelForm):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))
@@ -29,10 +29,10 @@ class PartForm(forms.ModelForm):
     # file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))
     # part = forms.ModelChoiceField(queryset=Part.objects.none(),widget=forms.HiddenInput(attrs={'required': True}))
     # type = forms.ChoiceField(choices=PartBulkFile().getTypeChoices,widget=forms.HiddenInput(attrs={'required': True}))
-    model = forms.ModelMultipleChoiceField(queryset=Model.objects.none())
+    appliance = forms.ModelMultipleChoiceField(queryset=Appliance.objects.none())
     class Meta:
         model = Part
-        fields = ['reference', 'model', 'name', 'material', 'length', 'width','height', 'dimension_unit', 'weight', 'weight_unit', 'color', 'grade', 'environment']
+        fields = ['reference', 'appliance', 'name', 'material', 'length', 'width','height', 'dimension_unit', 'weight', 'weight_unit', 'color', 'grade', 'environment']
 
     def __init__(self, *args, **kwargs):
         created_by = None
@@ -45,7 +45,7 @@ class PartForm(forms.ModelForm):
             self.organisation = created_by.organisation
             # parts_qs = Parts.objects.filter(organisation = created_by.organisation)
             # self.fields['model'].queryset = Model.objects.filter(model_set__in = parts_qs)
-            self.fields['model'].queryset = Model.objects.filter(organisation = created_by.organisation)
+            self.fields['appliance'].queryset = Appliance.objects.filter(organisation = created_by.organisation)
 
     def save(self):
         part = super(PartForm, self).save(commit=False)
