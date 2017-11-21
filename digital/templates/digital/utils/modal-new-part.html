@@ -1,0 +1,68 @@
+{% load digital_filters %}
+<div id="modalNewPart" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+      <form enctype="multipart/form-data" action="" method="post" id="new_part_form" class="">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:#003F71;color:#ffffff;">
+
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"> <i class="fa fa-cube" style="margin-right:20px;font-size:2.3rem;"></i>New Part</h4>
+      </div>
+      <div class="modal-body" style="background-color:#f5f5f5">
+          <div class="row">
+              <div class="col-xs-12">
+
+                      {%csrf_token%}
+                      {%comment%}{{formPart.as_p}}{%endcomment%}
+                      <div class="form-group">
+                          <label for="id_reference">Reference:</label>
+                          {{formPart.reference|add_class:"form-control"|attr:"placeholder:unique identifier of part"}}
+                      </div>
+                      <div class="form-group">
+                          <label for="id_name">Name:</label>
+                          {{formPart.name|add_class:"form-control"|attr:"placeholder:name of part"}}
+                      </div>
+                      <div class="form-group">
+                          <label for="id_name">Fits Models:</label>
+                          {{formPart.model|add_class:"form-control"}}
+                      </div>
+                      <div class="form-group">
+                          <label for="" style="display:block;">L x W x H:</label>
+                          {{formPart.length|add_class:"form-control dim-input"|attr:"placeholder:l"}}
+                          {{formPart.width|add_class:"form-control dim-input"|attr:"placeholder:w"}}
+                          {{formPart.height|add_class:"form-control dim-input"|attr:"placeholder:h"}}
+                          {{formPart.dimension_unit|add_class:"form-control dim-input unit-input"|attr:"value:mm"}}
+                      </div>
+                      <div class="form-group">
+                          <label for="" style="display:block;">Weight</label>
+                          {{formPart.weight|add_class:"form-control dim-input"|attr:"placeholder:weight"}}
+                          {{formPart.weight_unit|add_class:"form-control dim-input unit-input"|attr:"value:mm"}}
+                      </div>
+                      <div class="form-group">
+                          <label for="id_color">Color:</label>
+                          {{formPart.color|add_class:"form-control"|attr:"placeholder:color of part"}}
+                      </div>
+                      <div class="form-group">
+                          <label for="id_color">Grades:</label>
+                          {{formPart.grade|add_class:"form-control"}}
+                      </div>
+                      <div class="form-group">
+                          <label for="id_color">Environments:</label>
+                          {{formPart.environment|add_class:"form-control"}}
+                      </div>
+
+
+
+              </div>
+          </div>
+
+      </div>
+      <div class="modal-footer">
+         <input type="submit" class="btn btn-success" value="Save" name="_save">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+     </form>
+  </div>
+</div>

@@ -115,6 +115,14 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # ACTIVATE DB ROUTERS FOR SPECIAL DB ROUTING
 # DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
 if DEBUG:
+    # default_db = {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'SP3D_USERS',
+    #     'USER': 'root',
+    #     'PASSWORD': '2210',
+    #     'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+    #     'PORT': '3306',
+    # }
     default_db = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SP3D_USERS',

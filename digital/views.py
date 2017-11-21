@@ -7,11 +7,12 @@ from os.path import join
 import numpy
 from stl import mesh
 from django.core import serializers
-from digital.forms import PartBulkFileForm
+from digital.forms import PartBulkFileForm, PartForm
 from django.core.files.uploadedfile import UploadedFile
 from digital.utils import getPartsClean, send_email, getPartSumUp
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+import json
 
 from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -55,6 +56,7 @@ def parts(request):
         'parts':parts,
         'parts_sumup':parts_sumup,
         'formPartBulkFile': PartBulkFileForm(),
+        'formPart': PartForm(created_by=request.user, initial={'dimension_unit': 'mm', "weight_unit":"gr"}),
     }
     return render(request, 'digital/parts.html', context)
 @login_required
@@ -206,3 +208,29 @@ def get_part_history(request):
         "events":serializers.serialize('json', events, use_natural_foreign_keys=True),
         }
     return JsonResponse(data)
+
+@login_required
+def new_part(request):
+    if request.method == 'POST':
+        # initialize default values
+        success = True
+        errors = []
+        part=None
+        print request.POST
+        form = PartForm(request.POST, created_by=request.user)
+        if form.is_valid():
+            print "FORM IS VALID"
+            _new_part = form.save()
+            part = serializers.serialize("json", [_new_part],  use_natural_foreign_keys=True)[1:-1]
+        else:
+            print "FORM IS NOT VALID"
+            success = False
+            errors.append("form is not valid")
+        data={
+            "success":success,
+            "errors":errors,
+            "part":part,
+            }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/parts/")

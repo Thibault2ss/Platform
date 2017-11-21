@@ -487,6 +487,56 @@ $(document).ready(function(){
 
 
 
+
+//ADDING A NEW PART///////////////////////////////////////////////////////////////////////////
+    $("#new_part_form").submit(function(event){
+        event.preventDefault();
+        var $form = $(this);
+        var data = new FormData(this);
+        // console.log("received");
+        $.ajax({
+            url: '/digital/parts/new-part/',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            method: 'POST',
+            type: 'POST', // For jQuery < 1.9
+            beforeSend:function(XMLHttpRequest, settings){
+                // $form.find(".progressBar-inner").css("background-color","blue");
+                // $form.find(".progressBar").css("opacity",1);
+            },
+            xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){
+                    // myXhr.upload.addEventListener('progress',uploadProgress, false);
+                }
+                return myXhr;
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success){
+                    // $form.find(".progressBar-inner").css("background-color","green");
+                    console.log(JSON.parse(data.part));
+                } else {
+                    // $form.find(".progressBar-inner").css("background-color","red");
+                    console.log(data);
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+                // $form.find(".progressBar-inner").css("background-color","red");
+            },
+            complete:function(jqXHR, textStatus){
+                // setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                // setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+            },
+
+        });
+    });
+//END ADDING NEW PART////////////////////////////////////////////////////////////////////////
+
+
 // FUNCTION TO INIT A STL CANVAS########################################
 
     if ( ! Detector.webgl ) Detector.addGetWebGLMessage();

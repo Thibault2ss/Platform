@@ -7,7 +7,8 @@
 {% endblock extrahead %}
 {%block content%}
 
-<div id="ordersCarousel" class="carousel slide" data-ride="carousel" style="height: calc(100% - 74px);">
+
+<div id="ordersCarousel" class="carousel slide" data-interval="false" style="height: calc(100% - 74px);">
     <div class="carousel-inner" style="height:100%;overflow-y:scroll;">
         <div class="item active">
             <div class="content" style="position:relative;">
@@ -18,6 +19,8 @@
                             <button class="btn btn-order-class btn-warning" value="2"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_pending_indus}}</span> Pending</button>
                             <button class="btn btn-order-class btn-danger" value="3"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_disqualified}}</span> Disqualified</button>
                             <button class="btn btn-order-class btn-success" value="4"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_industrialized}}</span> Digitalized</button>
+                            <!-- <button class="btn btn-default" data-toggle="modal" data-target="#modalNewPart">+</button> -->
+                            <div class="button-add-part" data-toggle="modal" data-target="#modalNewPart"><i class="ti-plus"></i></div>
                         </div>
                     </div>
                     <div class="row">
@@ -283,6 +286,7 @@
 {%endblock content%}
 
 {%block extrascript%}
+{%include 'digital/utils/modal-new-part.html'%}
 <script src="{% static 'digital/js/three/three.min.js' %}?dev={% random_int %}"></script>
 <script src="{% static 'digital/js/three/loaders/STLLoader1.js' %}?dev={% random_int %}"></script>
 <script src="{% static 'digital/js/three/Detector.js' %}?dev={% random_int %}"></script>

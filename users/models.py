@@ -89,10 +89,23 @@ class CustomUser(AbstractBaseUser):
             return False
         # Simplest possible answer: All admins are staff
         # return self.is_admin
+        
+class Industry(models.Model):
+    name = models.CharField(max_length=100, default = '', unique = True)
+
+    def __str__(self):
+        return "%s" % (self.name,)
+
+    def get_short_name(self):
+        return self.name
+
+    def natural_key(self):
+        return self.name
 
 class Organisation(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100, default = '', unique = True)
+    industry = models.ForeignKey(Industry, on_delete=models.CASCADE, default=1)
 
     def __str__(self):
         return "%s" % (self.name,)

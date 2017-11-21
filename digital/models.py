@@ -11,17 +11,19 @@ from django.core import serializers
 
 class PartFamily(models.Model):
     name = models.CharField(max_length=100, default = '', unique = True)
+    industry = models.ForeignKey('users.Industry', on_delete=models.CASCADE, default=1)
 
     def __str__(self):
         return "%s" % (self.name,)
 
     def natural_key(self):
-        return {'name':self.name}
+        return {'name':self.name, 'industry':self.industry}
 
 
 class Model(models.Model):
     name = models.CharField(max_length=200, default = '')
     reference = models.CharField(max_length=200, null = True, unique = True)
+    organisation = models.ForeignKey('users.Organisation', on_delete=models.CASCADE, null=True)
     family = models.ForeignKey('PartFamily', on_delete=models.CASCADE, null=True)
 
     def __str__(self):

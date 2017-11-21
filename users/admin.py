@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from .models import CustomUser, Organisation
+from .models import CustomUser, Organisation, Industry
 # Register your models here.
 
 class CustomUserCreationForm(forms.ModelForm):
@@ -88,5 +88,10 @@ admin.site.register(CustomUser, CustomUserAdmin)
 
 @admin.register(Organisation)
 class Organisation_Admin(admin.ModelAdmin):
+    fields = ['name', 'industry']
+    list_display = ('id','name','industry')
+
+@admin.register(Industry)
+class Industry_Admin(admin.ModelAdmin):
     fields = ['name']
     list_display = ('id','name',)

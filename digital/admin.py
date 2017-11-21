@@ -8,13 +8,13 @@ from .models import PartFamily, Model, Part, PartImage, PartBulkFile, Grade, Env
 # Register your models here.
 @admin.register(PartFamily)
 class PartFamily_Admin(admin.ModelAdmin):
-    fields = ['name']
-    list_display = ('id','name',)
+    fields = ['name', 'industry']
+    list_display = ('id','name','industry')
 
 @admin.register(Model)
 class Model_Admin(admin.ModelAdmin):
-    fields = ['name','reference','family']
-    list_display = ('id', 'name','reference','family')
+    fields = ['name','organisation', 'reference','family']
+    list_display = ('id', 'name', 'organisation', 'reference','family')
 
 @admin.register(ClientPartStatus)
 class ClientPartStatus_Admin(admin.ModelAdmin):
