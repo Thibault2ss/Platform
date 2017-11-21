@@ -60,7 +60,7 @@ $(document).ready(function(){
         setTimeout(function(){$('#imageCarousel').slick('setPosition');},250);
 
         // populate info
-        var name, ref, material, length, dimension_unit, weight_unit, date_created, model, bulk_files, color, grade_list, environment_list, status
+        var name, ref, material, length, dimension_unit, weight_unit, date_created, appliance, bulk_files, color, grade_list, environment_list, status
         name = part.fields.name;
         ref = part.fields.reference;
         if (part.fields.material){material = part.fields.material.name}else{material=null};
@@ -68,7 +68,7 @@ $(document).ready(function(){
         dimension_unit = part.fields.dimension_unit, weight_unit = part.fields.weight_unit;
         date_created = new Date(part.fields.date_created);
         date_created = date_created.getDate() + " " + monthNames[date_created.getMonth()] + " " + date_created.getFullYear();
-        model = part.fields.model;
+        appliance = part.fields.appliance;
         color = part.fields.color;
         grade_list = part.fields.grade;
         status = part.fields.status;
@@ -99,17 +99,17 @@ $(document).ready(function(){
             $("#button-action-1").removeClass().addClass("btn btn-success btn-fill btn-wd print-request-button").text("Print");
         };
         $(".id_part").val(part.pk);
-        $("#models-attached").empty();
-        for (var i = 0; i < model.length; i++){
+        $("#appliances-attached").empty();
+        for (var i = 0; i < appliance.length; i++){
             var html = "<div class='col-sm-6 col-xs-12'>\
-                            <span class='text-muted' style='float:left;font-size:70%;'>Model</span><br>\
-                            <div class='part-model' style='margin-left:15px;'>" + model[i].name + "</div>\
+                            <span class='text-muted' style='float:left;font-size:70%;'>Appliance</span><br>\
+                            <div class='part-appliance' style='margin-left:15px;'>" + appliance[i].name + "</div>\
                         </div>\
                         <div class='col-sm-6 col-xs-12'>\
                             <span class='text-muted' style='float:left;font-size:70%;'>Family</span><br>\
-                            <div class='part-family' style='margin-left:15px;'>" + model[i].family + "</div>\
+                            <div class='appliance-family' style='margin-left:15px;'>" + appliance[i].family + "</div>\
                         </div>";
-            $("#models-attached").append(html);
+            $("#appliances-attached").append(html);
         };
         $("#grades-attached").empty();
         for (var i = 0; i < grade_list.length; i++){
