@@ -1,3 +1,19 @@
+// EXTEND JQUERY FOR ANIMATION##################################################
+$.fn.extend({
+    animateCss: function (animationName, callback) {
+        callback =  callback || null;
+        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+        this.addClass('animated ' + animationName).one(animationEnd, function() {
+            $(this).removeClass('animated ' + animationName);
+            if (typeof callback == 'function'){
+                callback.call(this);
+            }
+        });
+        return this;
+    }
+});
+
+
 $(document).ready(function(){
     monthNames=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 // ORDER TYPES TOGGLING#####################################
@@ -59,29 +75,48 @@ $(document).ready(function(){
         };
         setTimeout(function(){$('#imageCarousel').slick('setPosition');},250);
 
+        // remove old stl from canvas
+        remove_stl();
+        $("#stl-demo").css("display", "block");
+
         // populate info
-        var name, ref, material, length, dimension_unit, weight_unit, date_created, appliance, bulk_files, color, grade_list, environment_list, status
+        var name, ref, material, length, dimension_unit, weight_unit, date_created, appliance, bulk_files, status, part_type, characs
         name = part.fields.name;
+        part_type = part.fields.type
         ref = part.fields.reference;
-        if (part.fields.material){material = part.fields.material.name}else{material=null};
+        characs = part.fields.characteristics;
+        if (part.fields.material){material = part.fields.material}else{material={'id':''}};
         length = part.fields.length, width = part.fields.width, height = part.fields.height, weight = part.fields.weight;
         dimension_unit = part.fields.dimension_unit, weight_unit = part.fields.weight_unit;
         date_created = new Date(part.fields.date_created);
         date_created = date_created.getDate() + " " + monthNames[date_created.getMonth()] + " " + date_created.getFullYear();
         appliance = part.fields.appliance;
-        color = part.fields.color;
-        grade_list = part.fields.grade;
         status = part.fields.status;
-        environment_list = part.fields.environment;
         bulk_files = $(this).data("part-bulk-files");
-        $("#part-detail-panel").data("part-id",part.pk);
-        $(".part-dimensions").text(length + "x" + width + "x" + height + " " + dimension_unit);
-        $(".part-weight").text(weight + " " + weight_unit);
-        $(".part-name").text(name);
-        $(".part-material").text(material);
-        $(".part-ref").text(ref);
-        $(".part-color").text(color);
         $(".part-status").removeClass().addClass("label part-status").text(status.name);
+        $("#part-detail-panel").data("part-id",part.pk);
+        $("#id_name_1").val(name);
+        $("#id_reference_1").val(ref);
+        $("#id_material_1").val(material.id);
+        $("#id_length_1").val(length);
+        $("#id_width_1").val(width);
+        $("#id_height_1").val(height);
+        $("#id_weight_1").val(weight);
+        $("#id_dimension_unit_1").val(dimension_unit);
+        $("#id_weight_unit_1").val(weight_unit);
+        $("#id_type_1").val(part_type.id);
+        $("#id_color_1").val(characs.color);
+        $("#id_min_temp_1").val(characs.min_temp);
+        $("#id_max_temp_1").val(characs.max_temp);
+        $("#id_temp_unit_1").val(characs.temp_unit);
+        $("#id_is_flame_retardant_1").prop("checked", false).prop("checked",characs.is_flame_retardant);
+        $("#id_is_chemical_resistant_1").prop("checked", false).prop("checked",characs.is_chemical_resistant);
+        $("#id_is_food_grade_1").prop("checked", false).prop("checked",characs.is_food_grade);
+        $("#id_is_transparent_1").prop("checked", false).prop("checked",characs.is_transparent);
+        $("#id_is_visual_1").prop("checked", false).prop("checked",characs.is_visual);
+        $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
+        $(".collapse").collapse('hide');
+
         if (status.id>=1){
             $(".part-status").addClass("label-default");
             $("#button-action-1").removeClass().addClass("btn btn-warning btn-fill btn-wd request-for-indus-button order-part-button").text("Request Indus");
@@ -99,42 +134,23 @@ $(document).ready(function(){
             $("#button-action-1").removeClass().addClass("btn btn-success btn-fill btn-wd print-request-button").text("Print");
         };
         $(".id_part").val(part.pk);
-        $("#appliances-attached").empty();
+        $("#id_appliance_1").find("option").removeAttr("selected").hide();
         for (var i = 0; i < appliance.length; i++){
-            var html = "<div class='col-sm-6 col-xs-12'>\
-                            <span class='text-muted' style='float:left;font-size:70%;'>Appliance</span><br>\
-                            <div class='part-appliance' style='margin-left:15px;'>" + appliance[i].name + "</div>\
-                        </div>\
-                        <div class='col-sm-6 col-xs-12'>\
-                            <span class='text-muted' style='float:left;font-size:70%;'>Family</span><br>\
-                            <div class='appliance-family' style='margin-left:15px;'>" + appliance[i].family + "</div>\
-                        </div>";
-            $("#appliances-attached").append(html);
+            $("#id_appliance_1").find("option[value='" + appliance[i].id + "']").show().attr("selected","");
         };
-        $("#grades-attached").empty();
-        for (var i = 0; i < grade_list.length; i++){
-            var html = "<div class='col-sm-12 col-xs-12'>\
-                            <span class='text-muted' style='float:left;font-size:70%;'>Grade</span><br>\
-                            <div class='part-grade' style='margin-left:15px;'>" + grade_list[i].name + "</div>\
-                        </div>";
-            $("#grades-attached").append(html);
-        };
-        $("#environments-attached").empty();
-        for (var i = 0; i < environment_list.length; i++){
-            var html = "<div class='col-sm-12 col-xs-12'>\
-                            <span class='text-muted' style='float:left;font-size:70%;'>Environment</span><br>\
-                            <div class='part-grade' style='margin-left:15px;'>" + environment_list[i].name + "</div>\
-                        </div>";
-            $("#environments-attached").append(html);
-        };
+
         $(".file-list").empty();
         for (var i = 0; i < bulk_files.length; i++){
+            var stl_button = "";
+            if (bulk_files[i].type == 'STL'){
+                var stl_button = "<btn class='btn btn-sm btn-warning btn-icon btn-3d-view' data-stl='" + bulk_files[i].data + "'><i class='fa fa-cube'></i></btn>"
+            };
             var html = "\
-                        <div class='file-row' data-id='" +  bulk_files[i].id + "'><a href='" + bulk_files[i].url + "' target='_blank'>\
+                        <div class='file-row' data-id='" +  bulk_files[i].id + "'>" + stl_button + "<a href='" + bulk_files[i].url + "' target='_blank'>\
                             <i class='ti-download'></i>" + bulk_files[i].name + "</a>\
                             <div class='remove-file remove-icon'><i class='ti-close'></i></div>\
                         </div>"
-            if (bulk_files[i].type == "3D" || bulk_files[i].type == "2D"){
+            if (bulk_files[i].type == "3D" || bulk_files[i].type == "2D"|| bulk_files[i].type == "STL" ){
                 $("#part3dfile_form").find(".file-list").append(html);
             } else {
                 $("#partbulkfile_form").find(".file-list").append(html);
@@ -157,11 +173,6 @@ $(document).ready(function(){
 // END INIT ORDERS DATA ON CLICK ON ONE ORDER#####################################
 
 
-    $("#stl-demo").click(function(){
-        $(this).remove();
-        // populate stl dynamic view
-        load_stl("/static/hub/stl/assemb6.STL");
-    });
 
 
 // SENDING BULK FILES ASYNCHRONOUSLY#############################################
@@ -264,9 +275,13 @@ $(document).ready(function(){
                     // update part-row:
                     for (var i = 0; i < response.files_success.length; i++){
                         console.log("it pushed");
+                        var stl_button = "";
+                        if (response.files_success[i].type == 'STL'){
+                            var stl_button = "<btn class='btn btn-sm btn-warning btn-icon btn-3d-view' data-stl='" + response.files_success[i].data + "'><i class='fa fa-cube'></i></btn>"
+                        };
                         $(".part-row[data-part-id='" + response.id_part + "']").data("part-bulk-files").push(response.files_success[i]);
                         $form.find(".file-list").append("\
-                            <div class='file-row' data-id='" + response.files_success[i].id + "'><a href='" + response.files_success[i].url + "' target='_blank'>\
+                            <div class='file-row' data-id='" + response.files_success[i].id + "'>" + stl_button + "<a href='" + response.files_success[i].url + "' target='_blank'>\
                                 <i class='ti-download'></i>" + response.files_success[i].name + "</a>\
                                 <div class='remove-file remove-icon'><i class='ti-close'></i></div>\
                             </div>");
@@ -386,6 +401,35 @@ $(document).ready(function(){
             removeFile($(this).closest(".file-row").data("id"));
         });
 
+        // DYNAMICALLY ADD STL TO VIEW//////////////////////////////////////////////////////////
+        $('#stl-demo').off();
+        $("#stl-demo").click(function(){
+            var $stlButton = $(".btn-3d-view");
+            if ($stlButton.length !== 0){
+                $stlButton.first().click();
+                $stlButton.first().closest(".file-row").animateCss('tada');
+            } else {
+                // $(this).css("display","none");
+                // load_stl("/static/hub/stl/assemb6.STL", null);
+                $.notify({
+                    icon: 'ti-info',
+                    message: "There are no STL files !"
+                },{
+                    type: 'warning',
+                    timer: 500,
+                    delay: 200,
+                });
+            };
+        });
+        $('.btn-3d-view').off();
+        $(".btn-3d-view").click(function(){
+            var url = $(this).siblings("a").attr('href');
+            var stl_data = $(this).data('stl');
+            $("#stl-demo").css("display","none");
+            load_stl(url, stl_data);
+        });
+
+        // END DYNAMICALLY ADD STL TO VIEW//////////////////////////////////////////////////////////
 
     };
     refreshButtons();
@@ -534,7 +578,20 @@ $(document).ready(function(){
 
         });
     });
+
+    $("#id_is_flame_retardant").click(function(){
+        if(this.checked) {
+            $("#fg-flame-retardancy").show();
+            $("#id_flame_retardancy").val("HB");
+        }else{
+            $("#fg-flame-retardancy").hide();
+            $("#id_flame_retardancy").val("NA");
+        };
+    });
 //END ADDING NEW PART////////////////////////////////////////////////////////////////////////
+
+
+
 
 
 // FUNCTION TO INIT A STL CANVAS########################################
@@ -725,14 +782,21 @@ $(document).ready(function(){
 	}
 
 
-    function load_stl(filepath){
+    function load_stl(filepath, data){
         loader.load( filepath, function ( geometry ) {
-            if (typeof mesh !== 'undefined') {
-                scene.remove( mesh );
+            remove_stl();
+            var cog_x = -19, cog_y = -14, cog_z = -33;
+            if (data){
+                cog_x = - data.cog[0];
+                cog_y = - data.cog[1];
+                cog_z = - data.cog[2];
             };
+            console.log(cog_x);
+            console.log(cog_y);
+            console.log(cog_z);
             var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
             mesh = new THREE.Mesh( geometry, material );
-            mesh.position.set( -19, -14, -33 );
+            mesh.position.set( cog_x, cog_y, cog_z );
             mesh.rotation.set( 0, 0, 0 );
             mesh.scale.set( 1, 1, 1 );
             mesh.castShadow = true;
@@ -742,7 +806,9 @@ $(document).ready(function(){
     };
 
     function remove_stl(){
-        scene.remove(mesh);
+        if (typeof mesh !== 'undefined') {
+            scene.remove(mesh);
+        }
     };
     $(".label-info").click(function(){
         load_stl("/static/hub/stl/assemb6.STL");

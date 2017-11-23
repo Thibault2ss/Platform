@@ -9,6 +9,52 @@ from django.conf import settings
 from django.core import serializers
 # Create your models here.
 
+class Characteristics(models.Model):
+    COLOR_CHOICES = (("NA", "n/a"),("GREEN", "Green"),("WHITE", "White"),("BLACK", "Black"))
+    FLAME_RETARDANT_CHOICES = (("NA", "n/a"),("HB", "HB"),("V0", "V0"),("V1", "V1"),("V2", "V2"))
+    TEMPERATURE_UNIT_CHOICES = (("°C", "°C"),("°F", "°F"))
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES, default="NA")
+    is_visual = models.BooleanField("Visual part", default=False, blank=True)
+    is_transparent = models.BooleanField("Transparent", default=False, blank=True)
+    is_water_resistant = models.BooleanField("Water Resistant", default=False, blank=True)
+    is_chemical_resistant = models.BooleanField("Chemical Resistant", default=False, blank=True)
+    is_flame_retardant = models.BooleanField("Flame Retardant", default=False, blank=True)
+    is_food_grade = models.BooleanField("Food Grade", default=False, blank=True)
+    flame_retardancy =  models.CharField(max_length=10, choices=FLAME_RETARDANT_CHOICES, default="NA")
+    min_temp =  models.IntegerField(default=0)
+    max_temp =  models.IntegerField(default=60)
+    temp_unit = models.CharField(max_length=5, choices=TEMPERATURE_UNIT_CHOICES, default="°C")
+    def __str__(self):
+        return "Characteristics card %s" % (self.id,)
+
+    def natural_key(self):
+        return {
+            'id':self.id,
+            'color':self.color,
+            'is_visual':self.is_visual,
+            'is_transparent':self.is_transparent,
+            'is_water_resistant':self.is_water_resistant,
+            'is_chemical_resistant':self.is_chemical_resistant,
+            'is_flame_retardant':self.is_flame_retardant,
+            'is_food_grade':self.is_food_grade,
+            'flame_retardancy':self.flame_retardancy,
+            'min_temp':self.min_temp,
+            'max_temp':self.max_temp,
+            'temp_unit':self.temp_unit,
+            }
+
+class PartType(models.Model):
+    name = models.CharField(max_length=100, default = '')
+    industry = models.ForeignKey('users.Industry', on_delete=models.CASCADE, default=1)
+
+    def __str__(self):
+        return "%s" % (self.name,)
+
+    def natural_key(self):
+        return {'id':self.id,'name':self.name, 'industry':self.industry.name}
+    class Meta:
+        unique_together = (('name', 'industry'),)
+
 class ApplianceFamily(models.Model):
     name = models.CharField(max_length=100, default = '', unique = True)
     industry = models.ForeignKey('users.Industry', on_delete=models.CASCADE, default=1)
@@ -17,7 +63,7 @@ class ApplianceFamily(models.Model):
         return "%s" % (self.name,)
 
     def natural_key(self):
-        return {'name':self.name, 'industry':self.industry}
+        return {'name':self.name, 'industry':self.industry.name}
 
 
 class Appliance(models.Model):
@@ -30,7 +76,7 @@ class Appliance(models.Model):
         return "%s" % (self.name,)
 
     def natural_key(self):
-        return {'name':self.name, 'reference':self.reference, 'family':self.family.name}
+        return {'id':self.id, 'name':self.name, 'reference':self.reference, 'family':self.family.name}
 
     class Meta:
         unique_together = (('name', 'reference','family'),)
@@ -94,6 +140,8 @@ class Environment(models.Model):
 class Part(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
+    type = models.ForeignKey('PartType', on_delete=models.CASCADE, null=True)
+    characteristics = models.OneToOneField('Characteristics', on_delete=models.CASCADE, null=True)
     organisation = models.ForeignKey('users.Organisation', on_delete=models.CASCADE, null=True)
     appliance = models.ManyToManyField(Appliance, blank=True)
     reference = models.CharField(max_length=200, null = True, unique = True)
@@ -103,11 +151,10 @@ class Part(models.Model):
     width = models.FloatField(max_length=10, null=True, blank=True)
     height = models.FloatField(max_length=10, null=True, blank=True)
     weight = models.FloatField(max_length=10, null=True, blank=True)
-    dimension_unit = models.CharField(max_length=5, null=True, choices=[('mm','mm'), ('inch','inch')], blank=True)
+    dimension_unit = models.CharField(max_length=5, default="mm", choices=[('mm','mm'), ('inch','inch')])
     weight_unit = models.CharField(max_length=5, null=True, choices=[('gr','gr')], blank=True)
-    color = models.CharField(max_length=20, default = '')
-    grade = models.ManyToManyField(Grade)
-    environment = models.ManyToManyField(Environment)
+    # grade = models.ManyToManyField(Grade)
+    # environment = models.ManyToManyField(Environment)
     status = models.ForeignKey('ClientPartStatus', on_delete=models.CASCADE, default=1)
 
     def __str__(self):
@@ -209,8 +256,10 @@ def get_bulk_path(instance, filename):
         path = path + 'bulk_files/{0}'.format(filename)
     elif instance.type == "2D":
         path = path + '2d_files/{0}'.format(filename)
-    elif instance.type == "3D":
+    elif instance.type == "3D" or instance.type == "STL":
         path = path + '3d_files/{0}'.format(filename)
+    else:
+        path = path + '{0}'.format(filename)
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
     return path
 
@@ -220,12 +269,14 @@ class PartBulkFile(models.Model):
         ("MATERIAL", "material files"),
         ("3D", "3d model"),
         ("2D", "2d drawings"),
+        ("STL", "STL file"),
     )
     date_created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
     part = models.ForeignKey('Part', on_delete=models.CASCADE, null=True)
     type = models.CharField(max_length=20, choices=FILE_TYPE_CHOICES, default="BULK")
     file = models.FileField(storage = PrivateMediaStorage(bucket='sp3d-clients'), upload_to = get_bulk_path, blank=True)
+    data = models.CharField(max_length=1000, default = '')
 
     def __str__(self):
         return "%s" % (self.file.name,)
@@ -234,7 +285,7 @@ class PartBulkFile(models.Model):
         return self.FILE_TYPE_CHOICES
 
     def natural_key(self):
-        return {"name":self.file.name, "url":self.file.url, 'id':self.id, 'type':self.type}
+        return {"name":self.file.name.rsplit("/",1)[1], "url":self.file.url, 'id':self.id, 'type':self.type, 'data':self.data}
 
 # delete image file on bucket on delete instance if not in  production:
 @receiver(pre_delete, sender=PartBulkFile)

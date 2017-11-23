@@ -70,7 +70,7 @@ def url_list(image_instance_list):
 def dict_list(file_instance_list):
     dict_list=[]
     for file in file_instance_list:
-        dict_list.append({"id":file.id,"type":file.type, "url":file.file.url,"name":(file.file.name).rsplit("/",1)[1]})
+        dict_list.append(file.natural_key())
     return json.dumps(dict_list)
 
 @register.simple_tag

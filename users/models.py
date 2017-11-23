@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime
 from django.contrib.auth.models import Group
+from sp3d.storage_backends import PrivateMediaStorage
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None):
@@ -80,6 +81,9 @@ class CustomUser(AbstractBaseUser):
         # Simplest possible answer: Yes, always
         return True
 
+    def get_types(self):
+        return self.type_choices
+
     @property
     def is_staff(self):
         "Is the user a member of staff?"
@@ -89,7 +93,7 @@ class CustomUser(AbstractBaseUser):
             return False
         # Simplest possible answer: All admins are staff
         # return self.is_admin
-        
+
 class Industry(models.Model):
     name = models.CharField(max_length=100, default = '', unique = True)
 
@@ -102,10 +106,16 @@ class Industry(models.Model):
     def natural_key(self):
         return self.name
 
+def get_logo_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return '{0}/logo/{1}'.format(instance.name, filename)
+
+
 class Organisation(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100, default = '', unique = True)
     industry = models.ForeignKey(Industry, on_delete=models.CASCADE, default=1)
+    logo = models.ImageField(storage = PrivateMediaStorage(bucket='sp3d-users'), upload_to = get_logo_path, null=True, blank=True)
 
     def __str__(self):
         return "%s" % (self.name,)

@@ -7,9 +7,9 @@ from os.path import join
 import numpy
 from stl import mesh
 from django.core import serializers
-from digital.forms import PartBulkFileForm, PartForm
+from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm
 from django.core.files.uploadedfile import UploadedFile
-from digital.utils import getPartsClean, send_email, getPartSumUp
+from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
@@ -46,17 +46,18 @@ def parts(request):
     parts_sumup = getPartSumUp(request.user.organisation)
     stl_mesh = mesh.Mesh.from_file(join(dir_path, 'static', 'digital', 'stl', 'assemb6.STL'))
     volume, cog, inertia = stl_mesh.get_mass_properties()
-    # print("Volume                                  = {0}".format(volume))
-    # print("Position of the center of gravity (COG) = {0}".format(cog))
-    # print("Inertia matrix at expressed at the COG  = {0}".format(inertia[0,:]))
-    # print("                                          {0}".format(inertia[1,:]))
-    # print("                                          {0}".format(inertia[2,:]))
+    print("Volume                                  = {0}".format(volume))
+    print("Position of the center of gravity (COG) = {0}".format(cog))
+    print("Inertia matrix at expressed at the COG  = {0}".format(inertia[0,:]))
+    print("                                          {0}".format(inertia[1,:]))
+    print("                                          {0}".format(inertia[2,:]))
     context = {
         'page':"parts",
         'parts':parts,
         'parts_sumup':parts_sumup,
         'formPartBulkFile': PartBulkFileForm(),
         'formPart': PartForm(created_by=request.user, initial={'dimension_unit': 'mm', "weight_unit":"gr"}),
+        'formCharacteristics': CharacteristicsForm(),
     }
     return render(request, 'digital/parts.html', context)
 @login_required
@@ -121,8 +122,9 @@ def upload_part_bulk_file(request):
                 form = PartBulkFileForm(request.POST, request.FILES, created_by=request.user)
                 if form.is_valid():
                     print "FORM IS VALID"
-                    _new_file = form.save()
-                    files_success.append({"name":(_new_file.file.name).rsplit("/",1)[1], "url":_new_file.file.url, 'id':_new_file.id, 'type':_new_file.type})
+                    type, data = getfiledata(_file)
+                    _new_file = form.save(type= type, data = data)
+                    files_success.append({"name":(_new_file.file.name).rsplit("/",1)[1], "url":_new_file.file.url, 'id':_new_file.id, 'type':_new_file.type, 'data':_new_file.data})
                 else:
                     print "FORM IS NOT VALID"
                     files_failure.append({"name":_file})
@@ -218,9 +220,15 @@ def new_part(request):
         part=None
         print request.POST
         form = PartForm(request.POST, created_by=request.user)
-        if form.is_valid():
-            print "FORM IS VALID"
-            _new_part = form.save()
+        form_charac = CharacteristicsForm(request.POST)
+        if not form.is_valid():
+            print "Part form is not valid"
+        if not form_charac.is_valid():
+            print "Charac form is not valid"
+        if all((form.is_valid(), form_charac.is_valid())):
+            _characteristics = form_charac.save()
+            print "ALL FORMS ARE VALID"
+            _new_part = form.save(characteristics = _characteristics)
             part = serializers.serialize("json", [_new_part],  use_natural_foreign_keys=True)[1:-1]
         else:
             print "FORM IS NOT VALID"

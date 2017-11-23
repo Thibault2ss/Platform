@@ -884,8 +884,8 @@ hr {
   border-left: 0 none; }
 
 .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
-  background-color: #E3E3E3;
-  cursor: not-allowed;
+  background-color: #ffffff;
+  cursor: text;
   color: #9A9A9A;
   opacity: 1;
   filter: alpha(opacity=100); }

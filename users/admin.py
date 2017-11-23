@@ -88,7 +88,7 @@ admin.site.register(CustomUser, CustomUserAdmin)
 
 @admin.register(Organisation)
 class Organisation_Admin(admin.ModelAdmin):
-    fields = ['name', 'industry']
+    fields = ['name', 'industry', 'logo']
     list_display = ('id','name','industry')
 
 @admin.register(Industry)

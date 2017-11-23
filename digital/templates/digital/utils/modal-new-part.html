@@ -13,47 +13,98 @@
           <div class="row">
               <div class="col-xs-12">
 
-                      {%csrf_token%}
-                      {%comment%}{{formPart.as_p}}{%endcomment%}
-                      <div class="form-group">
-                          <label for="id_reference">Reference:</label>
-                          {{formPart.reference|add_class:"form-control"|attr:"placeholder:unique identifier of part"}}
+                  {%csrf_token%}
+                  {%comment%}{{formPart.as_p}}{%endcomment%}
+                  <div class="form-group">
+                      <label for="id_reference">Reference:</label>
+                      {{formPart.reference|add_class:"form-control"|attr:"placeholder:unique identifier of part"}}
+                  </div>
+                  <div class="form-group">
+                      <label for="id_name">Name:</label>
+                      {{formPart.name|add_class:"form-control"|attr:"placeholder:name of part"}}
+                  </div>
+                  <div class="row subcategory" data-toggle="collapse" href="#new-part-details">
+                      <h5><i class="ti-arrow-right"></i>Details</h5>
+                  </div>
+                  <div id ="new-part-details" class="row text-center collapse" aria-expanded="false">
+                      <div class="col-xs-12 col-sm-6">
+                          <div class="form-group">
+                              <label for="id_type">Type:</label>
+                              {{formPart.type|add_class:"form-control"|attr:"placeholder:name of part"}}
+                          </div>
+                          <div class="form-group">
+                              <label for="id_appliance">Fits Appliance:</label>
+                              {{formPart.appliance|add_class:"form-control"}}
+                          </div>
                       </div>
-                      <div class="form-group">
-                          <label for="id_name">Name:</label>
-                          {{formPart.name|add_class:"form-control"|attr:"placeholder:name of part"}}
+                      <div class="col-xs-12 col-sm-6">
+                          <div class="form-group">
+                              <label for="id_material">Material:</label>
+                              {{formPart.material|add_class:"form-control"}}
+                          </div>
+                          <div class="form-group">
+                              <label for="" style="display:block;">L x W x H:</label>
+                              {{formPart.length|add_class:"form-control dim-input"|attr:"placeholder:l"}}
+                              {{formPart.width|add_class:"form-control dim-input"|attr:"placeholder:w"}}
+                              {{formPart.height|add_class:"form-control dim-input"|attr:"placeholder:h"}}
+                              {{formPart.dimension_unit|add_class:"form-control dim-input unit-input"}}
+                          </div>
+                          <div class="form-group">
+                              <label for="" style="display:block;">Weight</label>
+                              {{formPart.weight|add_class:"form-control dim-input"|attr:"placeholder:weight"}}
+                              {{formPart.weight_unit|add_class:"form-control dim-input unit-input"}}
+                          </div>
                       </div>
-                      <div class="form-group">
-                          <label for="id_name">Fits Models:</label>
-                          {{formPart.model|add_class:"form-control"}}
-                      </div>
-                      <div class="form-group">
-                          <label for="" style="display:block;">L x W x H:</label>
-                          {{formPart.length|add_class:"form-control dim-input"|attr:"placeholder:l"}}
-                          {{formPart.width|add_class:"form-control dim-input"|attr:"placeholder:w"}}
-                          {{formPart.height|add_class:"form-control dim-input"|attr:"placeholder:h"}}
-                          {{formPart.dimension_unit|add_class:"form-control dim-input unit-input"|attr:"value:mm"}}
-                      </div>
-                      <div class="form-group">
-                          <label for="" style="display:block;">Weight</label>
-                          {{formPart.weight|add_class:"form-control dim-input"|attr:"placeholder:weight"}}
-                          {{formPart.weight_unit|add_class:"form-control dim-input unit-input"|attr:"value:mm"}}
-                      </div>
-                      <div class="form-group">
-                          <label for="id_color">Color:</label>
-                          {{formPart.color|add_class:"form-control"|attr:"placeholder:color of part"}}
-                      </div>
-                      <div class="form-group">
-                          <label for="id_color">Grades:</label>
-                          {{formPart.grade|add_class:"form-control"}}
-                      </div>
-                      <div class="form-group">
-                          <label for="id_color">Environments:</label>
-                          {{formPart.environment|add_class:"form-control"}}
-                      </div>
+                  </div>
+                  <div class="row subcategory" data-toggle="collapse" href="#new-part-characteristics">
+                      <h5><i class="ti-arrow-right"></i>Characteristics</h5>
+                  </div>
+                    <div id ="new-part-characteristics" class="row collapse" aria-expanded="false">
+                        <div class="col-xs-12 col-sm-6">
+                            {%comment%}{{formCharacteristics.as_p}}{%endcomment%}
 
-
-
+                            <div class="form-group">
+                                {{formCharacteristics.is_visual|add_class:"styled-checkbox"}}
+                                <label for="id_is_visual">Visual Part</label>
+                            </div>
+                            <div class="form-group">
+                                {{formCharacteristics.is_transparent|add_class:"styled-checkbox"}}
+                                <label for="id_is_transparent">Transparent</label>
+                            </div>
+                            <div class="form-group">
+                                {{formCharacteristics.is_water_resistant|add_class:"styled-checkbox"}}
+                                <label for="id_is_water_resistant">Water Resistant</label>
+                            </div>
+                            <div class="form-group">
+                                {{formCharacteristics.is_chemical_resistant|add_class:"styled-checkbox"}}
+                                <label for="id_is_chemical_resistant">Chemical Resistant</label>
+                            </div>
+                            <div class="form-group">
+                                {{formCharacteristics.is_flame_retardant|add_class:"styled-checkbox"}}
+                                <label for="id_is_flame_retardant">Flame Retardant</label>
+                            </div>
+                            <div class="form-group">
+                                {{formCharacteristics.is_food_grade|add_class:"styled-checkbox"}}
+                                <label for="id_is_food_grade">Food Grade</label>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <div class="form-group">
+                                <label for="id_color">Color</label>
+                                {{ formCharacteristics.color|add_class:"form-control"}}
+                            </div>
+                            <div class="form-group" id="fg-temp-range">
+                                <label for="id_min_temp">Operating Temperature Range</label>
+                                {{formCharacteristics.min_temp|add_class:"form-control temp-dim-input"}}
+                                {{formCharacteristics.max_temp|add_class:"form-control temp-dim-input"}}
+                                {{formCharacteristics.temp_unit|add_class:"form-control temp-dim-input"}}
+                            </div>
+                            <div class="form-group" id="fg-flame-retardancy" style="display:none;">
+                                <label for="id_flame_retardancy">Flame Retardancy Level</label>
+                                {{formCharacteristics.flame_retardancy|add_class:"form-control"}}
+                            </div>
+                        </div>
+                    </div>
               </div>
           </div>
 

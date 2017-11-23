@@ -7,18 +7,40 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime
 
-class Material(models.Model):
-    family= models.CharField(max_length=200, choices=[('metal','metal'), ('plastic','plastic')], null=True)
-    name = models.CharField(max_length=200, default = '')
+class Technology(models.Model):
+    name = models.CharField("Technology Name",max_length=100, default = '', unique=True)
 
     def __str__(self):
         return "%s" % (self.name,)
 
     def natural_key(self):
-        return {'family':self.family, 'name':self.name}
+        return {'id':self.id,'name':self.name}
+
+class Material(models.Model):
+    MATERIAL_FAMILY_CHOICES = [('metal','metal'), ('plastic','plastic')]
+    family= models.CharField("Material Family", max_length=20, choices = MATERIAL_FAMILY_CHOICES, null=True)
+    name = models.CharField("Material Name",max_length=100, default = '', unique=True)
+    technology = models.ManyToManyField(Technology, through='CoupleTechnoMaterial')
+
+    def __str__(self):
+        return "%s" % (self.name,)
+
+    def natural_key(self):
+        return {'id':self.id,'family':self.family, 'name':self.name}
+
+
+class CoupleTechnoMaterial(models.Model):
+    material= models.ForeignKey(Material, on_delete=models.CASCADE)
+    technology = models.ForeignKey(Technology, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "%s + %s" % (self.technology.name, self.material.name,)
+
+    def natural_key(self):
+        return {'id':self.id, 'material':self.material.id, 'technology':self.technology.id}
 
     class Meta:
-        unique_together = (('family', 'name'),)
+        unique_together = (('material', 'technology'),)
 
 class Part(models.Model):
 

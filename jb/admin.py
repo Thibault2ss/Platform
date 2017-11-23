@@ -6,10 +6,20 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from .models import Part, Material
+from .models import Part, Material, Technology, CoupleTechnoMaterial
 
 
 @admin.register(Material)
 class Model_Admin(admin.ModelAdmin):
     fields = ['name','family']
     list_display = ('id', 'name','family')
+
+@admin.register(Technology)
+class Technology_Admin(admin.ModelAdmin):
+    fields = ['name']
+    list_display = ('id', 'name')
+
+@admin.register(CoupleTechnoMaterial)
+class CoupleTechnoMaterial_Admin(admin.ModelAdmin):
+    fields = ['technology', 'material']
+    list_display = ('id', 'technology', 'material')

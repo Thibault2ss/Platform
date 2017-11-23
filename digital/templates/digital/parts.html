@@ -16,6 +16,7 @@
                     <div class="row" style="text-align:center;margin-bottom:20px;">
                         <div class="col-lg-12">
                             <button class="btn btn-order-class btn-info btn-fill" value=""><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_total}}</span> All</button>
+                            <button class="btn btn-order-class btn-success" value="1"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_new}}</span> New</button>
                             <button class="btn btn-order-class btn-warning" value="2"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_pending_indus}}</span> Pending</button>
                             <button class="btn btn-order-class btn-danger" value="3"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_disqualified}}</span> Disqualified</button>
                             <button class="btn btn-order-class btn-success" value="4"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_industrialized}}</span> Digitalized</button>
@@ -39,7 +40,7 @@
                                             <div class="row">
                                                 <div class="col-xs-4" style="display:flex;align-items:center;">
                                                     <div class="avatar" style="margin-right:20px;">
-                                                        <img src="{%if part.images %}{{part.images.0.thumbnail.url}}{%else%}{% static 'digital/img/stl/stl1.jpg' %}{%endif%}" alt="Circle Image" class="img-circle img-no-padding img-responsive" style="height:100%;width:100%">
+                                                        <img src="{%if part.images %}{{part.images.0.thumbnail.url}}{%else%}{% static 'digital/img/cubes.png' %}{%endif%}" alt="Circle Image" class="img-circle img-no-padding img-responsive" style="height:100%;width:100%">
                                                     </div>
                                                     <div>
                                                         <span class="text-muted"><small>name: </small></span>{{part.name}}<br>
@@ -89,7 +90,7 @@
                             <div class="row">
                                 <div class="col-xs-12" id="canvas-container">
                                     <div id="stl-canvas" class="stl-canvas" style="display:flex;align-items:center;margin-bottom:15px;">
-                                        <button id="stl-demo" class="btn btn-warning btn-fill btn-wd" style="margin-left:23%;font-weight:900;">3D DEMO</button>
+                                        <button id="stl-demo" class="btn btn-warning btn-fill btn-wd" style="margin-left:23%;font-weight:900;">LOAD STL</button>
                                     </div>
                                 </div>
                                 <div class="col-xs-12">
@@ -111,73 +112,89 @@
                                     <div class="card">
                                         <i class="card-top-icon ti-settings"></i>
                                         <div class="content">
-                                            <div class="row text-center" style="margin-bottom:10px;">
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Name</span><br>
-                                                    <div class="part-name" style="margin-left:15px;"></div>
-                                                </div>
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Status</span><br>
-                                                    <span class="label part-status label-default" style="font-size:100%;margin-left:15px;">Created</span>
-                                                </div>
-
-                                            </div>
-                                            <div class="row subcategory" data-toggle="collapse" href="#specs-attached">
-                                                <h5><i class="ti-arrow-right"></i>Specs</h5>
-                                            </div>
-                                            <div id="specs-attached" class="row text-center collapse" aria-expanded="false" style="margin-bottom:10px;">
-                                                <div class="col-sm-12 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Ref</span><br>
-                                                    <div class="part-ref" style="margin-left:15px;"></div>
-                                                </div>
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Dimensions</span><br>
-                                                    <div class="part-dimensions" style="margin-left:15px;"></div>
-                                                </div>
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Material</span><br>
-                                                    <div class="part-material" style="margin-left:15px;"></div>
-                                                </div>
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Weight</span><br>
-                                                    <div class="part-weight" style="margin-left:15px;"></div>
-                                                </div>
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Color</span><br>
-                                                    <div class="part-color" style="margin-left:15px;"></div>
+                                            <div class="row" style="margin-bottom:10px;">
+                                                <div class="col-xs-12">
+                                                    <span class="label part-status label-default" style="font-size:100%;float:right;">Created</span>
+                                                    <span class="text-muted" style="font-size:70%;">Name</span>
+                                                    {{formPart.reference|attr:"id:id_reference_1"|add_class:"form-control"|attr:"disabled"}}
+                                                    <span class="text-muted" style="font-size:70%;">Reference</span>
+                                                    {{formPart.name|attr:"id:id_name_1"|add_class:"form-control"|attr:"disabled"}}
                                                 </div>
                                             </div>
-                                            <div class="row subcategory" data-toggle="collapse" href="#appliances-attached">
-                                                <h5><i class="ti-arrow-right"></i>Fits Appliances</h5>
+                                            <div class="row subcategory" data-toggle="collapse" href="#details-attached">
+                                                <h5><i class="ti-arrow-right"></i>Details</h5>
                                             </div>
-                                            <div id ="appliances-attached" class="row text-center collapse" aria-expanded="false">
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Appliance</span><br>
-                                                    <div class="part-appliance" style="margin-left:15px;"></div>
+                                            <div id="details-attached" class="row collapse" aria-expanded="false" style="margin-bottom:10px;">
+                                                <div class="col-xs-12 col-sm-12">
+                                                    <div class="form-group">
+                                                        <span class="text-muted" style="font-size:70%;">Type</span>
+                                                        {{formPart.type|attr:"id:id_type_1"|add_class:"form-control"|attr:"disabled"}}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="text-muted" style="font-size:70%;">Fit Appliances</span>
+                                                        {{formPart.appliance|attr:"id:id_appliance_1"|add_class:"form-control"|attr:"disabled"|attr:"value:1,2"}}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="text-muted" style="font-size:70%;">Material</span>
+                                                        {{formPart.material|attr:"id:id_material_1"|add_class:"form-control"|attr:"disabled"}}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="text-muted" style="font-size:70%;display:block;">L x W x H:</span>
+                                                        {{formPart.length|attr:"id:id_length_1"|add_class:"form-control dim-input"|attr:"placeholder:l"|attr:"disabled"}}x
+                                                        {{formPart.width|attr:"id:id_width_1"|add_class:"form-control dim-input"|attr:"placeholder:w"|attr:"disabled"}}x
+                                                        {{formPart.height|attr:"id:id_height_1"|add_class:"form-control dim-input"|attr:"placeholder:h"|attr:"disabled"}}
+                                                        {{formPart.dimension_unit|attr:"id:id_dimension_unit_1"|add_class:"form-control dim-input unit-input"|attr:"disabled"}}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="text-muted" style="font-size:70%;display:block;">Weight</span>
+                                                        {{formPart.weight|attr:"id:id_weight_1"|add_class:"form-control dim-input"|attr:"placeholder:weight"|attr:"disabled"}}
+                                                        {{formPart.weight_unit|attr:"id:id_weight_unit_1"|add_class:"form-control dim-input unit-input"|attr:"disabled"}}
+                                                    </div>
                                                 </div>
-                                                <div class="col-sm-6 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Family</span><br>
-                                                    <div class="appliance-family" style="margin-left:15px;"></div>
-                                                </div>
                                             </div>
-
-                                            <div class="row subcategory" data-toggle="collapse" href="#grades-attached">
-                                                <h5><i class="ti-arrow-right"></i>Grades</h5>
+                                            <div class="row subcategory" data-toggle="collapse" href="#characteristics-attached">
+                                                <h5><i class="ti-arrow-right"></i>Characteristics</h5>
                                             </div>
-                                            <div id ="grades-attached" class="row text-center collapse" aria-expanded="false">
-                                                <div class="col-sm-12 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Grade</span><br>
-                                                    <div class="part-grade" style="margin-left:15px;"></div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row subcategory" data-toggle="collapse" href="#environments-attached">
-                                                <h5><i class="ti-arrow-right"></i>Environments</h5>
-                                            </div>
-                                            <div id ="environments-attached" class="row text-center collapse" aria-expanded="false">
-                                                <div class="col-sm-12 col-xs-12">
-                                                    <span class="text-muted" style="float:left;font-size:70%;">Environment</span><br>
-                                                    <div class="part-grade" style="margin-left:15px;"></div>
+                                            <div id ="characteristics-attached" class="row collapse" aria-expanded="false">
+                                                <div class="col-xs-12 col-sm-12">
+                                                    <div class="form-group">
+                                                        <span class="text-muted" style="font-size:70%;">Color</span>
+                                                        {{ formCharacteristics.color|attr:"id:id_color_1"|add_class:"form-control"|attr:"disabled"}}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        {{formCharacteristics.is_visual|attr:"id:id_is_visual_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                        <label for="id_is_visual_1">Visual Part</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        {{formCharacteristics.is_transparent|attr:"id:id_is_transparent_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                        <label for="id_is_transparent_1">Transparent</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        {{formCharacteristics.is_water_resistant|attr:"id:id_is_water_resistant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                        <label for="id_is_water_resistant_1">Water Resistant</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        {{formCharacteristics.is_chemical_resistant|attr:"id:id_is_chemical_resistant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                        <label for="id_is_chemical_resistant_1">Chemical Resistant</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        {{formCharacteristics.is_flame_retardant|attr:"id:id_is_flame_retardant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                        <label for="id_is_flame_retardant_1">Flame Retardant</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        {{formCharacteristics.is_food_grade|attr:"id:id_is_food_grade_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                        <label for="id_is_food_grade_1">Food Grade</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="text-muted" style="font-size:70%;display:block;">Operating Temperature Range</span>
+                                                        {{formCharacteristics.min_temp|attr:"id:id_min_temp_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                        {{formCharacteristics.max_temp|attr:"id:id_max_temp_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                        {{formCharacteristics.temp_unit|attr:"id:id_temp_unit_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="text-muted" style="font-size:70%;display:block;">Flame Retardancy Level</span>
+                                                        {{formCharacteristics.flame_retardancy|attr:"id:id_flame_retardancy_1"|add_class:"form-control"|attr:"disabled"}}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -264,6 +281,7 @@
                                                 <div class="file-list" class="row">
                                                     <div class='file-row' data-id=""><a href='' target='_blank'>
                                                         <i class='ti-download'></i></href>test bulk file</a>
+                                                        <btn class="btn btn-sm btn-warning btn-icon btn-3d-view" data-stl=""><i class="fa fa-cube"></i></btn>
                                                         <div class="remove-file remove-icon"><i class="ti-close"></i></div>
                                                     </div>
 
