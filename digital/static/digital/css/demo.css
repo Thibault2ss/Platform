@@ -234,7 +234,7 @@
     color: #949494;
 }
 #timeline-card{
-    max-height:500px;
+    max-height:300px;
     overflow-y:scroll;
 }
 #timeline-card:after {
@@ -417,4 +417,84 @@ input[type=number]::-webkit-outer-spin-button {
   margin: 0;
   padding: 0;
   list-style-type: none;
+}
+.status, .button-change-status{
+    font-weight: 900 !important;
+    color:#fff !important;
+    border:none;
+}
+.status[data-status-id="1"],
+.button-change-status[data-status-id="1"] {
+    background-color: #aaaaaa;
+}
+.status[data-status-id="1"]:hover,
+.button-change-status[data-status-id="1"]:hover {
+    background-color: #928F8B;
+}
+.status[data-status-id="1"]::before,
+.button-change-status[data-status-id="1"]::before {
+    content:"Created";
+}
+.status[data-status-id="2"],
+.button-change-status[data-status-id="2"] {
+    background-color: #F0AD4E;
+}
+.status[data-status-id="2"]:hover,
+.button-change-status[data-status-id="2"]:hover {
+    background-color: #F0BB6F;
+}
+.status[data-status-id="2"]::before,
+.button-change-status[data-status-id="2"]::before {
+    content:"Pending Indus";
+}
+.status[data-status-id="3"],
+.button-change-status[data-status-id="3"] {
+    background-color: #D9534F;
+}
+.status[data-status-id="3"]:hover,
+.button-change-status[data-status-id="3"]:hover {
+    background-color: #F07B77;
+}
+.status[data-status-id="3"]::before,
+.button-change-status[data-status-id="3"]::before {
+    content:"Disqualified";
+}
+.status[data-status-id="4"],
+.button-change-status[data-status-id="4"] {
+    background-color: #5CB85C;
+}
+.status[data-status-id="4"]:hover,
+.button-change-status[data-status-id="4"]:hover {
+    background-color: #6DCC6D;
+}
+.status[data-status-id="4"]::before,
+.button-change-status[data-status-id="4"]::before {
+    content:"Ready";
+}
+.status[data-status-id="5"],
+.button-change-status[data-status-id="5"] {
+    background-color: #F89406;
+}
+.status[data-status-id="6"],
+.button-change-status[data-status-id="6"] {
+    background-color: #BD362F;
+}
+#final-card input, #final-card select{
+    color:#000;
+    font-weight:900;
+}
+.price-input-1{
+    display:inline-block;
+    max-width:55px;
+    padding:7px 0 7px 15px
+}
+.price-input-2{
+    display:inline-block;
+    max-width:80px;
+    padding:7px 0 7px 0px
+}
+.lead-time-input{
+    display:inline-block;
+    max-width:40px;
+    padding:7px 0 7px 0px
 }

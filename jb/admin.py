@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from .models import Part, Material, Technology, CoupleTechnoMaterial
+from .models import Part, Material, Technology, CoupleTechnoMaterial, FinalCard
 
 
 @admin.register(Material)
@@ -21,5 +21,10 @@ class Technology_Admin(admin.ModelAdmin):
 
 @admin.register(CoupleTechnoMaterial)
 class CoupleTechnoMaterial_Admin(admin.ModelAdmin):
-    fields = ['technology', 'material']
-    list_display = ('id', 'technology', 'material')
+    fields = ['technology', 'material', 'characteristics']
+    list_display = ('id', 'technology', 'material', 'characteristics')
+
+@admin.register(FinalCard)
+class FinalCard_Admin(admin.ModelAdmin):
+    fields = ['techno_material', 'lead_time', 'unit_price', 'currency']
+    list_display = ('id', 'techno_material', 'lead_time', 'unit_price', 'currency')

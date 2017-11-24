@@ -64,6 +64,7 @@ class Part_Admin(admin.ModelAdmin):
         (None, {'fields': ('created_by','organisation','appliance', 'type', 'reference', 'name')}),
         ('Dimensions & Weight', {'fields': ('material','length', 'width', 'height','dimension_unit', 'weight','weight_unit')}),
         ('Other Characteristics', {'fields': ('characteristics',)}),
+        ('Final Card', {'fields': ('final_card',)}),
     )
     inlines=[PartImage_Inline, PartBulkFile_Inline]
 

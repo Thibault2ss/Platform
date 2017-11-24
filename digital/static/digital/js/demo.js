@@ -1,6 +1,48 @@
+// EXTEND JQUERY FOR ANIMATION##################################################
+$.fn.extend({
+    animateCss: function (animationName, callback) {
+        callback =  callback || null;
+        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+        this.addClass('animated ' + animationName).one(animationEnd, function() {
+            $(this).removeClass('animated ' + animationName);
+            if (typeof callback == 'function'){
+                callback.call(this);
+            }
+        });
+        return this;
+    }
+});
+
+$(document).ready(function(){
+
+    // SEND RECAP TO CLIENT ON PART STATUS####################################
+    $('.recap-mail-button').off();
+    $('.recap-mail-button').click(function(){
+        $(this).addClass("disabled");
+        $.ajax({
+            url: '/digital/parts/send-recap-mail/',
+            data:{
+            },
+            dataType:'json',
+            success:function(data){
+                if (data.success){
+                    console.log(data.success);
+                    $(this).animateCss('tada');
+                    $(this).removeClass("disabled");
+                };
+                if (data.error){
+                    console.log(data.error);
+                };
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+            }
+        });
+    });
+    // END SEND RECAP TO CLIENT ON PART STATUS####################################
+});
+
 type = ['','info','success','warning','danger'];
-
-
 demo = {
     initPickColor: function(){
         $('.pick-class-label').click(function(){

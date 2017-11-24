@@ -8,6 +8,7 @@ import numpy
 from stl import mesh
 from django.core import serializers
 from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm
+from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
 from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata
 from django.contrib.auth.decorators import login_required
@@ -15,6 +16,8 @@ from django.conf import settings
 import json
 
 from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent
+from users.models import CustomUser
+from jb.models import FinalCard
 dir_path = os.path.dirname(os.path.realpath(__file__))
 # Create your views here.
 @login_required
@@ -58,6 +61,8 @@ def parts(request):
         'formPartBulkFile': PartBulkFileForm(),
         'formPart': PartForm(created_by=request.user, initial={'dimension_unit': 'mm', "weight_unit":"gr"}),
         'formCharacteristics': CharacteristicsForm(),
+        'formFinalCard':FinalCardForm(),
+        'clientPartStatuses':ClientPartStatus.objects.all().order_by('id'),
     }
     return render(request, 'digital/parts.html', context)
 @login_required
@@ -194,6 +199,65 @@ def request_for_indus(request):
     return JsonResponse(data)
 
 @login_required
+def change_part_status(request):
+    success=True
+    errors=[]
+    id_part = request.GET.get("id_part")
+    id_status = request.GET.get("id_status")
+    part = Part.objects.get(id=id_part)
+    new_status = ClientPartStatus.objects.get(id=id_status)
+    if part.organisation == request.user.organisation:
+        if not part.status == new_status:
+            if new_status == 3 or new_status == 4:
+                part.notify_status_to_client = True
+            part.status = new_status
+            part.save()
+            if not settings.DEBUG:
+                send_email(
+                    'digital/mail_templates/status_change.html',
+                    { 'user': request.user, 'part':part },
+                    'SP3D: Client Part - Status Change',
+                    'contact@sp3d.co',
+                    ['paul.de-misouard@sp3d.co','thibault.de-saint-sernin@sp3d.co'],
+                    )
+            new_event = PartEvent.objects.create(
+                part=part,
+                created_by = request.user,
+                type="STATUS_CHANGE",
+                status = part.status,
+                short_description = "status changed to %s"%part.status.name,
+                long_description = "The part has been changed to status: %s, and will be reviewed by our team. We will get back to you ASAP"%part.status.name
+            )
+    else:
+        success=False
+        errors.append("this part does not belong to your organisation")
+    data={
+        "success":success,
+        "errors":errors,
+        }
+    return JsonResponse(data)
+
+@login_required
+def send_recap_mail(request):
+    success=True
+    errors=[]
+    parts = Part.objects.filter(organisation = request.user.organisation, notify_status_to_client = True).order_by('date')
+    email_list = CustomUser.objects.filter(organisation = request.user.organisation).values_list('email', flat=True)
+    send_email(
+        'digital/mail_templates/client_update_status.html',
+        { 'user': request.user, 'parts':parts },
+        'Update on your Parts',
+        'contact@sp3d.co',
+        list(email_list),
+        )
+    parts.update(notify_status_to_client = False)
+    data={
+        "success":success,
+        "errors":errors,
+        }
+    return JsonResponse(data)
+
+@login_required
 def get_part_history(request):
     success=True
     errors=[]
@@ -238,6 +302,84 @@ def new_part(request):
             "success":success,
             "errors":errors,
             "part":part,
+            }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/parts/")
+
+@login_required
+def update_part_card(request):
+    if request.method == 'POST':
+        # initialize default values
+        success = True
+        errors = []
+        new_part = None
+        part = Part.objects.get(id=request.POST.get("id_part"))
+        if part.organisation == request.user.organisation:
+            print request.POST
+            form = PartForm(request.POST, created_by = request.user, instance = part)
+            if part.characteristics is None:
+                form_charac = CharacteristicsForm(request.POST)
+            else:
+                form_charac = CharacteristicsForm(request.POST, instance=part.characteristics)
+            if all((form.is_valid(), form_charac.is_valid())):
+                _characteristics = form_charac.save()
+                print "ALL FORMS ARE VALID"
+                _new_part = form.save(characteristics = _characteristics)
+                new_part = serializers.serialize("json", [_new_part],  use_natural_foreign_keys=True)[1:-1]
+            else:
+                print "FORM IS NOT VALID"
+                success = False
+                errors.append("form is not valid")
+        else:
+            print "NOT RIGHT ORGANISATION OR PART"
+            success = False
+            errors.append("Part doesn't belong to Organisation")
+
+        data={
+            "success":success,
+            "errors":errors,
+            "part":new_part,
+            }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/parts/")
+
+@login_required
+def update_final_card(request):
+    if request.method == 'POST':
+        success = True
+        errors = []
+        print request.POST
+        print request.POST["id_part"]
+        part = Part.objects.get(id=request.POST.get("id_part"))
+        if part.organisation == request.user.organisation:
+            if part.final_card is None:
+                form = FinalCardForm(request.POST)
+                if form.is_valid():
+                    _final_card = form.save()
+                    part.final_card = _final_card
+                    part.save()
+                else:
+                    success = False
+                    errors.append("Form is not Valid Step 1")
+            else:
+                form = FinalCardForm(request.POST, instance=part.final_card)
+                if form.is_valid():
+                    _final_card= form.save()
+                else:
+                    success = False
+                    errors.append("Form is not Valid Step 2")
+            final_card = serializers.serialize("json", [_final_card],  use_natural_foreign_keys=True)[1:-1]
+        else:
+            print "NOT RIGHT ORGANISATION OR PART"
+            success = False
+            errors.append("Part doesn't belong to Organisation")
+
+        data={
+            "success":success,
+            "errors":errors,
+            "final_card":final_card,
             }
         return JsonResponse(data)
 

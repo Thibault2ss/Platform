@@ -74,17 +74,6 @@
 
             <div class="content" id="part-detail-panel" data-part-id="" style="position:relative;">
                 <div class="container-fluid">
-                    <!-- <div class="row row-status" style="margin-bottom:20px;">
-                        <div class="col-xs-4 text-center">
-                            <span class="label label-default" data-status-id="1" style="font-size:100%">Created</span><div><small class="part-date part-date-created"></small></div>
-                        </div>
-                        <div class="col-xs-4 text-center">
-                            <span class="label label-info" data-status-id="2" style="font-size:100%">Pending Indus</span><div><small class="part-date part-date-requested-indus"></small></div>
-                        </div>
-                        <div class="col-xs-4 text-center">
-                            <span class="text-muted" data-status-id="3" style="font-size:100%">Digitalized</span><div><small class="part-date part-date-indus-result"></small></div>
-                        </div>
-                    </div> -->
                     <div class="row">
                         <div class="col-md-4">
                             <div class="row">
@@ -110,93 +99,141 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="card">
+                                        {%if user.is_admin%}
+                                        <i class="ti-pencil allow-inputs" style="color:#000;font-size:2.2rem;cursor:pointer;"></i>
+                                        {%endif%}
                                         <i class="card-top-icon ti-settings"></i>
                                         <div class="content">
-                                            <div class="row" style="margin-bottom:10px;">
-                                                <div class="col-xs-12">
-                                                    <span class="label part-status label-default" style="font-size:100%;float:right;">Created</span>
-                                                    <span class="text-muted" style="font-size:70%;">Name</span>
-                                                    {{formPart.reference|attr:"id:id_reference_1"|add_class:"form-control"|attr:"disabled"}}
-                                                    <span class="text-muted" style="font-size:70%;">Reference</span>
-                                                    {{formPart.name|attr:"id:id_name_1"|add_class:"form-control"|attr:"disabled"}}
-                                                </div>
-                                            </div>
-                                            <div class="row subcategory" data-toggle="collapse" href="#details-attached">
-                                                <h5><i class="ti-arrow-right"></i>Details</h5>
-                                            </div>
-                                            <div id="details-attached" class="row collapse" aria-expanded="false" style="margin-bottom:10px;">
-                                                <div class="col-xs-12 col-sm-12">
-                                                    <div class="form-group">
-                                                        <span class="text-muted" style="font-size:70%;">Type</span>
-                                                        {{formPart.type|attr:"id:id_type_1"|add_class:"form-control"|attr:"disabled"}}
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <span class="text-muted" style="font-size:70%;">Fit Appliances</span>
-                                                        {{formPart.appliance|attr:"id:id_appliance_1"|add_class:"form-control"|attr:"disabled"|attr:"value:1,2"}}
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <span class="text-muted" style="font-size:70%;">Material</span>
-                                                        {{formPart.material|attr:"id:id_material_1"|add_class:"form-control"|attr:"disabled"}}
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <span class="text-muted" style="font-size:70%;display:block;">L x W x H:</span>
-                                                        {{formPart.length|attr:"id:id_length_1"|add_class:"form-control dim-input"|attr:"placeholder:l"|attr:"disabled"}}x
-                                                        {{formPart.width|attr:"id:id_width_1"|add_class:"form-control dim-input"|attr:"placeholder:w"|attr:"disabled"}}x
-                                                        {{formPart.height|attr:"id:id_height_1"|add_class:"form-control dim-input"|attr:"placeholder:h"|attr:"disabled"}}
-                                                        {{formPart.dimension_unit|attr:"id:id_dimension_unit_1"|add_class:"form-control dim-input unit-input"|attr:"disabled"}}
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <span class="text-muted" style="font-size:70%;display:block;">Weight</span>
-                                                        {{formPart.weight|attr:"id:id_weight_1"|add_class:"form-control dim-input"|attr:"placeholder:weight"|attr:"disabled"}}
-                                                        {{formPart.weight_unit|attr:"id:id_weight_unit_1"|add_class:"form-control dim-input unit-input"|attr:"disabled"}}
+                                            <form enctype="multipart/form-data" action="" method="post" id="update_part_form">
+                                                {%csrf_token%}
+                                                <div class="row" style="margin-bottom:10px;">
+                                                    <div class="col-xs-12">
+                                                        <span class="label status" data-status-id="1" style="font-size:100%;float:right;"><span></span></span>
+                                                        <span class="text-muted" style="font-size:70%;">Name</span>
+                                                        {{formPart.reference|attr:"id:id_reference_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        <span class="text-muted" style="font-size:70%;">Reference</span>
+                                                        {{formPart.name|attr:"id:id_name_1"|add_class:"form-control"|attr:"disabled"}}
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="row subcategory" data-toggle="collapse" href="#characteristics-attached">
-                                                <h5><i class="ti-arrow-right"></i>Characteristics</h5>
-                                            </div>
-                                            <div id ="characteristics-attached" class="row collapse" aria-expanded="false">
-                                                <div class="col-xs-12 col-sm-12">
-                                                    <div class="form-group">
-                                                        <span class="text-muted" style="font-size:70%;">Color</span>
-                                                        {{ formCharacteristics.color|attr:"id:id_color_1"|add_class:"form-control"|attr:"disabled"}}
-                                                    </div>
-                                                    <div class="form-group">
-                                                        {{formCharacteristics.is_visual|attr:"id:id_is_visual_1"|add_class:"styled-checkbox"|attr:"disabled"}}
-                                                        <label for="id_is_visual_1">Visual Part</label>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        {{formCharacteristics.is_transparent|attr:"id:id_is_transparent_1"|add_class:"styled-checkbox"|attr:"disabled"}}
-                                                        <label for="id_is_transparent_1">Transparent</label>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        {{formCharacteristics.is_water_resistant|attr:"id:id_is_water_resistant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
-                                                        <label for="id_is_water_resistant_1">Water Resistant</label>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        {{formCharacteristics.is_chemical_resistant|attr:"id:id_is_chemical_resistant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
-                                                        <label for="id_is_chemical_resistant_1">Chemical Resistant</label>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        {{formCharacteristics.is_flame_retardant|attr:"id:id_is_flame_retardant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
-                                                        <label for="id_is_flame_retardant_1">Flame Retardant</label>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        {{formCharacteristics.is_food_grade|attr:"id:id_is_food_grade_1"|add_class:"styled-checkbox"|attr:"disabled"}}
-                                                        <label for="id_is_food_grade_1">Food Grade</label>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <span class="text-muted" style="font-size:70%;display:block;">Operating Temperature Range</span>
-                                                        {{formCharacteristics.min_temp|attr:"id:id_min_temp_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
-                                                        {{formCharacteristics.max_temp|attr:"id:id_max_temp_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
-                                                        {{formCharacteristics.temp_unit|attr:"id:id_temp_unit_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <span class="text-muted" style="font-size:70%;display:block;">Flame Retardancy Level</span>
-                                                        {{formCharacteristics.flame_retardancy|attr:"id:id_flame_retardancy_1"|add_class:"form-control"|attr:"disabled"}}
+                                                <div class="row subcategory" data-toggle="collapse" href="#details-attached">
+                                                    <h5><i class="ti-arrow-right"></i>Details</h5>
+                                                </div>
+                                                <div id="details-attached" class="row collapse" aria-expanded="false" style="margin-bottom:10px;">
+                                                    <div class="col-xs-12 col-sm-12">
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;">Type</span>
+                                                            {{formPart.type|attr:"id:id_type_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;">Fit Appliances</span>
+                                                            {{formPart.appliance|attr:"id:id_appliance_1"|add_class:"form-control"|attr:"disabled"|attr:"value:1,2"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;">Material</span>
+                                                            {{formPart.material|attr:"id:id_material_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;display:block;">L x W x H:</span>
+                                                            {{formPart.length|attr:"id:id_length_1"|add_class:"form-control dim-input"|attr:"placeholder:l"|attr:"disabled"}}x
+                                                            {{formPart.width|attr:"id:id_width_1"|add_class:"form-control dim-input"|attr:"placeholder:w"|attr:"disabled"}}x
+                                                            {{formPart.height|attr:"id:id_height_1"|add_class:"form-control dim-input"|attr:"placeholder:h"|attr:"disabled"}}
+                                                            {{formPart.dimension_unit|attr:"id:id_dimension_unit_1"|add_class:"form-control dim-input unit-input"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;display:block;">Weight</span>
+                                                            {{formPart.weight|attr:"id:id_weight_1"|add_class:"form-control dim-input"|attr:"placeholder:weight"|attr:"disabled"}}
+                                                            {{formPart.weight_unit|attr:"id:id_weight_unit_1"|add_class:"form-control dim-input unit-input"|attr:"disabled"}}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                <div class="row subcategory" data-toggle="collapse" href="#characteristics-attached">
+                                                    <h5><i class="ti-arrow-right"></i>Characteristics</h5>
+                                                </div>
+                                                <div id ="characteristics-attached" class="row collapse" aria-expanded="false">
+                                                    <div class="col-xs-12 col-sm-12">
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;">Color</span>
+                                                            {{ formCharacteristics.color|attr:"id:id_color_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_visual|attr:"id:id_is_visual_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_visual_1">Visual Part</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_transparent|attr:"id:id_is_transparent_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_transparent_1">Transparent</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_water_resistant|attr:"id:id_is_water_resistant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_water_resistant_1">Water Resistant</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_chemical_resistant|attr:"id:id_is_chemical_resistant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_chemical_resistant_1">Chemical Resistant</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_flame_retardant|attr:"id:id_is_flame_retardant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_flame_retardant_1">Flame Retardant</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_food_grade|attr:"id:id_is_food_grade_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_food_grade_1">Food Grade</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;display:block;">Operating Temperature Range</span>
+                                                            {{formCharacteristics.min_temp|attr:"id:id_min_temp_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                            {{formCharacteristics.max_temp|attr:"id:id_max_temp_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                            {{formCharacteristics.temp_unit|attr:"id:id_temp_unit_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;display:block;">Flame Retardancy Level</span>
+                                                            {{formCharacteristics.flame_retardancy|attr:"id:id_flame_retardancy_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {%if user.is_admin%}
+                                                <div class="row">
+                                                    <div class="col-sm-12 text-center">
+                                                         <input type="submit" class="btn btn-success" disabled value="Save" name="_save">
+                                                    </div>
+                                                </div>
+                                                {%endif%}
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12" id="final-card">
+                                    <div class="card">
+                                        {%if user.is_admin%}
+                                        <i class="ti-pencil allow-inputs" style="color:#000;font-size:2.2rem;cursor:pointer;"></i>
+                                        {%endif%}
+                                        <i class="card-top-icon ti-check" style="color:#35b26d"></i>
+                                        <div class="content">
+                                            <form enctype="multipart/form-data" action="" method="post" id="final_card_form">
+                                                {%csrf_token%}
+                                                <div class="row" style="margin-bottom:10px;">
+                                                    <div class="col-sm-6">
+                                                        {%comment%}{{formFinalCard.as_p}}{%endcomment%}
+
+                                                        <span class="text-muted" style="font-size:70%;display:block;">Unit Cost</span>
+                                                        {{formFinalCard.unit_price|add_class:"form-control price-input-1"|attr:"disabled"}}
+                                                        {{formFinalCard.currency|add_class:"form-control price-input-2"|attr:"disabled"}}
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <span class="text-muted" style="font-size:70%;display:block;">Lead Time</span>
+                                                        {{formFinalCard.lead_time|add_class:"form-control lead-time-input"|attr:"disabled"}} <span style="color:#000;font-weight:900;">days</span>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <span class="text-muted" style="font-size:70%;">Process - Material</span>
+                                                        {{formFinalCard.techno_material|add_class:"form-control"|attr:"disabled"}}
+                                                    </div>
+                                                    {%if user.is_admin%}
+                                                    <div class="col-sm-12 text-center">
+                                                         <input type="submit" class="btn btn-success" disabled value="Save" name="_save">
+                                                    </div>
+                                                    {%endif%}
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -205,7 +242,18 @@
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-md-12 text-center" style="margin-bottom:20px;">
-                                    <button id="button-action-1" class="btn btn-default btn-fill btn-wd disabled" style="font-weight:900;"></button>
+                                    {% if user.is_admin %}
+                                        <div class="dropdown dropdwon-status">
+                                            <button class="btn btn-default dropdown-toggle btn-fill btn-wd status"  data-status-id="" data-toggle="dropdown" style="font-weight:900;"><span class="caret" style="margin-left:15px;"></span></button>
+                                              <ul class="dropdown-menu" style="text-align:center; width: 50px">
+                                                  {% for status in clientPartStatuses %}
+                                                  <li><a class="button-change-status" data-status-id="{{status.id}}" href="#" role="button"></a></li>
+                                                  {% endfor %}
+                                              </ul>
+                                        </div>
+                                    {% else %}
+                                        <button id="button-action-1" class="btn btn-default btn-fill btn-wd disabled" data-status-id="" style="font-weight:900;"></button>
+                                    {% endif %}
                                 </div>
                                 <div class="col-md-12">
                                     <div class="card">

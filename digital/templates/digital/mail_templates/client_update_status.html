@@ -93,25 +93,43 @@ Licensed under MIT
 			<tr><td align="center">
 				<!-- padding --><div style="height: 60px; line-height: 60px; font-size: 10px;"></div>
 				<div style="line-height: 44px;">
-					<font face="Arial, Helvetica, sans-serif" size="5" color="#57697e" style="font-size: 34px;">
-					<span style="font-family: Arial, Helvetica, sans-serif; font-size: 34px; color: #57697e;">
-						Thank you for your Request, we will answer with the shortest lead time
+					<font face="Arial, Helvetica, sans-serif" size="5" color="#57697e" style="font-size: 24px;">
+					<span style="font-family: Arial, Helvetica, sans-serif; font-size: 24px; color: #57697e;">
+						Hi {{user.first_name}}, here is an update on your parts Industrialisation:
 					</span></font>
 				</div>
 				<!-- padding --><div style="height: 40px; line-height: 40px; font-size: 10px;"></div>
 			</td></tr>
-			<tr><td align="center">
+			<tr><td align="left">
 				<div style="line-height: 24px;">
 					<font face="Arial, Helvetica, sans-serif" size="4" color="#57697e" style="font-size: 15px;">
-					<span style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #57697e;">
-						contact us at contact@sp3d.co for any further request.
-					</span></font>
+                    <p style="font-family: Arial, Helvetica, sans-serif; font-size: 20px; color: #3ead5d;">
+						SUCCESSFULLY DIGITALIZED and READY TO PRODUCE:
+                    </p>
+					<p style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #57697e;">
+                        {% for part in parts %}
+                        {% if part.status.id == 4 %}
+                        <div>{{part.reference}} : {{part.name}}</div>
+                        {% endif %}
+                        {% endor %}
+                    </p>
+                    <p style="font-family: Arial, Helvetica, sans-serif; font-size: 25px; color: #c63f41;">
+						DISQULIFIED:
+                    </p>
+                    <p style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #57697e;">
+                        {% for part in parts %}
+                        {% if part.status.id == 3 %}
+                        <div>{{part.reference}} : {{part.name}}</div>
+                        {% endif %}
+                        {% endor %}
+                    </p>
+                    </font>
 				</div>
 				<!-- padding --><div style="height: 40px; line-height: 40px; font-size: 10px;"></div>
 			</td></tr>
 			<tr><td align="center">
 				<div style="line-height: 24px;">
-                    <a href="https://digital.spare-parts-3d.com/digital/" target="_blank" class="btn btn-danger block-center">
+					<a href="https://digital.spare-parts-3d.com/digital/" target="_blank" class="btn btn-danger block-center">
 					    Go to your portal
 					</a>
 				</div>

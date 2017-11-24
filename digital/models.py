@@ -153,9 +153,9 @@ class Part(models.Model):
     weight = models.FloatField(max_length=10, null=True, blank=True)
     dimension_unit = models.CharField(max_length=5, default="mm", choices=[('mm','mm'), ('inch','inch')])
     weight_unit = models.CharField(max_length=5, null=True, choices=[('gr','gr')], blank=True)
-    # grade = models.ManyToManyField(Grade)
-    # environment = models.ManyToManyField(Environment)
     status = models.ForeignKey('ClientPartStatus', on_delete=models.CASCADE, default=1)
+    final_card = models.OneToOneField('jb.FinalCard', on_delete=models.CASCADE, null=True, blank=True)
+    notify_status_to_client = models.BooleanField("Notify Part Status to Client", default=False, blank=True)
 
     def __str__(self):
         return "%s" % (self.name,)

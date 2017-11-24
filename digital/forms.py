@@ -33,7 +33,7 @@ class PartForm(forms.ModelForm):
     type = forms.ModelChoiceField(queryset=PartType.objects.none())
     class Meta:
         model = Part
-        exclude = ['date_created', 'created_by', 'organisation', 'characteristics', 'status']
+        exclude = ['date_created', 'created_by', 'organisation', 'characteristics', 'status', 'final_card']
 
     def __init__(self, *args, **kwargs):
         created_by = None

@@ -1,19 +1,3 @@
-// EXTEND JQUERY FOR ANIMATION##################################################
-$.fn.extend({
-    animateCss: function (animationName, callback) {
-        callback =  callback || null;
-        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-        this.addClass('animated ' + animationName).one(animationEnd, function() {
-            $(this).removeClass('animated ' + animationName);
-            if (typeof callback == 'function'){
-                callback.call(this);
-            }
-        });
-        return this;
-    }
-});
-
-
 $(document).ready(function(){
     monthNames=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 // ORDER TYPES TOGGLING#####################################
@@ -80,19 +64,30 @@ $(document).ready(function(){
         $("#stl-demo").css("display", "block");
 
         // populate info
-        var name, ref, material, length, dimension_unit, weight_unit, date_created, appliance, bulk_files, status, part_type, characs
+        var name, ref, material, length, dimension_unit, weight_unit, date_created, appliance, bulk_files, status, part_type, characs, name_creator, final_card
         name = part.fields.name;
         part_type = part.fields.type
         ref = part.fields.reference;
+        final_card = part.fields.final_card;
         characs = part.fields.characteristics;
         if (part.fields.material){material = part.fields.material}else{material={'id':''}};
         length = part.fields.length, width = part.fields.width, height = part.fields.height, weight = part.fields.weight;
         dimension_unit = part.fields.dimension_unit, weight_unit = part.fields.weight_unit;
         date_created = new Date(part.fields.date_created);
         date_created = date_created.getDate() + " " + monthNames[date_created.getMonth()] + " " + date_created.getFullYear();
+        name_creator = part.fields.created_by.first_name;
         appliance = part.fields.appliance;
         status = part.fields.status;
         bulk_files = $(this).data("part-bulk-files");
+        if (final_card != null && status.id == 4){
+            $("#final-card").find("#id_currency").val(final_card.currency);
+            $("#final-card").find("#id_unit_price").val(final_card.unit_price);
+            $("#final-card").find("#id_techno_material").val(final_card.techno_material.id);
+            $("#final-card").find("#id_lead_time").val(final_card.lead_time);
+            $("#final-card").show();
+        } else {
+            $("#final-card").hide();
+        };
         $(".part-status").removeClass().addClass("label part-status").text(status.name);
         $("#part-detail-panel").data("part-id",part.pk);
         $("#id_name_1").val(name);
@@ -117,20 +112,17 @@ $(document).ready(function(){
         $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
         $(".collapse").collapse('hide');
 
+        $(".status").attr("data-status-id", "" + status.id);
         if (status.id>=1){
-            $(".part-status").addClass("label-default");
             $("#button-action-1").removeClass().addClass("btn btn-warning btn-fill btn-wd request-for-indus-button order-part-button").text("Request Indus");
         };
         if (status.id>=2){
-            $(".part-status").addClass("label-warning");
             $("#button-action-1").removeClass().addClass("btn btn-default btn-fill btn-wd disabled").text("Indus Pending");
         };
         if (status.id>=3){
-            $(".part-status").addClass("label-danger");
             $("#button-action-1").removeClass().addClass("btn btn-danger btn-fill btn-wd disabled").text("Not Printable");
         };
         if (status.id>=4){
-            $(".part-status").addClass("label-success");
             $("#button-action-1").removeClass().addClass("btn btn-success btn-fill btn-wd print-request-button").text("Print");
         };
         $(".id_part").val(part.pk);
@@ -160,7 +152,7 @@ $(document).ready(function(){
         // refresh buttons listeners
         refreshButtons();
         //get Part HISTORY and scroll to bottom of history
-        getPartHistory(part.pk, date_created);
+        getPartHistory(part.pk, date_created, name_creator);
         setTimeout(function(){
             $("#timeline-card").animate({ scrollTop: $('#timeline-card').prop("scrollHeight")}, 1000);
         },500);
@@ -181,7 +173,6 @@ $(document).ready(function(){
         event.preventDefault();
         var $form = $(this);
         var data = new FormData(this);
-        // console.log("received");
         $.ajax({
             url: '/digital/parts/upload-part-bulk-file/',
             data: data,
@@ -379,10 +370,9 @@ $(document).ready(function(){
                 success:function(data){
                     if (data.success){
                         console.log(data.success);
-                        $('.request-for-indus-button').removeClass().addClass("btn btn-default btn-fill btn-wd disabled");
                         var date_now = new Date();
-                        $("span[data-status-id='2']").removeClass().addClass("label label-warning");
-                        $(".part-date-requested-indus").text(date_now.getDate() + " " + monthNames[date_now.getMonth()] + " " + date_now.getFullYear());
+                        $('.status').attr("data-status-id", "" + id_status);
+                        $('.request-for-indus-button').removeClass().addClass("btn btn-default btn-fill btn-wd disabled");
                         var updated_part = $(".part-row[data-part-id='" + id_part + "']").data("part");
                         updated_part.fields.status.id = 2;
                         $(".part-row[data-part-id='" + id_part + "']").data("part", updated_part);
@@ -396,6 +386,41 @@ $(document).ready(function(){
                 }
             });
         });
+        $('.button-change-status').off();
+        $('.button-change-status').click(function(){
+            var id_part = $("#part-detail-panel").data("part-id");
+            var id_status = $(this).data("status-id");
+            $.ajax({
+                url: '/digital/parts/change-part-status/',
+                data:{
+                    'id_part':id_part,
+                    'id_status':id_status,
+                },
+                dataType:'json',
+                success:function(data){
+                    if (data.success){
+                        console.log(data.success);
+                        $('.status').attr("data-status-id", "" + id_status)
+                        var date_now = new Date();
+                        var updated_part = $(".part-row[data-part-id='" + id_part + "']").data("part");
+                        updated_part.fields.status.id = id_status;
+                        $(".part-row[data-part-id='" + id_part + "']").data("part", updated_part);
+                        if (id_status==4){
+                            $("#final-card").find("input").removeAttr("disabled");
+                            $("#final-card").find("select").removeAttr("disabled");
+                            $("#final-card").show();
+                        };
+                    };
+                    if (data.error){
+                        console.log(data.error);
+                    };
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+                }
+            });
+        });
+
         $('.remove-file').off();
         $(".remove-file").click(function(){
             removeFile($(this).closest(".file-row").data("id"));
@@ -411,6 +436,7 @@ $(document).ready(function(){
             } else {
                 // $(this).css("display","none");
                 // load_stl("/static/hub/stl/assemb6.STL", null);
+                $(this).animateCss('tada');
                 $.notify({
                     icon: 'ti-info',
                     message: "There are no STL files !"
@@ -429,6 +455,20 @@ $(document).ready(function(){
             load_stl(url, stl_data);
         });
 
+        $('.print-request-button').off();
+        $(".print-request-button").click(function(){
+            $(this).animateCss('tada');
+            $.notify({
+                icon: 'ti-info',
+                message: "Not available for Beta testers :)"
+            },{
+                type: 'warning',
+                timer: 1000,
+                delay: 1000,
+            });
+        });
+
+
         // END DYNAMICALLY ADD STL TO VIEW//////////////////////////////////////////////////////////
 
     };
@@ -440,7 +480,7 @@ $(document).ready(function(){
 
 // GET PART HISTORY######################################################################
 
-    function getPartHistory(id_part, date_created){
+    function getPartHistory(id_part, date_created, name_creator){
         $.ajax({
             url: '/digital/parts/get-part-history/',
             data:{
@@ -450,7 +490,7 @@ $(document).ready(function(){
             success:function(data){
                 if (data.success){
                     console.log(JSON.parse(data.events));
-                    fillTimeline(date_created, JSON.parse(data.events));
+                    fillTimeline(date_created, name_creator, JSON.parse(data.events));
                 };
                 if (data.error){
                     console.log(data.error);
@@ -462,9 +502,9 @@ $(document).ready(function(){
         });
     };
 
-    function fillTimeline(date_created, events){
+    function fillTimeline(date_created, name_creator, events){
         $("#timeline-card").empty();
-        $("#timeline-card").append(get_HTML_Timeline(date_created, "label", "default", "Created", "Part was created"));
+        $("#timeline-card").append(get_HTML_Timeline(date_created, "label", "default", "Created", "Part was created", name_creator));
         for (var i = 0; i < events.length; i++){
             var event = events[i].fields;
             var date = new Date(event.date);
@@ -493,13 +533,13 @@ $(document).ready(function(){
                 label_text = 'Info'
             };
             if (i == events.length - 1){last = true}else{last = false};
-            $("#timeline-card").append(get_HTML_Timeline(date, label_type, label_class, label_text, event.short_description, last = last, warning = warning));
+            $("#timeline-card").append(get_HTML_Timeline(date, label_type, label_class, label_text, event.short_description, event.created_by.first_name, last = last, warning = warning));
 
         };
 
     };
 
-    function get_HTML_Timeline(date, label_type, label_class, label_text, description, last = false, warning = false){
+    function get_HTML_Timeline(date, label_type, label_class, label_text, description, name, last = false, warning = false){
         var label, icon_warning;
         var icon = "circle-o";
         if(last){icon = "circle"};
@@ -512,7 +552,8 @@ $(document).ready(function(){
         var html = "\
         <div class='row equal-height'>\
             <div class='col-xs-4 timeline-date'>\
-                <span class='text-muted' style='font-size:80%;'>" + date + "</span>\
+                <span class='text-muted' style='font-size:80%;'>" + date + "</span><br>\
+                <span class='text-muted' style='font-size:80%'> by " + name + "</span>\
             </div>\
             <div class='col-xs-1 timeline-circles no-padding'>\
                 <div class='border-right'><i class='fa fa-" + icon + "'></i></div>\
@@ -589,6 +630,154 @@ $(document).ready(function(){
         };
     });
 //END ADDING NEW PART////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+// UPDATING FINAL CARD/////////////////////////////////////////////////////////////////////////
+    $("#final_card_form").submit(function(event){
+        event.preventDefault();
+        var $form = $(this);
+        var data = new FormData(this);
+        var id_part = $("#part-detail-panel").data("part-id");
+        data.append("id_part", id_part);
+        // console.log("received");
+        $.ajax({
+            url: '/digital/parts/update-final-card/',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            method: 'POST',
+            type: 'POST', // For jQuery < 1.9
+            beforeSend:function(XMLHttpRequest, settings){
+                // $form.find(".progressBar-inner").css("background-color","blue");
+                // $form.find(".progressBar").css("opacity",1);
+            },
+            xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){
+                    // myXhr.upload.addEventListener('progress',uploadProgress, false);
+                }
+                return myXhr;
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success){
+                    var updated_part = $(".part-row[data-part-id='" + id_part + "']").data("part");
+                    var final_card_model = JSON.parse(data.final_card);
+                    updated_part.fields.final_card = final_card_model.fields;
+                    console.log("updated_part:");console.log(updated_part);
+                    $(".part-row[data-part-id='" + id_part + "']").data("part", updated_part);
+
+                    $.notify({
+                        icon: 'ti-check',
+                        message: "Final Card Updated"
+                    },{
+                        type: 'success',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                } else {
+                    $.notify({
+                        icon: 'ti-face-sad',
+                        message: "Could not Update final card"
+                    },{
+                        type: 'danger',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+                // $form.find(".progressBar-inner").css("background-color","red");
+            },
+            complete:function(jqXHR, textStatus){
+                // setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                // setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+            },
+
+        });
+    });
+
+    $(".allow-inputs").click(function(){
+        $(this).closest(".card").find("input,select").removeAttr("disabled");
+        $(this).closest(".card").find("select[multiple='multiple']").find("option").show();
+    });
+// END UPDATING FINAL CARD/////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+// UPDATING PART CARD/////////////////////////////////////////////////////////////////////////
+    $("#update_part_form").submit(function(event){
+        event.preventDefault();
+        var $form = $(this);
+        var data = new FormData(this);
+        var id_part = $("#part-detail-panel").data("part-id");
+        data.append("id_part", id_part);
+        // console.log("received");
+        $.ajax({
+            url: '/digital/parts/update-part-card/',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            method: 'POST',
+            type: 'POST', // For jQuery < 1.9
+            beforeSend:function(XMLHttpRequest, settings){
+                // $form.find(".progressBar-inner").css("background-color","blue");
+                // $form.find(".progressBar").css("opacity",1);
+            },
+            xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){
+                    // myXhr.upload.addEventListener('progress',uploadProgress, false);
+                }
+                return myXhr;
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success){
+                    $(".part-row[data-part-id='" + id_part + "']").data("part", JSON.parse(data.part));
+                    $.notify({
+                        icon: 'ti-check',
+                        message: "Part Successfully Updated"
+                    },{
+                        type: 'success',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                } else {
+                    $.notify({
+                        icon: 'ti-face-sad',
+                        message: "Could not Update Part"
+                    },{
+                        type: 'danger',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+                // $form.find(".progressBar-inner").css("background-color","red");
+            },
+            complete:function(jqXHR, textStatus){
+                // setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                // setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+            },
+
+        });
+    });
+
+
+// ENDUPDATING PART CARD/////////////////////////////////////////////////////////////////////////
 
 
 

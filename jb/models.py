@@ -32,6 +32,7 @@ class Material(models.Model):
 class CoupleTechnoMaterial(models.Model):
     material= models.ForeignKey(Material, on_delete=models.CASCADE)
     technology = models.ForeignKey(Technology, on_delete=models.CASCADE)
+    characteristics = models.OneToOneField('digital.Characteristics', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return "%s + %s" % (self.technology.name, self.material.name,)
@@ -41,6 +42,25 @@ class CoupleTechnoMaterial(models.Model):
 
     class Meta:
         unique_together = (('material', 'technology'),)
+
+class FinalCard(models.Model):
+    CURRENCY_CHOICE = [('USD','$US'), ('SGD','$SG'), ('EUR','€'), ('BTC','Bitcoin'), ('ETH','Euthereum')]
+    unit_price = models.FloatField("Unit Price",max_length=20, default = 0.0)
+    currency = models.CharField("Currency", max_length=10, choices = CURRENCY_CHOICE, default="USD")
+    lead_time = models.IntegerField("Lead time (days)", default=3)
+    techno_material = models.ForeignKey(CoupleTechnoMaterial, on_delete=models.CASCADE, verbose_name = 'Couple Techno-Material')
+
+    def __str__(self):
+        return "%s" % (self.id,)
+
+    def natural_key(self):
+        return {
+            'id':self.id,
+            'unit_price':self.unit_price,
+            'currency':self.currency,
+            'techno_material':self.techno_material.natural_key(),
+            'lead_time':self.lead_time
+            }
 
 class Part(models.Model):
 

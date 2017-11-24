@@ -76,6 +76,9 @@ class CustomUser(AbstractBaseUser):
     def get_full_name(self):
         return self.first_name + self.last_name
 
+    def natural_key(self):
+        return {"first_name":self.first_name, "last_name":self.last_name}
+
     def has_module_perms(self, app_label):
         "Does the user have permissions to view the app `app_label`?"
         # Simplest possible answer: Yes, always
