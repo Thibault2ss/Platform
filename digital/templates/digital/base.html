@@ -67,7 +67,9 @@
                     {%if not user.organisation.name == 'Spare Parts 3D'%}
                     <img src="{% static 'digital/icons/3donly.png' %}" style="width:20%"></img>
                     {%endif%}
+                    {% if user.organisation.logo %}
                     <img src="{{ user.organisation.logo.url }}" style="width:60%"></img>
+                    {% endif %}
                 </a>
             </div>
 

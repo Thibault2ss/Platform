@@ -66,8 +66,8 @@ $(document).ready(function(){
         // populate info
         var name, ref, material, length, dimension_unit, weight_unit, date_created, appliance, bulk_files, status, part_type, characs, name_creator, final_card
         name = part.fields.name;
-        part_type = part.fields.type
-        ref = part.fields.reference;
+        if(part.fields.type){part_type = part.fields.type}else{part_type = {'id':''}};
+        if(part.fields.reference){ref = part.fields.reference}else{ref = ''};
         final_card = part.fields.final_card;
         characs = part.fields.characteristics;
         if (part.fields.material){material = part.fields.material}else{material={'id':''}};
