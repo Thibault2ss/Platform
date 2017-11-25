@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'n^+xf77tb6$z2bp$)+nsng2in2#ummrfr)+&4agwf%#0f$xuz*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -114,32 +114,33 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 # ACTIVATE DB ROUTERS FOR SPECIAL DB ROUTING
 # DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
-if DEBUG:
-    # default_db = {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'SP3D_USERS',
-    #     'USER': 'root',
-    #     'PASSWORD': '2210',
-    #     'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
-    #     'PORT': '3306',
-    # }
-    default_db = {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'SP3D_USERS',
-        'USER': 'user01',
-        'PASSWORD': 'SpareParts3D#',
-        'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
-    }
-else:
-    default_db = {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'SP3D_CLOUD',
-        'USER': 'sp3dadmin',
-        'PASSWORD': 'SpareParts3D#',
-        'HOST': 'sp3dclouddb.csgmjvodxypo.ap-southeast-1.rds.amazonaws.com',   # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
-    }
+
+# if DEBUG:
+# default_db = {
+#     'ENGINE': 'django.db.backends.mysql',
+#     'NAME': 'SP3D_USERS',
+#     'USER': 'root',
+#     'PASSWORD': '2210',
+#     'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+#     'PORT': '3306',
+# }
+# default_db = {
+#     'ENGINE': 'django.db.backends.mysql',
+#     'NAME': 'SP3D_USERS',
+#     'USER': 'user01',
+#     'PASSWORD': 'SpareParts3D#',
+#     'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
+#     'PORT': '3306',
+# }
+# else:
+default_db = {
+    'ENGINE': 'django.db.backends.mysql',
+    'NAME': 'SP3D_CLOUD',
+    'USER': 'sp3dadmin',
+    'PASSWORD': 'SpareParts3D#',
+    'HOST': 'sp3dclouddb.csgmjvodxypo.ap-southeast-1.rds.amazonaws.com',   # Or an IP Address that your DB is hosted on
+    'PORT': '3306',
+}
 
 DATABASES = {
 # ACTIVATE THE DEFAULT DB BELOW FOR PROD
