@@ -17,7 +17,9 @@ $.fn.extend({
 // logo animation///////////////////////////////////////////////////////////////////
 var logoAnimation = (function() {
     var logoSVG = document.querySelector('#logoDrawingAnimation');
-    logoSVG.style.transform = 'translateY(100px)'
+    if (logoSVG !==null){
+        logoSVG.style.transform = 'translateY(100px)';
+    };
     var logoTimeline = anime.timeline({ autoplay: false });
     var pathEls = document.querySelectorAll('#logoDrawingAnimation path');
     for (var i = 0; i < pathEls.length; i++) {
@@ -106,7 +108,10 @@ $(document).ready(function(){
         // setTimeout(function(){
         //     $("#particles-container").css("opacity",1).animateCss('zoomIn');
         // }, 3500);
-        logoAnimation.init();
+        if (document.querySelector('#logoDrawingAnimation') !== null){
+            logoAnimation.init();
+        };
+
     };
 ////////////////////////////////////////////////////////////////////////////////
 

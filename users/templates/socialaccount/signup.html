@@ -3,6 +3,7 @@
 {% load tz %}
 {% load static %}
 {% load i18n %}
+{% load users_filters %}
 {% load account socialaccount %}
 
 {% block head_title %}SP3D Auth{% endblock %}
@@ -10,7 +11,7 @@
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/css/iziModal.min.css" />
 <link rel="stylesheet" href="{% static 'account/css/animate.min.css'%}" />
-<link rel="stylesheet" href="{% static 'account/css/login.css'%}" />
+<link rel="stylesheet" href="{% static 'account/css/login.css'%}?dev={% random_int %}" />
 <link rel="stylesheet" href="{% static 'account/css/checkbox.css'%}" />
 {% endblock %}
 
@@ -29,7 +30,7 @@
         <div class="subcontainer">
             <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
                 {% csrf_token %}
-                <div class="usertype-button" data-usertype = "CLIENT">Client</div>
+                <div class="usertype-button" data-usertype = "CLIENT">OEM</div>
                 <div class="usertype-button" data-usertype = "HUB">Hub</div>
                 <div class="signup-step2">
                     <div class="errors">
@@ -57,17 +58,10 @@
 <div id="social-signup-modal">
 </div>
 
-<ul class="bg-bubbles">
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
+<ul id="particles-container" class="bg-bubbles">
+    <!-- <li></li>
+    <li></li> -->
+
 </ul>
 
 {% endblock %}
@@ -75,5 +69,7 @@
 {% block extra_body %}
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script>
-<script src="{% static 'account/js/login.js'%}"></script>
+<script src="{% static 'account/js/particles.min.js'%}"></script>
+<script src="{% static 'account/js/anime.min.js'%}"></script>
+<script src="{% static 'account/js/login.js'%}?dev={% random_int %}"></script>
 {% endblock %}
