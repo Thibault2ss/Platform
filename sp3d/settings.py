@@ -233,7 +233,7 @@ ACCOUNT_FORMS = {'signup':'users.forms.SignupForm', 'login': 'users.forms.LoginF
 # SOCIALACCOUNT_ADAPTER = "users.socialadapter.SocialAccountAdapter"
 SOCIALACCOUNT_FORMS = {'signup':'users.forms.SocialSignupForm'}
 SOCIALACCOUNT_AUTO_SIGNUP = False
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 
 
