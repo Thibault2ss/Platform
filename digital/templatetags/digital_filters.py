@@ -75,7 +75,7 @@ def dict_list(file_instance_list):
 
 @register.simple_tag
 def random_int():
-    return random.randint(1, 1000)
+    return random.randint(1, 5000)
 
 def _process_field_attributes(field, attr, process):
 

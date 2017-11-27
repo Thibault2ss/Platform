@@ -116,22 +116,22 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # DATABASE_ROUTERS = ['sp3d.dbRouters.jbRouter']
 
 # if DEBUG:
-# default_db = {
-#     'ENGINE': 'django.db.backends.mysql',
-#     'NAME': 'SP3D_USERS',
-#     'USER': 'root',
-#     'PASSWORD': '2210',
-#     'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
-#     'PORT': '3306',
-# }
-# default_db = {
-#     'ENGINE': 'django.db.backends.mysql',
-#     'NAME': 'SP3D_USERS',
-#     'USER': 'user01',
-#     'PASSWORD': 'SpareParts3D#',
-#     'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
-#     'PORT': '3306',
-# }
+#     # default_db = {
+#     #     'ENGINE': 'django.db.backends.mysql',
+#     #     'NAME': 'SP3D_USERS',
+#     #     'USER': 'root',
+#     #     'PASSWORD': '2210',
+#     #     'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+#     #     'PORT': '3306',
+#     # }
+#     default_db = {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'SP3D_USERS',
+#         'USER': 'user01',
+#         'PASSWORD': 'SpareParts3D#',
+#         'HOST': '192.168.0.20',   # Or an IP Address that your DB is hosted on
+#         'PORT': '3306',
+#     }
 # else:
 default_db = {
     'ENGINE': 'django.db.backends.mysql',
@@ -233,6 +233,7 @@ ACCOUNT_FORMS = {'signup':'users.forms.SignupForm', 'login': 'users.forms.LoginF
 # SOCIALACCOUNT_ADAPTER = "users.socialadapter.SocialAccountAdapter"
 SOCIALACCOUNT_FORMS = {'signup':'users.forms.SocialSignupForm'}
 SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
 
 

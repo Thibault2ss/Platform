@@ -9,6 +9,7 @@ from datetime import datetime
 
 class Technology(models.Model):
     name = models.CharField("Technology Name",max_length=100, default = '', unique=True)
+    description = models.TextField("Material Description", default = '', blank=True)
 
     def __str__(self):
         return "%s" % (self.name,)
@@ -19,7 +20,8 @@ class Technology(models.Model):
 class Material(models.Model):
     MATERIAL_FAMILY_CHOICES = [('metal','metal'), ('plastic','plastic')]
     family= models.CharField("Material Family", max_length=20, choices = MATERIAL_FAMILY_CHOICES, null=True)
-    name = models.CharField("Material Name",max_length=100, default = '', unique=True)
+    name = models.CharField("Short Material Name",max_length=20, default = '', unique=True)
+    description = models.TextField("Material Description", default = '', blank=True)
     technology = models.ManyToManyField(Technology, through='CoupleTechnoMaterial')
 
     def __str__(self):

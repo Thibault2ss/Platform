@@ -353,13 +353,13 @@
 
 {%block extrascript%}
 {%include 'digital/utils/modal-new-part.html'%}
-<script src="{% static 'digital/js/three/three.min.js' %}?dev={% random_int %}"></script>
-<script src="{% static 'digital/js/three/loaders/STLLoader1.js' %}?dev={% random_int %}"></script>
-<script src="{% static 'digital/js/three/Detector.js' %}?dev={% random_int %}"></script>
-<script src="{% static 'digital/js/three/libs/stats.min.js' %}?dev={% random_int %}"></script>
-<script src="{% static 'digital/js/three/libs/TrackballControls.js' %}?dev={% random_int %}"></script>
-<script src="{% static 'digital/js/slick.min.js' %}?dev={% random_int %}"></script>
-<script src="{% static 'digital/js/dropzone.min.js' %}?dev={% random_int %}"></script>
+<script src="{% static 'digital/js/three/three.min.js' %}"></script>
+<script src="{% static 'digital/js/three/loaders/STLLoader1.js' %}"></script>
+<script src="{% static 'digital/js/three/Detector.js' %}"></script>
+<script src="{% static 'digital/js/three/libs/stats.min.js' %}"></script>
+<script src="{% static 'digital/js/three/libs/TrackballControls.js' %}"></script>
+<script src="{% static 'digital/js/slick.min.js' %}"></script>
+<script src="{% static 'digital/js/dropzone.min.js' %}"></script>
 <script>
 $(document).ready(function(){
     $('#ordersCarousel').carousel({
@@ -373,5 +373,5 @@ $(document).ready(function(){
 Dropzone.autoDiscover = false;
 var csrftoken = '{{ csrf_token }}';
 </script>
-<script src="{% static 'digital/js/parts.js' %}"></script>
+<script src="{% static 'digital/js/parts.js' %}?dev={% random_int %}"></script>
 {%endblock extrascript%}

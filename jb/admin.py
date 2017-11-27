@@ -11,12 +11,12 @@ from .models import Part, Material, Technology, CoupleTechnoMaterial, FinalCard
 
 @admin.register(Material)
 class Model_Admin(admin.ModelAdmin):
-    fields = ['name','family']
+    fields = ['name','family', 'description']
     list_display = ('id', 'name','family')
 
 @admin.register(Technology)
 class Technology_Admin(admin.ModelAdmin):
-    fields = ['name']
+    fields = ['name', 'description']
     list_display = ('id', 'name')
 
 @admin.register(CoupleTechnoMaterial)

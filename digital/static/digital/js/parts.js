@@ -100,16 +100,19 @@ $(document).ready(function(){
         $("#id_dimension_unit_1").val(dimension_unit);
         $("#id_weight_unit_1").val(weight_unit);
         $("#id_type_1").val(part_type.id);
-        $("#id_color_1").val(characs.color);
-        $("#id_min_temp_1").val(characs.min_temp);
-        $("#id_max_temp_1").val(characs.max_temp);
-        $("#id_temp_unit_1").val(characs.temp_unit);
-        $("#id_is_flame_retardant_1").prop("checked", false).prop("checked",characs.is_flame_retardant);
-        $("#id_is_chemical_resistant_1").prop("checked", false).prop("checked",characs.is_chemical_resistant);
-        $("#id_is_food_grade_1").prop("checked", false).prop("checked",characs.is_food_grade);
-        $("#id_is_transparent_1").prop("checked", false).prop("checked",characs.is_transparent);
-        $("#id_is_visual_1").prop("checked", false).prop("checked",characs.is_visual);
-        $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
+        if(characs!=null){
+            $("#id_min_temp_1").val(characs.min_temp);
+            $("#id_max_temp_1").val(characs.max_temp);
+            $("#id_temp_unit_1").val(characs.temp_unit);
+            $("#id_is_flame_retardant_1").prop("checked", false).prop("checked",characs.is_flame_retardant);
+            $("#id_is_chemical_resistant_1").prop("checked", false).prop("checked",characs.is_chemical_resistant);
+            $("#id_is_food_grade_1").prop("checked", false).prop("checked",characs.is_food_grade);
+            $("#id_is_transparent_1").prop("checked", false).prop("checked",characs.is_transparent);
+            $("#id_is_visual_1").prop("checked", false).prop("checked",characs.is_visual);
+            $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
+            $("#id_color_1").val(characs.color);
+        };
+
         $(".collapse").collapse('hide');
 
         $(".status").attr("data-status-id", "" + status.id);

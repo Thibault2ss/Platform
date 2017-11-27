@@ -358,9 +358,9 @@ demo = {
         parts_metal = parseInt(parts_metal);
         parts_total = parseInt(parts_total);
         if (parts_total == 0){parts_total=1};//safety
-        console.log(parts_plastic);
-        console.log(parts_metal);
-        console.log(parts_plastic);
+        // console.log(parts_plastic);
+        // console.log(parts_metal);
+        // console.log(parts_plastic);
         var dataPreferences = {
             series:[parts_plastic, parts_metal],
             labels: [(parts_plastic*100.0)/parts_total + "%", (parts_metal*100.0)/parts_total +'%']
@@ -416,7 +416,7 @@ demo = {
         } else if (data.type == "label"){
             var to_opacity = 1;
             if (data.text == "0%"){to_opacity=0};
-            console.log(data.text);
+            // console.log(data.text);
             // If the drawn element is an area we do a simple opacity fade in. This could also be achieved using CSS3 animations.
             data.element.animate({
               opacity: {
@@ -462,12 +462,14 @@ demo = {
                 axisX: {
                   labelInterpolationFnc: function (value) {
                     return value[0];
-                  }
+                }
                 }
               }]
             ];
-
-            Chartist.Bar('#materialBarChart', dataViews, optionsViews, responsiveOptionsViews);
+            var materialBarChart = document.getElementById('materialBarChart');
+            if (materialBarChart !== null){
+                Chartist.Bar('#materialBarChart', dataViews, optionsViews, responsiveOptionsViews);
+            };
 
     },
 	showNotification: function(from, align){
