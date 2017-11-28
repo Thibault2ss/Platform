@@ -144,6 +144,12 @@ def getfiledata(file):
             'inertia': inertia.tolist(),
         }
 
+
+    if file_extension.lower() in ['.sldprt','.sldasm','.step','.iges','.gcode']:
+        type="3D"
+    if file_extension.lower() in ['.dwg', '.dxf']:
+        type='2D'
+        
     return type, json.dumps(data)
 
 
