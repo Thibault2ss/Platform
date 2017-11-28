@@ -29,7 +29,7 @@ class PartBulkFileForm(forms.ModelForm):
 
 class PartForm(forms.ModelForm):
     # file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))
-    appliance = forms.ModelMultipleChoiceField(queryset=Appliance.objects.none())
+    appliance = forms.ModelMultipleChoiceField(queryset=Appliance.objects.none(), attrs={'required':False})
     type = forms.ModelChoiceField(queryset=PartType.objects.none())
     class Meta:
         model = Part
