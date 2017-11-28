@@ -115,6 +115,18 @@ $(document).ready(function(){
             $("#id_is_visual_1").prop("checked", false).prop("checked",characs.is_visual);
             $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
             $("#id_color_1").val(characs.color);
+        }else{
+            $("#id_min_temp_1").val(0);
+            $("#id_max_temp_1").val(70);
+            $("#id_temp_unit_1").val('°C');
+            $("#id_is_flame_retardant_1").prop("checked", false);
+            $("#id_is_chemical_resistant_1").prop("checked", false);
+            $("#id_is_food_grade_1").prop("checked", false);
+            $("#id_elastic_1").prop("checked", false);
+            $("#id_is_transparent_1").prop("checked", false);
+            $("#id_is_visual_1").prop("checked", false);
+            $("#id_is_water_resistant_1").prop("checked", false);
+            $("#id_color_1").val('NA');
         };
 
         $(".collapse").collapse('hide');
