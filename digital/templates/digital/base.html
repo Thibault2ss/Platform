@@ -267,7 +267,8 @@
 	<script src="{% static 'digital/js/demo.js' %}?dev={% random_int %}"></script>
 
     <!--  Google Maps Plugin    -->
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyZ4782IXg8US1yrhugnzFLrB6IIBsXmo"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyZ4782IXg8US1yrhugnzFLrB6IIBsXmo&libraries=places&amp;sensor=false"></script>
+    <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;sensor=false"></script> -->
 
     {%block extrascript%}
     {%endblock extrascript%}

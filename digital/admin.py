@@ -53,8 +53,8 @@ class PartBulkFile_Inline(admin.TabularInline):
 
 class Characteristics_Inline(admin.TabularInline):
     model = Characteristics
-    fields = ['color', 'is_visual']
-    list_display = ('id','is_visual', 'color')
+    fields = ['color', 'is_visual', 'is_transparent','is_elastic', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy','min_temp', 'max_temp', 'temp_unit', 'max_X', 'max_Y','max_Z','techno_material']
+    list_display = ('id','is_visual', 'is_transparent','is_elastic','is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy')
 
 @admin.register(Part)
 class Part_Admin(admin.ModelAdmin):

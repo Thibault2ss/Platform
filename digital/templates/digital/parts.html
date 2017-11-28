@@ -15,18 +15,28 @@
                 <div class="container-fluid">
                     <div class="row" style="text-align:center;margin-bottom:20px;">
                         <div class="col-lg-12">
-                            <button class="btn btn-order-class btn-info btn-fill" value=""><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_total}}</span> All</button>
-                            <button class="btn btn-order-class btn-success" value="1"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_new}}</span> New</button>
-                            <button class="btn btn-order-class btn-warning" value="2"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_pending_indus}}</span> Pending</button>
-                            <button class="btn btn-order-class btn-danger" value="3"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_disqualified}}</span> Disqualified</button>
-                            <button class="btn btn-order-class btn-success" value="4"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_industrialized}}</span> Digitalized</button>
+                            <button class="btn btn-status-filter btn-info {%if id_status == ''%}btn-fill{%endif%}" value=""><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_total}}</span> All</button>
+                            <button class="btn btn-status-filter btn-success {%if id_status == '1'%}btn-fill{%endif%}" value="1"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_new}}</span> New</button>
+                            <button class="btn btn-status-filter btn-warning {%if id_status == '2'%}btn-fill{%endif%}" value="2"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_pending_indus}}</span> Pending</button>
+                            <button class="btn btn-status-filter btn-danger {%if id_status == '3'%}btn-fill{%endif%}" value="3"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_disqualified}}</span> Disqualified</button>
+                            <button class="btn btn-status-filter btn-success {%if id_status == '4'%}btn-fill{%endif%}" value="4"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_industrialized}}</span> Digitalized</button>
                             <!-- <button class="btn btn-default" data-toggle="modal" data-target="#modalNewPart">+</button> -->
                             <div class="button-add-part" data-toggle="modal" data-target="#modalNewPart"><i class="ti-plus"></i></div>
                         </div>
                     </div>
+                    {% if user.email == 'thibault.de-saint-sernin@sp3d.co'%}
+                    <div class="row" style="text-align:center;margin-bottom:20px;">
+                        <div class="col-lg-12">
+                            <form action="/digital/upload-solution-matrix/" method="post" enctype="multipart/form-data">
+                                {%csrf_token%}
+                                <p><input type="file" name="file"></p>
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                    {%endif%}
                     <div class="row">
                         <div class="col-lg-12">
-
                             <div class="card">
                                 <div class="content">
                                     <ul class="list-unstyled team-members">
@@ -58,12 +68,28 @@
                                             </div>
                                         </li>
                                         {%endfor%}
+                                        {%if not parts%}<li>No part to Display in this category</li>{%endif%}
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-lg-12 text-center" style="display:flex;justify-content:center;align-items:center;">
+                            <ul class="pagination">
+                                {% for page in pagination_range%}
+                                <li><a class="{% if page|add:'0' == page_number|add:'0' %}active{%endif%}" href="?page={{page}}">{{page}}</a></li>
+                                {%endfor%}
+                            </ul>
 
+                            <select id="number-per-page" class='form-control' style="cursor:pointer;margin-left:20px;display:inline-block;max-width:60px;height:33px;padding:7px 7px;">
+                                <option value='20' selected>20</option>
+                                <option value='50' {%if nb_per_page == '50' %}selected{%endif%}>50</option>
+                                <option value='100' {%if nb_per_page == '100' %}selected{%endif%}>100</option>
+                            </select>
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -178,6 +204,10 @@
                                                         <div class="form-group">
                                                             {{formCharacteristics.is_food_grade|attr:"id:id_is_food_grade_1"|add_class:"styled-checkbox"|attr:"disabled"}}
                                                             <label for="id_is_food_grade_1">Food Grade</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_elastic|attr:"id:id_is_food_elastic_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_elastic_1">Elastic</label>
                                                         </div>
                                                         <div class="form-group">
                                                             <span class="text-muted" style="font-size:70%;display:block;">Operating Temperature Range</span>
@@ -360,7 +390,15 @@
 <script src="{% static 'digital/js/three/libs/TrackballControls.js' %}"></script>
 <script src="{% static 'digital/js/slick.min.js' %}"></script>
 <script src="{% static 'digital/js/dropzone.min.js' %}"></script>
+<!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;sensor=false"></script> -->
+
+<!-- include for autocomplete address -->
+<!-- <script type="text/javascript" src="/static/js/jquery.geocomplete.min.js"></script> -->
+<!-- <script type="text/javascript" src="/static/address/js/address.js"></script> -->
+<!-- end include for autocomplete address -->
+
 <script>
+
 $(document).ready(function(){
     $('#ordersCarousel').carousel({
         interval: false

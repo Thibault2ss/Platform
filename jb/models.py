@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from datetime import datetime
 
 class Technology(models.Model):
-    name = models.CharField("Technology Name",max_length=100, default = '', unique=True)
+    name = models.CharField("Short Technology Name",max_length=100, default = '', unique=True)
     description = models.TextField("Material Description", default = '', blank=True)
 
     def __str__(self):
@@ -34,7 +34,6 @@ class Material(models.Model):
 class CoupleTechnoMaterial(models.Model):
     material= models.ForeignKey(Material, on_delete=models.CASCADE)
     technology = models.ForeignKey(Technology, on_delete=models.CASCADE)
-    characteristics = models.OneToOneField('digital.Characteristics', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return "%s + %s" % (self.technology.name, self.material.name,)

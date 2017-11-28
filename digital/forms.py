@@ -62,4 +62,4 @@ class PartForm(forms.ModelForm):
 class CharacteristicsForm(forms.ModelForm):
     class Meta:
         model = Characteristics
-        exclude = []
+        exclude = ['max_X','max_Y','max_Z']

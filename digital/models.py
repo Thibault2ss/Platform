@@ -16,6 +16,7 @@ class Characteristics(models.Model):
     color = models.CharField(max_length=20, choices=COLOR_CHOICES, default="NA")
     is_visual = models.BooleanField("Visual part", default=False, blank=True)
     is_transparent = models.BooleanField("Transparent", default=False, blank=True)
+    is_elastic = models.BooleanField("Elastic", default=False, blank=True)
     is_water_resistant = models.BooleanField("Water Resistant", default=False, blank=True)
     is_chemical_resistant = models.BooleanField("Chemical Resistant", default=False, blank=True)
     is_flame_retardant = models.BooleanField("Flame Retardant", default=False, blank=True)
@@ -24,6 +25,10 @@ class Characteristics(models.Model):
     min_temp =  models.IntegerField(default=0)
     max_temp =  models.IntegerField(default=60)
     temp_unit = models.CharField(max_length=5, choices=TEMPERATURE_UNIT_CHOICES, default="°C")
+    techno_material = models.ForeignKey('jb.CoupleTechnoMaterial', on_delete=models.CASCADE, null=True, blank=True, verbose_name = "Couple Techno-Material (Only if this card is not attached to a part already)")
+    max_X = models.IntegerField("Maximum X (for Couple Techno-Mat only)", null=True, blank=True)
+    max_Y = models.IntegerField("Maximum Y (for Couple Techno-Mat only)", null=True, blank=True)
+    max_Z = models.IntegerField("Maximum Z (for Couple Techno-Mat only)", null=True, blank=True)
     def __str__(self):
         return "Characteristics card %s" % (self.id,)
 
@@ -33,6 +38,7 @@ class Characteristics(models.Model):
             'color':self.color,
             'is_visual':self.is_visual,
             'is_transparent':self.is_transparent,
+            'is_elastic':self.is_elastic,
             'is_water_resistant':self.is_water_resistant,
             'is_chemical_resistant':self.is_chemical_resistant,
             'is_flame_retardant':self.is_flame_retardant,
@@ -42,6 +48,14 @@ class Characteristics(models.Model):
             'max_temp':self.max_temp,
             'temp_unit':self.temp_unit,
             }
+    def get_retardant_choice(self, string):
+        error = ''
+        choices = [choice[0] for choice in self.FLAME_RETARDANT_CHOICES]
+        if string.upper() in choices:
+            return error, string.upper()
+        else:
+            error = 'Wrong Retardancy Level: %s. Instead, assigned HB'%string
+            return error, "HB"
 
 class PartType(models.Model):
     name = models.CharField(max_length=100, default = '')

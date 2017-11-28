@@ -8,9 +8,10 @@ import numpy
 from stl import mesh
 from django.core import serializers
 from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm
+from users.forms import OrganisationForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
-from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata
+from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
@@ -45,18 +46,23 @@ def printers(request):
 @login_required
 def parts(request):
     # query parts, and add all images to a _image attribute in Part object for more query efficiency in template
-    parts = getPartsClean(request.user.organisation)
+    parts, page_number, pagination_range, nb_per_page, id_status = getPartsClean(request)
     parts_sumup = getPartSumUp(request.user.organisation)
     stl_mesh = mesh.Mesh.from_file(join(dir_path, 'static', 'digital', 'stl', 'assemb6.STL'))
     volume, cog, inertia = stl_mesh.get_mass_properties()
-    print("Volume                                  = {0}".format(volume))
-    print("Position of the center of gravity (COG) = {0}".format(cog))
-    print("Inertia matrix at expressed at the COG  = {0}".format(inertia[0,:]))
-    print("                                          {0}".format(inertia[1,:]))
-    print("                                          {0}".format(inertia[2,:]))
+    # print("Volume                                  = {0}".format(volume))
+    # print("Position of the center of gravity (COG) = {0}".format(cog))
+    # print("Inertia matrix at expressed at the COG  = {0}".format(inertia[0,:]))
+    # print("                                          {0}".format(inertia[1,:]))
+    # print("                                          {0}".format(inertia[2,:]))
+    print pagination_range
     context = {
         'page':"parts",
         'parts':parts,
+        'id_status':id_status,
+        'page_number':page_number,
+        'pagination_range':pagination_range,
+        'nb_per_page':nb_per_page,
         'parts_sumup':parts_sumup,
         'formPartBulkFile': PartBulkFileForm(),
         'formPart': PartForm(created_by=request.user, initial={'dimension_unit': 'mm', "weight_unit":"gr"}),
@@ -380,6 +386,31 @@ def update_final_card(request):
             "success":success,
             "errors":errors,
             "final_card":final_card,
+            }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/parts/")
+
+
+@login_required
+def upload_solution_matrix(request):
+    if request.method == 'POST' and request.user.is_staff:
+        # initialize default values
+        success = True
+        errors = []
+        files_success=[]
+        files_failure=[]
+        print request.POST
+        print request.FILES
+        if request.FILES == None:
+            success = False
+            errors.append("No files attached")
+        else:
+            errors = translate_matrix(request.FILES.get('file'))
+            print errors
+        data={
+            "success":success,
+            "errors":errors,
             }
         return JsonResponse(data)
 

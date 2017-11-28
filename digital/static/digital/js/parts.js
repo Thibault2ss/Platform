@@ -1,18 +1,9 @@
 $(document).ready(function(){
     monthNames=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 // ORDER TYPES TOGGLING#####################################
-    $(".btn-order-class").click(function(){
-        $(".btn-order-class").removeClass("btn-fill");
-        $(this).addClass("btn-fill");
-        // for rfq
-        search_string = '"status": {"id": ' + $(this).val();
-        console.log(search_string);
-        var rex = new RegExp(search_string, 'i');
-        $(".part-row").hide();
-        $(".part-row").filter(function () {
-            console.log(rex.test($(this).attr('data-part')));
-            return rex.test($(this).attr('data-part'));
-        }).show();
+    $(".btn-status-filter").click(function(){
+        var id_status = $(this).val();
+        refresh_with_parameter('status', id_status)
 
     });
 // end ORDER TYPE TOGGLING ######################################
@@ -41,6 +32,18 @@ $(document).ready(function(){
                 focusOnSelect:false,
             });
 // end INITIALIZE SLICK /########################################
+
+
+
+// INITIALIZE PARAMTERS VIEWS//////////////////////////////////////
+    var searchParams = new URLSearchParams(window.location.search);
+    $('#number-per-page').change(function(){
+        refresh_with_parameter('nb-per-page', $(this).val());
+    });
+
+
+
+// END INITIALIZE PARAMTERS VIEWS//////////////////////////////////////
 
 
 
@@ -107,6 +110,7 @@ $(document).ready(function(){
             $("#id_is_flame_retardant_1").prop("checked", false).prop("checked",characs.is_flame_retardant);
             $("#id_is_chemical_resistant_1").prop("checked", false).prop("checked",characs.is_chemical_resistant);
             $("#id_is_food_grade_1").prop("checked", false).prop("checked",characs.is_food_grade);
+            $("#id_elastic_1").prop("checked", false).prop("checked",characs.is_elastic);
             $("#id_is_transparent_1").prop("checked", false).prop("checked",characs.is_transparent);
             $("#id_is_visual_1").prop("checked", false).prop("checked",characs.is_visual);
             $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
@@ -1008,3 +1012,35 @@ $(document).ready(function(){
 
 // END FUNCTION TO INIT A STL CANVAS########################################
 });
+
+
+// URL PARAMETER REDIRECTION////////////////////////////////////////
+function refresh_with_parameter(param_name, value){
+    var searchParams = new URLSearchParams(window.location.search);
+
+    var page = "&page=1";
+    var status = "&status=" + searchParams.get("status");
+    var nb_per_page = "&nb-per-page=" + searchParams.get("nb-per-page");
+    var search = "&search=" + searchParams.get("search");
+
+    if (param_name == 'page'){
+        page = "&page=" + value;
+    } else if (param_name == "status") {
+        status = "&status=" + value;
+    } else if (param_name == "nb-per-page") {
+        nb_per_page = "&nb-per-page=" + value;
+    } else if (param_name == "search") {
+        search = "&search=" + value;
+    }
+
+    var params_list = [page, status, nb_per_page, search]
+    var params=""
+    for (var i in params_list) {
+        if (!params_list[i].match(/null/)){
+            params += params_list[i];
+        }
+    };
+    console.log("params:" + params);
+    console.log( window.location.pathname + "?" + params);
+    document.location.href = window.location.pathname + "?" + params;
+}
