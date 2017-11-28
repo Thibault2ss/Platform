@@ -21,7 +21,7 @@ class Technology_Admin(admin.ModelAdmin):
 
 @admin.register(CoupleTechnoMaterial)
 class CoupleTechnoMaterial_Admin(admin.ModelAdmin):
-    fields = ['technology', 'material', 'characteristics']
+    fields = ['technology', 'material']
     list_display = ('id', 'technology', 'material')
 
 @admin.register(FinalCard)
