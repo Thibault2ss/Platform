@@ -4,7 +4,6 @@ $(document).ready(function(){
     $(".btn-status-filter").click(function(){
         var id_status = $(this).val();
         refresh_with_parameter('status', id_status)
-
     });
 // end ORDER TYPE TOGGLING ######################################
 
@@ -925,6 +924,27 @@ $(document).ready(function(){
 
 
 // ENDUPDATING PART CARD/////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+// PART SEARCH///////////////////////////////////////////////////////////
+    $(document).on('keyup','.part-search',function () {
+        var rex = new RegExp($(this).val(), 'i');
+        $(".part-row").hide();
+        $(".part-row").filter(function () {
+            return rex.test($(this).text());
+        }).show();
+    });
+
+    $(".form-part-search").submit(function(event){
+        event.preventDefault();
+        var string = $(this).find("input[name='search']").val();
+        refresh_with_parameter('search', string);
+
+    });
+// END PART SEARCH///////////////////////////////////////////////////////////
 
 
 

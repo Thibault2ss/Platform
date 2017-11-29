@@ -508,3 +508,12 @@ input[type=number]::-webkit-outer-spin-button {
     background-color: #68B3C8;
     color:#fff;
 }
+ul, li{
+    list-style-type: none;
+}
+.btn-search-part{
+    margin:0!important;
+    padding: 10px 16px 10px 12px!important;
+    border:none;
+    background-color: #fff;
+}

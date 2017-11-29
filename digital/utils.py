@@ -16,6 +16,7 @@ import json
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from digital.models import ClientPartStatus
 import csv
+from django.db.models import Q
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 DEFAULT_NB_PER_PAGE = 20
@@ -29,7 +30,11 @@ def getPartsClean(request):
     if id_status:
         filters['status'] = get_object_or_404(ClientPartStatus, pk=id_status)
 
-    all_parts = Part.objects.filter(**filters).order_by('date_created')
+    # search
+    search_string = request.GET.get('search', '')
+    sarch_q  = Q(name__icontains=search_string) | Q(reference__icontains=search_string)
+
+    all_parts = Part.objects.filter(sarch_q, **filters).order_by('date_created')
 
 
     # PAGINATION
