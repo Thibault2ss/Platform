@@ -12,3 +12,7 @@ register = template.Library()
 @register.simple_tag
 def random_int():
     return random.randint(1, 5000)
+
+@register.filter("has_perm")
+def has_perm(user, perm):
+    return user.has_perm(perm)

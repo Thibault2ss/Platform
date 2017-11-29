@@ -29,7 +29,7 @@ def getPartsClean(request):
     if id_status:
         filters['status'] = get_object_or_404(ClientPartStatus, pk=id_status)
 
-    all_parts = Part.objects.filter(**filters).order_by('-date_created')
+    all_parts = Part.objects.filter(**filters).order_by('date_created')
 
 
     # PAGINATION

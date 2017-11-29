@@ -403,7 +403,7 @@ hr {
     opacity: 1; }
   .sidebar[data-active-color="danger"] .nav li.active > a,
   .off-canvas-sidebar[data-active-color="danger"] .nav li.active > a {
-    color: #f3bb45;
+    color: #fbfbfb;
     opacity: 1; }
 
 .main-panel {

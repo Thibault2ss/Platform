@@ -45,6 +45,10 @@ def printers(request):
     return render(request, 'digital/printers.html', context)
 @login_required
 def parts(request):
+    if request.user.has_perm('add_part'):
+        print "YES HAS PERM !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    else:
+        print "NO HAS NOT PERM !!!!!!!!!!!!!!!!!!!!!!!!!!!"
     # query parts, and add all images to a _image attribute in Part object for more query efficiency in template
     parts, page_number, pagination_range, nb_per_page, id_status = getPartsClean(request)
     parts_sumup = getPartSumUp(request.user.organisation)

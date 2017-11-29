@@ -1,6 +1,7 @@
 {% extends 'digital/base.html' %}
 {% load static %}
 {% load digital_filters %}
+{% load users_filters %}
 {% block extrahead %}
 <link href="{% static 'digital/css/slick.css' %}?dev={% random_int %}" rel="stylesheet" />
 <link href="{% static 'digital/css/slick-theme.css' %}?dev={% random_int %}" rel="stylesheet" />
@@ -25,7 +26,9 @@
                             <button class="btn btn-status-filter btn-danger {%if id_status == '3'%}btn-fill{%endif%}" value="3"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_disqualified}}</span> Disqualified</button>
                             <button class="btn btn-status-filter btn-success {%if id_status == '4'%}btn-fill{%endif%}" value="4"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_industrialized}}</span> Digitalized</button>
                             <!-- <button class="btn btn-default" data-toggle="modal" data-target="#modalNewPart">+</button> -->
+                            {% if user|has_perm:'add_part' or user.is_admin %}
                             <div class="button-add-part" data-toggle="modal" data-target="#modalNewPart"><i class="ti-plus"></i></div>
+                            {% endif %}
                         </div>
                     </div>
                     {% if user.email == 'thibault.de-saint-sernin@sp3d.co'%}

@@ -25,7 +25,7 @@ $(document).ready(function(){
               $('.button-back').hide();
           }
     });
-    
+
     $('#imageCarousel').carousel({
         interval: false
     });
@@ -661,6 +661,7 @@ $(document).ready(function(){
                     $("#id_is_elastic").prop("checked", false);
                     $("#id_color").val('NA');
                     $("#id_flame_retardancy").val('NA');
+                    setTimeout(function(){location.reload()},1000);
                 } else {
                     $.notify({
                         icon: 'ti-face-sad',

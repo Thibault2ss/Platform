@@ -6,6 +6,8 @@ from datetime import datetime
 from django.contrib.auth.models import Group
 from sp3d.storage_backends import PrivateMediaStorage
 from address.models import AddressField
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None):
@@ -57,19 +59,27 @@ class CustomUser(AbstractBaseUser):
     last_name = models.CharField(max_length=200, default='')
     date_joined = models.DateTimeField(auto_now_add=True)
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE, null=True)
+    permissions = models.ManyToManyField('auth.Permission', blank=True)
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
     # REQUIRED_FIELDS = ['first_name', 'last_name']
+    # class Meta:
+    #     permissions = (
+    #         ("add_part", "Can Add Part"),
+    #     )
 
     def __str__(self):
         return self.email
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
-        # Simplest possible answer: Yes, always
-        return True
+        permission = self.permissions.filter(codename = perm)
+        if permission:
+            return True
+        else:
+            return False
 
     def get_short_name(self):
         return self.first_name
