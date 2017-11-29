@@ -192,8 +192,14 @@
 .file-row>i{
     margin:0px 20px 0px 0px;
 }
+.slick-slider{
+    border-radius:4px;
+}
+.dz-drag-hover .slick-slider{
+    border: dotted 2px #536e8a;
+}
 .dz-drag-hover .card{
-    background-color:#72d4f1;
+    background-color:#536e8a;
 }
 .row.equal-height{
     display: flex;

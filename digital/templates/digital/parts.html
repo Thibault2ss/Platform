@@ -81,7 +81,7 @@
                         <div class="col-lg-12 text-center" style="display:flex;justify-content:center;align-items:center;">
                             <ul class="pagination">
                                 {% for page in pagination_range%}
-                                <li><a class="{% if page|add:'0' == page_number|add:'0' %}active{%endif%}" href="?page={{page}}">{{page}}</a></li>
+                                <li><a class="pagination-link {% if page|add:'0' == page_number|add:'0' %}active{%endif%}" data-page="{{page}}" href="">{{page}}</a></li>
                                 {%endfor%}
                             </ul>
 
@@ -108,11 +108,22 @@
                                     </div>
                                 </div>
                                 <div class="col-xs-12">
-                                    <div id="imageCarousel" style="margin-bottom:15px;">
-                                        <!-- <img src="https://news.nationalgeographic.com/content/dam/news/photos/000/755/75552.ngsversion.1422285553360.adapt.1900.1.jpg" alt="Los Angeles">
-                                        <img src="https://static.pexels.com/photos/54632/cat-animal-eyes-grey-54632.jpeg" alt="Chicago">
-                                        <img src="https://www.rd.com/wp-content/uploads/sites/2/2016/02/06-train-cat-shake-hands.jpg" alt="New York"> -->
-                                    </div>
+                                    <form enctype="multipart/form-data" action="" method="post" id="image_form" class="dropzone">
+                                        {%csrf_token%}
+                                        {%comment%}{{PartImageForm.as_p}}{%endcomment%}
+                                        <input type="hidden" class="id_part" name="part" required="">
+                                        <div class="progressBar">
+                                            <div class="progressBar-inner"></div>
+                                        </div>
+                                        <!-- <input type="submit" value="Save" name="_save"> -->
+                                        <div class="dz-default dz-message"><span></span></div>
+                                        <div id="imageCarousel" style="margin-bottom:15px;">
+                                            <!-- <img src="https://news.nationalgeographic.com/content/dam/news/photos/000/755/75552.ngsversion.1422285553360.adapt.1900.1.jpg" alt="Los Angeles">
+                                            <img src="https://static.pexels.com/photos/54632/cat-animal-eyes-grey-54632.jpeg" alt="Chicago">
+                                            <img src="https://www.rd.com/wp-content/uploads/sites/2/2016/02/06-train-cat-shake-hands.jpg" alt="New York"> -->
+                                        </div>
+                                    </form>
+
                                 </div>
 
                             </div>

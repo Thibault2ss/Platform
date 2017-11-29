@@ -7,7 +7,7 @@ from os.path import join
 import numpy
 from stl import mesh
 from django.core import serializers
-from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm
+from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm, PartImageForm
 from users.forms import OrganisationForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
@@ -69,6 +69,7 @@ def parts(request):
         'nb_per_page':nb_per_page,
         'parts_sumup':parts_sumup,
         'formPartBulkFile': PartBulkFileForm(),
+        'PartImageForm': PartImageForm(),
         'formPart': PartForm(created_by=request.user, initial={'dimension_unit': 'mm', "weight_unit":"gr"}),
         'formCharacteristics': CharacteristicsForm(),
         'formFinalCard':FinalCardForm(),
@@ -118,6 +119,8 @@ def qualification(request):
         'page':"qualification",
     }
     return render(request, 'digital/qualification.html', context)
+
+
 @login_required
 def upload_part_bulk_file(request):
     if request.method == 'POST':
@@ -158,6 +161,46 @@ def upload_part_bulk_file(request):
         return JsonResponse(data)
 
     return HttpResponseRedirect("/digital/parts/")
+
+
+
+@login_required
+def upload_part_image(request):
+    if request.method == 'POST':
+        # initialize default values
+        success = True
+        errors = []
+        images_success=[]
+        images_failure=[]
+        print request.POST
+        print request.FILES
+        if request.FILES == None:
+            success = False
+            errors.append("No files attached")
+        else:
+            for _image in request.FILES.getlist('image'):
+                request.FILES['file'] = _image
+                form = PartImageForm(request.POST, request.FILES, created_by=request.user)
+                if form.is_valid():
+                    print "FORM IS VALID"
+                    _new_image = form.save()
+                    images_success.append({"name":(_new_image.image.name).rsplit("/",1)[1], "url":_new_image.image.url, 'id':_new_image.id})
+                else:
+                    print "FORM IS NOT VALID"
+                    images_failure.append({"name":_image})
+                    success = False
+                    errors.append("form with file %s is not valid"%_image)
+        data={
+            "success":success,
+            "errors":errors,
+            "images_success":images_success,
+            "images_failure":images_failure,
+            "id_part": request.POST["part"],
+            }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/parts/")
+
 
 @login_required
 def delete_bulk_file(request):

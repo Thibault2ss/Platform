@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^printers/$', views.printers, name=app_name+'printers'),
     url(r'^parts/$', views.parts, name=app_name+'parts'),
     url(r'^parts/upload-part-bulk-file/$', views.upload_part_bulk_file, name=app_name+'upload_part_bulk_file'),
+    url(r'^parts/upload-part-image/$', views.upload_part_image, name=app_name+'upload_part_image'),
     url(r'^parts/delete-bulk-file/$', views.delete_bulk_file, name=app_name+'delete_bulk_file'),
     url(r'^parts/request-for-indus/$', views.request_for_indus, name=app_name+'request_for_indus'),
     url(r'^parts/change-part-status/$', views.change_part_status, name=app_name+'change_part_status'),

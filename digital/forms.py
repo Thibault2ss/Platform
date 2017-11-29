@@ -1,5 +1,5 @@
 from django import forms
-from digital.models import PartBulkFile, Part, Appliance, PartType, Characteristics
+from digital.models import PartBulkFile, Part, Appliance, PartType, Characteristics, PartImage
 
 class PartBulkFileForm(forms.ModelForm):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))
@@ -26,6 +26,29 @@ class PartBulkFileForm(forms.ModelForm):
         partBulkFile.type = "%s"%type
         partBulkFile.save()
         return partBulkFile
+
+class PartImageForm(forms.ModelForm):
+    image = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))
+    part = forms.ModelChoiceField(queryset=Part.objects.none(),widget=forms.HiddenInput(attrs={'required': True}))
+    class Meta:
+        model = PartImage
+        fields = ['part', 'image']
+
+    def __init__(self, *args, **kwargs):
+        created_by = None
+        if 'created_by' in kwargs:
+            created_by = kwargs.pop('created_by')
+        super(PartImageForm, self).__init__(*args, **kwargs)
+        # allow change only for a part of your organisation:
+        if created_by:
+            self.created_by = created_by
+            self.fields['part'].queryset = Part.objects.filter(organisation__id = created_by.organisation.id)
+
+    def save(self):
+        partImage = super(PartImageForm, self).save(commit=False)
+        partImage.created_by = self.created_by
+        partImage.save()
+        return partImage
 
 class PartForm(forms.ModelForm):
     # file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))

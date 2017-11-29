@@ -154,7 +154,7 @@ class Environment(models.Model):
 class Part(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
-    type = models.ForeignKey('PartType', on_delete=models.CASCADE, null=True)
+    type = models.ForeignKey('PartType', on_delete=models.CASCADE, null=True, blank=True)
     characteristics = models.OneToOneField('Characteristics', on_delete=models.CASCADE, null=True)
     organisation = models.ForeignKey('users.Organisation', on_delete=models.CASCADE, null=True)
     appliance = models.ManyToManyField(Appliance, blank=True)

@@ -34,6 +34,9 @@ $(document).ready(function(){
 
 
 
+
+
+
 // INITIALIZE SLICK ###############################################
     $('#imageCarousel').slick({
                 dots: false,
@@ -48,15 +51,22 @@ $(document).ready(function(){
 
 
 
+
+
 // INITIALIZE PARAMTERS VIEWS//////////////////////////////////////
     var searchParams = new URLSearchParams(window.location.search);
     $('#number-per-page').change(function(){
         refresh_with_parameter('nb-per-page', $(this).val());
     });
 
-
+    $('.pagination-link').click(function(e){
+            e.preventDefault();
+            refresh_with_parameter('page', $(this).data('page'));
+        });
 
 // END INITIALIZE PARAMTERS VIEWS//////////////////////////////////////
+
+
 
 
 
@@ -70,8 +80,12 @@ $(document).ready(function(){
 
         // populate images
         $('#imageCarousel').slick('removeSlide', null, null, true);
-        for (var i = 0; i < part_images.length; i++){
-            $('#imageCarousel').slick('slickAdd','<img src="' + part_images[i] + '">');
+        if (part_images.length > 0){
+            for (var i = 0; i < part_images.length; i++){
+                $('#imageCarousel').slick('slickAdd','<img src="' + part_images[i] + '">');
+            };
+        }else{
+            $('#imageCarousel').slick('slickAdd','<img src="/static/digital/img/default_pic.jpg">')
         };
         setTimeout(function(){$('#imageCarousel').slick('setPosition');},250);
 
@@ -95,6 +109,9 @@ $(document).ready(function(){
         appliance = part.fields.appliance;
         status = part.fields.status;
         bulk_files = $(this).data("part-bulk-files");
+
+        $(".id_part").val(part.pk);
+        $("input[name='id_part']").val(part.pk);
         if (final_card != null && status.id == 4){
             $("#final-card").find("#id_currency").val(final_card.currency);
             $("#final-card").find("#id_unit_price").val(final_card.unit_price);
@@ -161,7 +178,6 @@ $(document).ready(function(){
         if (status.id>=4){
             $("#button-action-1").removeClass().addClass("btn btn-success btn-fill btn-wd print-request-button").text("Print");
         };
-        $(".id_part").val(part.pk);
         $("#id_appliance_1").find("option").removeAttr("selected").hide();
         for (var i = 0; i < appliance.length; i++){
             $("#id_appliance_1").find("option[value='" + appliance[i].id + "']").show().attr("selected","");
@@ -336,6 +352,7 @@ $(document).ready(function(){
 
 
 
+
 // DELETING BULK FILES###############################################################
     $(".allow-remove").click(function(){
         $(this).closest(".card").find(".remove-file").each(function(i){
@@ -388,6 +405,63 @@ $(document).ready(function(){
 
 
 // END DELETING BULK FILES###############################################################
+
+
+
+
+
+// ADDING IMAGES AJAX/////////////////////////////////////////////////////////////////////
+    $("#image_form").dropzone({
+        url: "/digital/parts/upload-part-image/",
+        paramName: "image", // The name that will be used to transfer the file
+        maxFilesize: 5, // MB
+        createImageThumbnails: false,
+        clickable: true,
+        acceptedFiles:".png,.gif,.jpg",
+        accept: function(file, done) {
+            if (file.name == "justin.jpg") {
+              done("Naha, you don't.");
+            }
+            else { done(); }
+        },
+        init: function () {
+            var $form = $("#image_form");
+            this.on("sending", function(file, xhr, formData) {
+                console.log("sending");
+                $form.find(".progressBar-inner").css("background-color","#6dbad8");
+                $form.find(".progressBar").css("opacity",1);
+            });
+            this.on('uploadprogress',function(file, progress, bytesSent){
+                $form.find(".progressBar-inner").css("width", progress + "%");
+            });
+            this.on('complete', function () {
+                setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+            });
+            this.on("success", function(file, response) {
+                console.log(response);
+                if (response.success){
+                    $form.find(".progressBar-inner").css("background-color","green");
+                    $('#imageCarousel').find("img[src='/static/digital/img/default_pic.jpg']").each(function(){
+                        $('#imageCarousel').slick('slickRemove', $(this).data('slick-index'));
+                    });
+                } else {
+                    $form.find(".progressBar-inner").css("background-color","red");
+                };
+                for (var i = 0; i < response.images_success.length; i++){
+                    $('#imageCarousel').slick('slickAdd','<img src="' + response.images_success[i].url + '">');
+                    $(".part-row[data-part-id='" + response.id_part + "']").data("part-images").push(response.images_success[i].url);
+                };
+                setTimeout(function(){$('#imageCarousel').slick('setPosition');},250);
+            });
+        },
+        error:function(file, response){
+            console.log(response.message);
+            $("#partbulkfile_form").find(".progressBar-inner").css("background-color","red");
+        },
+    });
+// END ADDING IMAGES AJAX/////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -611,6 +685,7 @@ $(document).ready(function(){
 
 //ADDING A NEW PART///////////////////////////////////////////////////////////////////////////
     $("#new_part_form").submit(function(event){
+        console.log("fewfef");
         event.preventDefault();
         var $form = $(this);
         var data = new FormData(this);
