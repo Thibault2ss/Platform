@@ -75,11 +75,14 @@ class CustomUser(AbstractBaseUser):
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
+        if self.is_admin:
+            return True
         permission = self.permissions.filter(codename = perm)
         if permission:
             return True
         else:
             return False
+
 
     def get_short_name(self):
         return self.first_name
