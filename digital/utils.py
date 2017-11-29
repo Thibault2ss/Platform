@@ -131,25 +131,25 @@ def getfiledata(file):
         # stl_mesh = mesh.Mesh.from_file(os.path.join(dir_path, 'test.stl'))
         stl_mesh = mesh.Mesh.from_file(temp.name)
         volume, cog, inertia = stl_mesh.get_mass_properties()
-        os.unlink(temp.name)
-        # print("Volume                                  = {0}".format(volume))
-        # print("Position of the center of gravity (COG) = {0}".format(cog))
-        # print("Inertia matrix at expressed at the COG  = {0}".format(inertia[0,:]))
-        # print("                                          {0}".format(inertia[1,:]))
-        # print("                                          {0}".format(inertia[2,:]))
 
+        print("Volume                                  = {0}".format(volume))
+        print("Position of the center of gravity (COG) = {0}".format(cog))
+        print("Inertia matrix at expressed at the COG  = {0}".format(inertia[0,:]))
+        print("                                          {0}".format(inertia[1,:]))
+        print("                                          {0}".format(inertia[2,:]))
+        os.unlink(temp.name)
         data = {
             'volume': volume,
             'cog': cog.tolist(),
             'inertia': inertia.tolist(),
         }
-
+        print 'DEBUG 1'
 
     if file_extension.lower() in ['.sldprt','.sldasm','.step','.iges','.gcode']:
         type="3D"
     if file_extension.lower() in ['.dwg', '.dxf']:
         type='2D'
-        
+        print 'DEBUG 2'
     return type, json.dumps(data)
 
 

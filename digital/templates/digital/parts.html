@@ -5,12 +5,16 @@
 <link href="{% static 'digital/css/slick.css' %}?dev={% random_int %}" rel="stylesheet" />
 <link href="{% static 'digital/css/slick-theme.css' %}?dev={% random_int %}" rel="stylesheet" />
 {% endblock extrahead %}
+{% block top_title %}
+<div class="button-back" href="#partsCarousel" data-slide="prev" style='display:none'>
+    <i class="ti-arrow-left"></i>
+</div>
+{% endblock %}
 {%block content%}
 
-
-<div id="ordersCarousel" class="carousel slide" data-interval="false" style="height: calc(100% - 74px);">
+<div id="partsCarousel" class="carousel slide" data-interval="false" style="height:100%;">
     <div class="carousel-inner" style="height:100%;overflow-y:scroll;">
-        <div class="item active">
+        <div class="item active" id="partsCarousel-slide1">
             <div class="content" style="position:relative;">
                 <div class="container-fluid">
                     <div class="row" style="text-align:center;margin-bottom:20px;">
@@ -41,14 +45,14 @@
                                 <div class="content">
                                     <ul class="list-unstyled team-members">
                                         {% for part in parts %}
-                                        <li class="part-row" href="#ordersCarousel" style="padding:5px 0px;"
+                                        <li class="part-row" href="#partsCarousel" style="padding:5px 0px;"
                                             data-part="{{part|model_to_dict}}"
                                             data-part-id="{{part.id}}"
                                             data-part-images="{{part.images|url_list}}"
                                             data-part-bulk-files="{{part.bulk_files|dict_list}}"
                                             data-slide="next">
                                             <div class="row">
-                                                <div class="col-xs-4" style="display:flex;align-items:center;">
+                                                <div class="col-xs-9" style="display:flex;align-items:center;">
                                                     <div class="avatar" style="margin-right:20px;">
                                                         <img src="{%if part.images %}{{part.images.0.thumbnail.url}}{%else%}{% static 'digital/img/cubes.png' %}{%endif%}" alt="Circle Image" class="img-circle img-no-padding img-responsive" style="height:100%;width:100%">
                                                     </div>
@@ -57,10 +61,6 @@
                                                         <span class="text-muted"><small>ref: </small></span>{{part.reference}}
                                                     </div>
                                                 </div>
-                                                <div class="col-xs-5">
-
-                                                </div>
-
                                                 <div class="col-xs-3 text-right">
                                                     <btn class="btn btn-sm btn-info btn-icon"><i class="fa ti-printer"></i></btn>
                                                     <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
@@ -93,11 +93,7 @@
                 </div>
             </div>
         </div>
-        <div class="item">
-            <div class="button-back" href="#ordersCarousel" data-slide="prev">
-                <i class="ti-arrow-left"></i>
-            </div>
-
+        <div class="item" id="partsCarousel-slide2">
             <div class="content" id="part-detail-panel" data-part-id="" style="position:relative;">
                 <div class="container-fluid">
                     <div class="row">
@@ -400,7 +396,7 @@
 <script>
 
 $(document).ready(function(){
-    $('#ordersCarousel').carousel({
+    $('#partsCarousel').carousel({
         interval: false
     });
     $('#imageCarousel').carousel({

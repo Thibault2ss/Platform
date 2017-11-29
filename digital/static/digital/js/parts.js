@@ -11,12 +11,25 @@ $(document).ready(function(){
 
 
 // REMOVE CAROUSEL AUTO SLIDE#####################################
-    $('#ordersCarousel').carousel({
+    $('#partsCarousel').carousel({
         interval: false
     });
+    $('#partsCarousel').bind('slide.bs.carousel', function (ev) {
+        console.log('slide event!');
+        var id = ev.relatedTarget.id;
+        switch (id) {
+            case "partsCarousel-slide2":
+              $('.button-back').show()
+              break;
+            default:
+              $('.button-back').hide();
+          }
+    });
+    
     $('#imageCarousel').carousel({
         interval: false
     });
+
 // end REMOVE CAROUSEL AUTO SLIDE ######################################
 
 
@@ -114,7 +127,9 @@ $(document).ready(function(){
             $("#id_is_transparent_1").prop("checked", false).prop("checked",characs.is_transparent);
             $("#id_is_visual_1").prop("checked", false).prop("checked",characs.is_visual);
             $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
+            $("#id_is_elastic_1").prop("checked", false).prop("checked",characs.is_elastic);
             $("#id_color_1").val(characs.color);
+            $("#id_flame_retardancy_1").val(characs.flame_retardancy);
         }else{
             $("#id_min_temp_1").val(0);
             $("#id_max_temp_1").val(70);
@@ -126,7 +141,9 @@ $(document).ready(function(){
             $("#id_is_transparent_1").prop("checked", false);
             $("#id_is_visual_1").prop("checked", false);
             $("#id_is_water_resistant_1").prop("checked", false);
+            $("#id_is_elastic_1").prop("checked", false);
             $("#id_color_1").val('NA');
+            $("#id_flame_retardancy_1").val('NA');
         };
 
         $(".collapse").collapse('hide');
@@ -620,16 +637,51 @@ $(document).ready(function(){
             success: function(data){
                 console.log(data);
                 if (data.success){
-                    // $form.find(".progressBar-inner").css("background-color","green");
                     console.log(JSON.parse(data.part));
+                    $('#modalNewPart').modal('hide');
+                    $.notify({
+                        icon: 'ti-check',
+                        message: "New Part Created"
+                    },{
+                        type: 'success',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+
+                    $("#id_min_temp").val(0);
+                    $("#id_max_temp").val(70);
+                    $("#id_temp_unit").val('°C');
+                    $("#id_is_flame_retardant").prop("checked", false);
+                    $("#id_is_chemical_resistant").prop("checked", false);
+                    $("#id_is_food_grade").prop("checked", false);
+                    $("#id_elastic").prop("checked", false);
+                    $("#id_is_transparent").prop("checked", false);
+                    $("#id_is_visual").prop("checked", false);
+                    $("#id_is_water_resistant").prop("checked", false);
+                    $("#id_is_elastic").prop("checked", false);
+                    $("#id_color").val('NA');
+                    $("#id_flame_retardancy").val('NA');
                 } else {
-                    // $form.find(".progressBar-inner").css("background-color","red");
-                    console.log(data);
+                    $.notify({
+                        icon: 'ti-face-sad',
+                        message: "Part Creation failed"
+                    },{
+                        type: 'danger',
+                        timer: 1000,
+                        delay: 1000,
+                    });
                 }
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.notify({
+                    icon: 'ti-face-sad',
+                    message: "Part Creation failed"
+                },{
+                    type: 'danger',
+                    timer: 1000,
+                    delay: 1000,
+                });
                 console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
-                // $form.find(".progressBar-inner").css("background-color","red");
             },
             complete:function(jqXHR, textStatus){
                 // setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);

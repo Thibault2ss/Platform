@@ -134,8 +134,10 @@ def upload_part_bulk_file(request):
                 if form.is_valid():
                     print "FORM IS VALID"
                     type, data = getfiledata(_file)
+                    print 'debug3'
                     _new_file = form.save(type= type, data = data)
                     files_success.append({"name":(_new_file.file.name).rsplit("/",1)[1], "url":_new_file.file.url, 'id':_new_file.id, 'type':_new_file.type, 'data':_new_file.data})
+                    print 'debug4'
                 else:
                     print "FORM IS NOT VALID"
                     files_failure.append({"name":_file})
@@ -148,6 +150,7 @@ def upload_part_bulk_file(request):
             "files_failure":files_failure,
             "id_part": request.POST["part"],
             }
+        print 'debug5'
         return JsonResponse(data)
 
     return HttpResponseRedirect("/digital/parts/")
