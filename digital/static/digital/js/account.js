@@ -27,4 +27,80 @@ $(document).ready(function(){
 // END INIT MAP
 
 
+
+
+
+
+
+// UPLOAD PROFILE PICTURE###########################################################
+
+    $("#profile_pic_form").dropzone({
+        url: "/digital/account/upload-profile-pic/",
+        paramName: "profile_pic", // The name that will be used to transfer the file
+        maxFiles: 2,
+        maxFilesize: 2, // MB
+        createImageThumbnails: false,
+        clickable: true,
+        acceptedFiles:".png,.jpg,.gif",
+        accept: function(file, done) {
+            if (file.name == "justin.jpg") {
+              done("Naha, you don't.");
+            }
+            else { done(); }
+        },
+        init: function () {
+            var $form = $("#profile_pic_form");
+            this.on("sending", function(file, xhr, formData) {
+            //    formData.append("csrfmiddlewaretoken", csrftoken);
+                $form.find(".progressBar-inner").css("background-color","#6dbad8");
+                $form.find(".progressBar").css("opacity",1);
+                $form.find(".remove-file").removeClass("visible");
+            });
+            this.on('uploadprogress',function(file, progress, bytesSent){
+                $form.find(".progressBar-inner").css("width", progress + "%");
+            });
+            this.on('complete', function () {
+                setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+            });
+            this.on("success", function(file, response) {
+                console.log(response);
+                $('#modalProfilePic').modal('hide');
+                if (response.success){
+                    $form.find(".progressBar-inner").css("background-color","green");
+                    $('.user-pic,.user .avatar').css('background-image', "url(" + response.thumbnail + ")");
+                } else {
+                    $form.find(".progressBar-inner").css("background-color","red");
+                    $.notify({
+                        icon: 'ti-face-sad',
+                        message: "Picture Upload failed"
+                    },{
+                        type: 'danger',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                };
+            });
+        },
+        error:function(file, response){
+            console.log(response);
+            $('#modalProfilePic').modal('hide');
+            $("#profile_pic_form").find(".progressBar-inner").css("background-color","red");
+            $.notify({
+                icon: 'ti-face-sad',
+                message: "Picture Upload failed"
+            },{
+                type: 'danger',
+                timer: 1000,
+                delay: 1000,
+            });
+        },
+    });
+
+    $("#modalProfilePic .modal-body").click(function(){
+        $(this).closest(".dropzone").click();
+    });
+
+
+// END UPLOAD PROFILE PICTURE###########################################################
 });

@@ -7,6 +7,7 @@ urlpatterns = [
 
     url(r'^$', views.dashboard, name=app_name + 'dashboard'),
     url(r'^account/$', views.account, name=app_name+'account'),
+    url(r'^account/upload-profile-pic/$', views.upload_profile_pic, name=app_name+'upload_profile_pic'),
     url(r'^qualification/$', views.qualification, name=app_name+'qualification'),
     url(r'^printers/$', views.printers, name=app_name+'printers'),
     url(r'^parts/$', views.parts, name=app_name+'parts'),

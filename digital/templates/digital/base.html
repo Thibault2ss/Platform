@@ -54,7 +54,7 @@
 <body>
 
 <div class="wrapper">
-    <div class="sidebar" data-background-color="white" data-active-color="danger">
+    <div class="sidebar" data-background-color="black" data-active-color="danger">
 
     <!--
 		Tip 1: you can change the color of the sidebar's background using: data-background-color="white | black"
@@ -91,8 +91,8 @@
                         <i class="ti-user"></i>
                         <p>Account</p>
                     </a>
-                </li>
-                <li class="{% if page == 'printers' %}active{% endif %}">
+                </li> -->
+                <!-- <li class="{% if page == 'printers' %}active{% endif %}">
                     <a href="/digital/printers/" style="display:flex;align-items:center;">
                         <img style="height:35px;margin: 0 15px 0 3px;" src="{% static 'digital/img/extruder.png' %}"></i>
                         <p>Printers</p>
@@ -201,8 +201,14 @@
                         </li>
                         <li class="dropdown">
                               <a href="#" style="margin:0" class="dropdown-toggle" data-toggle="dropdown">
-                                    <img class="user-pic" src="{% static 'digital/img/faces/face-0.png' %}" alt="...">
-									<b class="caret"></b>
+                                  <div style="display:flex;align-items:center;">
+                                    {%if user.profile_thumb%}
+                                    <div class='user-pic' style="background-image: url({{user.profile_thumb.url}});"></div>
+                                    {%else%}
+                                    <div class='user-pic' style="background-image: url({% static 'digital/img/faces/face-0.png' %});"></div>
+                                    {% endif %}
+                                    <b class="caret" style="margin-left:15px;"></b>
+                                </div>
                               </a>
                               <ul class="dropdown-menu">
                                 <li><a href="javascript:logout()"><i class="ti-close" style="margin-right:15px"></i>Sign Out</a></li>
@@ -267,6 +273,9 @@
     <!--  Notifications Plugin    -->
     <script src="{% static 'digital/js/bootstrap-notify.js' %}"></script>
 
+    <!-- dropzone -->
+    <script src="{% static 'digital/js/dropzone.min.js' %}"></script>
+
     <!-- Paper Dashboard Core javascript and methods for Demo purpose -->
 	<script src="{% static 'digital/js/paper-dashboard.js' %}?dev={% random_int %}"></script>
 
@@ -279,5 +288,11 @@
 
     {%block extrascript%}
     {%endblock extrascript%}
+
+    <script>
+        // prevent dropzones to initialize when loaded, so that we initialize them with our own options below
+        Dropzone.autoDiscover = false;
+        var csrftoken = '{{ csrf_token }}';
+    </script>
 
 </html>

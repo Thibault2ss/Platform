@@ -8,6 +8,7 @@ import numpy
 from stl import mesh
 from django.core import serializers
 from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm, PartImageForm
+from users.forms import ProfilePicForm
 from users.forms import OrganisationForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
@@ -33,8 +34,10 @@ def dashboard(request):
     return render(request, 'digital/dashboard.html', context)
 @login_required
 def account(request):
+    team_members = CustomUser.objects.filter(organisation = request.user.organisation).exclude(pk = request.user.pk)
     context = {
         'page':"account",
+        'team_members':team_members,
     }
     return render(request, 'digital/account.html', context)
 @login_required
@@ -161,6 +164,7 @@ def upload_part_bulk_file(request):
 
 
 
+
 @login_required
 def upload_part_image(request):
     if request.method == 'POST':
@@ -197,6 +201,46 @@ def upload_part_image(request):
         return JsonResponse(data)
 
     return HttpResponseRedirect("/digital/parts/")
+
+
+
+
+
+
+@login_required
+def upload_profile_pic(request):
+    if request.method == 'POST':
+        # initialize default values
+        success = True
+        errors = []
+        thumbnail=''
+        print request.POST
+        print request.FILES
+        _file = request.FILES.get('profile_pic', False)
+        if request.FILES == None and _file:
+            success = False
+            errors.append("No files attached")
+        else:
+            form = ProfilePicForm(request.POST, request.FILES, instance=request.user)
+            if form.is_valid():
+                print "FORM IS VALID"
+                _user = form.save()
+                thumbnail = _user.profile_thumb.url
+            else:
+                print "FORM IS NOT VALID"
+                success = False
+                errors.append("form with file %s is not valid"%_image)
+        data={
+            "success":success,
+            "errors":errors,
+            "thumbnail":thumbnail,
+            }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/account/")
+
+
+
 
 
 @login_required

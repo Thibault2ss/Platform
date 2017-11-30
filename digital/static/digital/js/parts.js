@@ -309,7 +309,7 @@ $(document).ready(function(){
                 });
                 this.on("success", function(file, response) {
                     console.log(response);
-                    if (response.success=true){
+                    if (response.success){
                         $form.find(".progressBar-inner").css("background-color","green");
                     } else {
                         $form.find(".progressBar-inner").css("background-color","red");
@@ -931,11 +931,24 @@ $(document).ready(function(){
 
 // PART SEARCH///////////////////////////////////////////////////////////
     $(document).on('keyup','.part-search',function () {
+        if ($(this).val()) {
+            $('.btn-reset-search').show();
+        } else {
+            $('.btn-reset-search').hide();
+        };
+
         var rex = new RegExp($(this).val(), 'i');
         $(".part-row").hide();
         $(".part-row").filter(function () {
             return rex.test($(this).text());
         }).show();
+    });
+
+    $('.btn-reset-search').click(function(){
+        if ($(this).siblings(".part-search").val()){
+            $(this).siblings(".part-search").val("");
+            refresh_with_parameter('search', '');
+        }
     });
 
     $(".form-part-search").submit(function(event){

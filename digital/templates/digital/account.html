@@ -1,5 +1,6 @@
 {%extends 'digital/base.html'%}
 {% load static %}
+{% load digital_filters %}
 {%block content%}
 
         <div class="content">
@@ -11,17 +12,25 @@
                                 <img src="{% static 'digital/img/background.jpg' %}" alt="..."/>
                             </div>
                             <div class="content">
-                                <div class="author">
-                                  <img class="avatar border-white" src="{% static 'digital/img/faces/face-2.jpg' %}" alt="..."/>
+                                <div class="user">
+                                    {%if user.profile_thumb%}
+                                    <div class="avatar border-white" style="display:inline-block; background-image: url({{user.profile_thumb.url}});">
+                                        <div class='avatar-black-filter' data-toggle="modal" data-target="#modalProfilePic"><span class='ti-camera'></span></div>
+                                    </div>
+                                    {%else%}
+                                    <div class="avatar border-white" style="display:inline-block; background-image: url({% static 'digital/img/faces/face-0.png' %});">
+                                        <div class='avatar-black-filter' data-toggle="modal" data-target="#modalProfilePic"><span class='ti-camera'></span></div>
+                                    </div>
+                                    {% endif %}
                                   <h4 class="title">{{user.first_name}} {{user.last_name}}<br />
                                      <a href="#"><small>@{{user.first_name}}</small></a>
                                   </h4>
                                 </div>
+                                {%if user.title %}
                                 <p class="description text-center">
-                                    "I like a template when <br>
-                                    it's Clean <br>
-                                    and it screams 'Use me bro' "
+                                    {{user.title}}
                                 </p>
+                                {%endif%}
                             </div>
                             <hr>
                             <div class="text-center">
@@ -44,61 +53,31 @@
                             </div>
                             <div class="content">
                                 <ul class="list-unstyled team-members">
-                                            <li>
-                                                <div class="row">
-                                                    <div class="col-xs-3">
-                                                        <div class="avatar">
-                                                            <img src="{% static 'digital/img/faces/face-0.png' %}" alt="Circle Image" class="img-circle img-no-padding img-responsive">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-xs-6">
-                                                        DJ Khaled
-                                                        <br />
-                                                        <span class="text-muted"><small>Offline</small></span>
-                                                    </div>
-
-                                                    <div class="col-xs-3 text-right">
-                                                        <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
-                                                    </div>
+                                    {%for member in team_members%}
+                                    <li>
+                                        <div class="row">
+                                            <div class="col-xs-3">
+                                                <div class="avatar">
+                                                    {%if member.profile_thumb%}
+                                                    <img src="{{member.profile_thumb.url}}" alt="Profile pic" class="img-circle img-no-padding img-responsive">
+                                                    {%else%}
+                                                    <img src="{% static 'digital/img/faces/face-0.png' %}" alt="Profile pic" class="img-circle img-no-padding img-responsive">
+                                                    {%endif%}
                                                 </div>
-                                            </li>
-                                            <li>
-                                                <div class="row">
-                                                    <div class="col-xs-3">
-                                                        <div class="avatar">
-                                                            <img src="{% static 'digital/img/faces/face-1.jpg' %}" alt="Circle Image" class="img-circle img-no-padding img-responsive">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-xs-6">
-                                                        SP3D
-                                                        <br />
-                                                        <span class="text-success"><small>Available</small></span>
-                                                    </div>
+                                            </div>
+                                            <div class="col-xs-6">
+                                                {{member.first_name}} {{member.last_name}}
+                                                <br />
+                                                <span class="text-muted"><small>Offline</small></span>
+                                            </div>
 
-                                                    <div class="col-xs-3 text-right">
-                                                        <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="row">
-                                                    <div class="col-xs-3">
-                                                        <div class="avatar">
-                                                            <img src="{% static 'digital/img/faces/face-3.jpg' %}" alt="Circle Image" class="img-circle img-no-padding img-responsive">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-xs-6">
-                                                        Flume
-                                                        <br />
-                                                        <span class="text-danger"><small>Busy</small></span>
-                                                    </div>
-
-                                                    <div class="col-xs-3 text-right">
-                                                        <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </ul>
+                                            <div class="col-xs-3 text-right">
+                                                <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    {%endfor%}
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -217,5 +196,6 @@ But that's the difference in our opinions.</textarea>
 {%endblock content%}
 
 {%block extrascript%}
-<script src="{% static 'digital/js/account.js' %}"></script>
+{%include 'digital/utils/modal-profile-pic.html'%}
+<script src="{% static 'digital/js/account.js' %}?dev={% random_int %}"></script>
 {%endblock extrascript%}

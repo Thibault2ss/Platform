@@ -16,7 +16,9 @@
         <form class="form-part-search" action="" method="get" enctype="multipart/form-data">
             {%csrf_token%}
             <div class="input-group" style='max-width:250px;margin:0;'>
-                <input type='text' class='form-control part-search' name="search" placeholder="Search Part" value='{{search_string}}'></input>
+                <input type='text' class='form-control part-search' name="search" placeholder="Search Part" value='{{search_string}}'>
+                    <span class="btn-reset-search ti-close" {%if not search_string%}style='display:none'{%endif%}></span>
+
                 <div class="input-group-btn">
                     <button class="btn btn-primary btn-search-part" type="submit">
                         <span class="ti-search"></span>
@@ -414,7 +416,6 @@
 <script src="{% static 'digital/js/three/libs/stats.min.js' %}"></script>
 <script src="{% static 'digital/js/three/libs/TrackballControls.js' %}"></script>
 <script src="{% static 'digital/js/slick.min.js' %}"></script>
-<script src="{% static 'digital/js/dropzone.min.js' %}"></script>
 <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;sensor=false"></script> -->
 
 <!-- include for autocomplete address -->
@@ -423,18 +424,14 @@
 <!-- end include for autocomplete address -->
 
 <script>
-
-$(document).ready(function(){
-    $('#partsCarousel').carousel({
-        interval: false
+    $(document).ready(function(){
+        $('#partsCarousel').carousel({
+            interval: false
+        });
+        $('#imageCarousel').carousel({
+            interval: false
+        });
     });
-    $('#imageCarousel').carousel({
-        interval: false
-    });
-});
-// prevent dropzones to initialize when loaded, so that we initialize them with our own options below
-Dropzone.autoDiscover = false;
-var csrftoken = '{{ csrf_token }}';
 </script>
 <script src="{% static 'digital/js/parts.js' %}?dev={% random_int %}"></script>
 {%endblock extrascript%}

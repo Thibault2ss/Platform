@@ -3,6 +3,7 @@ from allauth.socialaccount.forms import SignupForm as OriginalSocialSignupForm
 from django.contrib.auth.models import Group
 from allauth.account.adapter import get_adapter as get_account_adapter
 from django import forms
+from users.models import CustomUser
 from django.utils.translation import pgettext, ugettext, ugettext_lazy as _
 from allauth.utils import (
     build_absolute_uri,
@@ -107,3 +108,9 @@ class OrganisationForm(forms.ModelForm):
     class Meta:
         model = Organisation
         exclude = []
+
+
+class ProfilePicForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['profile_pic']
