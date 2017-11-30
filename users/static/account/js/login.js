@@ -82,7 +82,7 @@ var logoAnimation = (function() {
 
 $(document).ready(function(){
 // LOAD PARTICLES//////////////////////////////////////////////////////////////////////
-    particlesJS.load('particles-container', '/static/account/json/particles.json', function() {
+    particlesJS.load('particles-container', '/static/account/json/particles1.json', function() {
       console.log('callback - particles.js config loaded');
     });
 // END LOAD PARTICLES//////////////////////////////////////////////////////////////////////
