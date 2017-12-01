@@ -2301,7 +2301,9 @@ textarea.form-control {
 
 @media (min-width: 992px) {
   .navbar {
-    min-height: 75px; }
+      height:75px;
+      min-height: 75px;
+}
 
   .navbar-form {
     margin-top: 21px;
