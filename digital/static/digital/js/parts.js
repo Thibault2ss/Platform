@@ -1152,6 +1152,7 @@ $(document).ready(function(){
 
 
     function load_stl(filepath, data){
+        $('#stl-loading').show();
         loader.load( filepath, function ( geometry ) {
             remove_stl();
             var cog_x = -19, cog_y = -14, cog_z = -33;
@@ -1171,6 +1172,7 @@ $(document).ready(function(){
             mesh.castShadow = true;
             mesh.receiveShadow = true;
             scene.add( mesh );
+            $('#stl-loading').hide();
         });
     };
 
