@@ -103,4 +103,145 @@ $(document).ready(function(){
 
 
 // END UPLOAD PROFILE PICTURE###########################################################
+
+
+
+
+
+// UPDATE USER DATA###########################################################
+    $("#form-update-profile").submit(function(event){
+        event.preventDefault();
+        var $form = $(this);
+        var data = new FormData(this);
+        // console.log("received");
+        $.ajax({
+            url: '/digital/account/update-profile/',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            method: 'POST',
+            type: 'POST', // For jQuery < 1.9
+            beforeSend:function(XMLHttpRequest, settings){
+                // $form.find(".progressBar-inner").css("background-color","blue");
+                // $form.find(".progressBar").css("opacity",1);
+            },
+            xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){
+                    // myXhr.upload.addEventListener('progress',uploadProgress, false);
+                }
+                return myXhr;
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success){
+                    $.notify({
+                        icon: 'ti-check',
+                        message: "Profile updated successfully"
+                    },{
+                        type: 'success',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                } else {
+                    $.notify({
+                        icon: 'ti-face-sad',
+                        message: "Sorry, update failed"
+                    },{
+                        type: 'danger',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.notify({
+                    icon: 'ti-face-sad',
+                    message: "Sorry, update failed"
+                },{
+                    type: 'danger',
+                    timer: 1000,
+                    delay: 1000,
+                });
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+            },
+            complete:function(jqXHR, textStatus){
+                // setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                // setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+            },
+
+        });
+    });
+// END UPDATE USER DATA###########################################################
+
+
+
+
+// UPDATE COMPANY DATA###########################################################
+    $("#form-update-company").submit(function(event){
+        event.preventDefault();
+        var $form = $(this);
+        var data = new FormData(this);
+        // console.log("received");
+        $.ajax({
+            url: '/digital/account/update-organisation/',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            method: 'POST',
+            type: 'POST', // For jQuery < 1.9
+            beforeSend:function(XMLHttpRequest, settings){
+                // $form.find(".progressBar-inner").css("background-color","blue");
+                // $form.find(".progressBar").css("opacity",1);
+            },
+            xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){
+                    // myXhr.upload.addEventListener('progress',uploadProgress, false);
+                }
+                return myXhr;
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success){
+                    $.notify({
+                        icon: 'ti-check',
+                        message: "Organisation updated successfully"
+                    },{
+                        type: 'success',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                } else {
+                    $.notify({
+                        icon: 'ti-face-sad',
+                        message: "Sorry, update failed"
+                    },{
+                        type: 'danger',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.notify({
+                    icon: 'ti-face-sad',
+                    message: "Sorry, update failed"
+                },{
+                    type: 'danger',
+                    timer: 1000,
+                    delay: 1000,
+                });
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+            },
+            complete:function(jqXHR, textStatus){
+                // setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                // setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+            },
+
+        });
+    });
+// END UPDATE COMPANY DATA###########################################################
 });

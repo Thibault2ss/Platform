@@ -9,7 +9,7 @@
                     <div class="col-lg-4 col-md-5">
                         <div class="card card-user">
                             <div class="image">
-                                <img src="{% static 'digital/img/background.jpg' %}" alt="..."/>
+                                <img src="{% static 'digital/img/manuf.jpg' %}" alt="Profile Background"/>
                             </div>
                             <div class="content">
                                 <div class="user">
@@ -18,7 +18,7 @@
                                         <div class='avatar-black-filter' data-toggle="modal" data-target="#modalProfilePic"><span class='ti-camera'></span></div>
                                     </div>
                                     {%else%}
-                                    <div class="avatar border-white" style="display:inline-block; background-image: url({% static 'digital/img/faces/face-0.png' %});">
+                                    <div class="avatar border-white" style="display:inline-block; background-image: url({% static 'digital/img/faces/face-default.png' %});">
                                         <div class='avatar-black-filter' data-toggle="modal" data-target="#modalProfilePic"><span class='ti-camera'></span></div>
                                     </div>
                                     {% endif %}
@@ -47,6 +47,7 @@
                                 </div>
                             </div>
                         </div>
+                        {%if team_members%}
                         <div class="card">
                             <div class="header">
                                 <h4 class="title">Team Members</h4>
@@ -61,13 +62,13 @@
                                                     {%if member.profile_thumb%}
                                                     <img src="{{member.profile_thumb.url}}" alt="Profile pic" class="img-circle img-no-padding img-responsive">
                                                     {%else%}
-                                                    <img src="{% static 'digital/img/faces/face-0.png' %}" alt="Profile pic" class="img-circle img-no-padding img-responsive">
+                                                    <img src="{% static 'digital/img/faces/face-default.png' %}" alt="Profile pic" class="img-circle img-no-padding img-responsive">
                                                     {%endif%}
                                                 </div>
                                             </div>
                                             <div class="col-xs-6">
                                                 {{member.first_name}} {{member.last_name}}
-                                                <br />
+                                                <br/>
                                                 <span class="text-muted"><small>Offline</small></span>
                                             </div>
 
@@ -80,88 +81,60 @@
                                 </ul>
                             </div>
                         </div>
+                        {%endif%}
                     </div>
                     <div class="col-lg-8 col-md-7">
+                        {%if user.is_admin%}
+                        <div class="card">
+                            <div class="header">
+                                <h4 class="title">Edit Company</h4>
+                            </div>
+                            <div class="content">
+                                <form id="form-update-company" action="" enctype="multipart/form-data">
+                                    {%csrf_token%}
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                {%comment%}{{formOrganisation.as_p}}{%endcomment%}
+                                                <label>Address</label>
+                                                <input type="text" name="address" class="form-control border-input address" placeholder="Company Address" value={{user.organisation.address.raw}}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-info btn-fill btn-wd">Update</button>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </form>
+                            </div>
+                        </div>
+                        {%endif%}
                         <div class="card">
                             <div class="header">
                                 <h4 class="title">Edit Profile</h4>
                             </div>
                             <div class="content">
-                                <form>
-                                    <div class="row">
-                                        <div class="col-md-5">
-                                            <div class="form-group">
-                                                <label>Company</label>
-                                                <input type="text" class="form-control border-input" disabled placeholder="Company" value="Creative Code Inc.">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label>Username</label>
-                                                <input type="text" class="form-control border-input" placeholder="Username" value="michael23">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="exampleInputEmail1">Email address</label>
-                                                <input type="email" class="form-control border-input" placeholder="Email">
-                                            </div>
-                                        </div>
-                                    </div>
-
+                                <form id="form-update-profile" action="" enctype="multipart/form-data">
+                                    {%csrf_token%}
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>First Name</label>
-                                                <input type="text" class="form-control border-input" placeholder="Company" value="Chet">
+                                                <input type="text" name="first_name" class="form-control border-input" placeholder="First Name" value={{user.first_name}}>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Last Name</label>
-                                                <input type="text" class="form-control border-input" placeholder="Last Name" value="Faker">
+                                                <input type="text" name="last_name" class="form-control border-input" placeholder="Last Name" value="{{user.last_name}}">
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>Address</label>
-                                                <input type="text" class="form-control border-input" placeholder="Home Address" value="Melbourne, Australia">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>City</label>
-                                                <input type="text" class="form-control border-input" placeholder="City" value="Melbourne">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>Country</label>
-                                                <input type="text" class="form-control border-input" placeholder="Country" value="Australia">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>Postal Code</label>
-                                                <input type="number" class="form-control border-input" placeholder="ZIP Code">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>About Me</label>
-                                                <textarea rows="5" class="form-control border-input" placeholder="Here can be your description" value="Mike">Oh so, your weak rhyme
-You doubt I'll bother, reading into it
-I'll probably won't, left to my own devices
-But that's the difference in our opinions.</textarea>
+                                                <label>Title</label>
+                                                <input type="text" name="title" class="form-control border-input" placeholder="Title" value='{%if user.title%}{{user.title}}{%endif%}'>
                                             </div>
                                         </div>
                                     </div>
@@ -197,5 +170,9 @@ But that's the difference in our opinions.</textarea>
 
 {%block extrascript%}
 {%include 'digital/utils/modal-profile-pic.html'%}
+<!-- include for autocomplete address -->
+<script type="text/javascript" src="{%static 'js/jquery.geocomplete.min.js'%}"></script> -->
+<script type="text/javascript" src="{%static 'address/js/address.js'%}"></script>
+
 <script src="{% static 'digital/js/account.js' %}?dev={% random_int %}"></script>
 {%endblock extrascript%}

@@ -107,10 +107,15 @@ class OrganisationForm(forms.ModelForm):
     address = AddressField()
     class Meta:
         model = Organisation
-        exclude = []
+        fields = ['address']
 
 
 class ProfilePicForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['profile_pic']
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'title']

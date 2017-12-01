@@ -8,8 +8,7 @@ import numpy
 from stl import mesh
 from django.core import serializers
 from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm, PartImageForm
-from users.forms import ProfilePicForm
-from users.forms import OrganisationForm
+from users.forms import ProfilePicForm, OrganisationForm, ProfileForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
 from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix
@@ -38,6 +37,7 @@ def account(request):
     context = {
         'page':"account",
         'team_members':team_members,
+        'formOrganisation':OrganisationForm(),
     }
     return render(request, 'digital/account.html', context)
 @login_required
@@ -481,6 +481,48 @@ def update_final_card(request):
         return JsonResponse(data)
 
     return HttpResponseRedirect("/digital/parts/")
+
+
+
+@login_required
+def update_profile(request):
+    if request.method == 'POST':
+        success = True
+        errors = []
+        print request.POST
+        form = ProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+        else:
+            success = False
+            errors.append("Form not valid")
+        data={
+            "success":success,
+            "errors":errors,
+            }
+        return JsonResponse(data)
+    return HttpResponseRedirect("/digital/account/")
+
+
+@login_required
+def update_organisation(request):
+    if request.method == 'POST':
+        success = True
+        errors = []
+        print request.POST
+        form = OrganisationForm(request.POST, instance=request.user.organisation)
+        if form.is_valid():
+            form.save()
+        else:
+            success = False
+            errors.append("Form not valid")
+        data={
+            "success":success,
+            "errors":errors,
+            }
+        return JsonResponse(data)
+    return HttpResponseRedirect("/digital/account/")
+
 
 
 @login_required

@@ -50,6 +50,7 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
+    {%include 'digital/utils/ga.html'%}
 </head>
 <body>
 
@@ -86,12 +87,12 @@
                         <p>Dashboard</p>
                     </a>
                 </li> -->
-                <!-- <li class="{% if page == 'account' %}active{% endif %}">
+                <li class="{% if page == 'account' %}active{% endif %}">
                     <a href="/digital/account/">
                         <i class="ti-user"></i>
                         <p>Account</p>
                     </a>
-                </li> -->
+                </li>
                 <!-- <li class="{% if page == 'printers' %}active{% endif %}">
                     <a href="/digital/printers/" style="display:flex;align-items:center;">
                         <img style="height:35px;margin: 0 15px 0 3px;" src="{% static 'digital/img/extruder.png' %}"></i>
@@ -205,7 +206,7 @@
                                     {%if user.profile_thumb%}
                                     <div class='user-pic' style="background-image: url({{user.profile_thumb.url}});"></div>
                                     {%else%}
-                                    <div class='user-pic' style="background-image: url({% static 'digital/img/faces/face-0.png' %});"></div>
+                                    <div class='user-pic' style="background-image: url({% static 'digital/img/faces/face-default.png' %});"></div>
                                     {% endif %}
                                     <b class="caret" style="margin-left:15px;"></b>
                                 </div>
