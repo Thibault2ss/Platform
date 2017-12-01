@@ -120,9 +120,12 @@
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-xs-12" id="canvas-container">
-                                    <div id="stl-canvas" class="stl-canvas" style="display:flex;align-items:center;margin-bottom:15px;">
+                                    <div id="stl-canvas" class="stl-canvas" style="display:flex;align-items:center;margin-bottom:15px;position:relative;">
                                         <button id="stl-demo" class="btn btn-warning btn-fill btn-wd" style="margin-left:23%;font-weight:900;">LOAD STL</button>
                                         <img id="stl-loading" style='display:none;width:100%;' src="{%static 'digital/gif/loading.gif'%}">
+                                        <div class="progressBar" style="position:absolute;bottom:20px;">
+                                            <div class="progressBar-inner"></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-xs-12">
@@ -416,7 +419,7 @@
 <script src="{% static 'digital/js/three/Detector.js' %}"></script>
 <script src="{% static 'digital/js/three/libs/stats.min.js' %}"></script>
 <script src="{% static 'digital/js/three/libs/TrackballControls.js' %}"></script>
-<script src="{% static 'digital/js/slick.min.js' %}"></script>
+<script src="{% static 'digital/js/slick.min.js' %}?dev={% random_int %}"></script>
 <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;sensor=false"></script> -->
 
 <!-- include for autocomplete address -->

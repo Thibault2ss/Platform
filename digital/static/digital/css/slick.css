@@ -119,5 +119,13 @@
 }
 
 #imageCarousel img{
+    /*height:100px;*/
+    /*padding:0px 50px;*/
+}
+#imageCarousel .img-container{
     height:300px;
+    width:500px;
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+    background-position: center center;
 }

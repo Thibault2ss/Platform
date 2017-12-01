@@ -15,6 +15,8 @@ class RestrictionMiddleware(object):
     def __call__(self, request):
         if request.user.is_authenticated():
             usertype = request.user.usertype.name
+            if request.path.startswith('/account/login'):
+                return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL_LIST[usertype])
             restriction_list = settings.RESTRICTION_LIST[usertype]
             for url in restriction_list:
                 if request.path.startswith(url):

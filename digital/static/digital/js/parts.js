@@ -69,7 +69,20 @@ $(document).ready(function(){
 
 
 
+// ADD IMAGE TO CAROUSEL METHOD////////////////////////////////////////
+    function addToCarousel(html, callback){
+        $('#imageCarousel').slick('slickAdd',html);
+        callback();
+        setTimeout(function(){$('#imageCarousel').slick('setPosition')},100);
+    };
+// END ADD IMAGE TO CAROUSEL METHOD////////////////////////////////////////
+
+
+
+
+
 // INIT PART DATA ON CLICK ON ONE PART#####################################
+
     $(".part-row").click(function(){
         // load part data
         var part = $(this).data('part');
@@ -81,13 +94,11 @@ $(document).ready(function(){
         $('#imageCarousel').slick('removeSlide', null, null, true);
         if (part_images.length > 0){
             for (var i = 0; i < part_images.length; i++){
-                $('#imageCarousel').slick('slickAdd','<img src="' + part_images[i] + '">');
+                addToCarousel('<div class="img-container" style="background-image:url(' + part_images[i] + ')"></div>', function(){$('#imageCarousel').slick('slickGoTo', 0, true)});
             };
         }else{
-            $('#imageCarousel').slick('slickAdd','<img src="/static/digital/img/default_pic.jpg">')
+            addToCarousel('<div class="img-container" style="background-image:url(/static/digital/img/default_pic.jpg)"></div>', function(){$('#imageCarousel').slick('slickGoTo', 0, true)})
         };
-        setTimeout(function(){$('#imageCarousel').slick('setPosition');},250);
-
         // remove old stl from canvas
         remove_stl();
         $("#stl-demo").css("display", "block");
@@ -282,7 +293,7 @@ $(document).ready(function(){
         var config = {
             url: "/digital/parts/upload-part-bulk-file/",
             paramName: "file", // The name that will be used to transfer the file
-            maxFilesize: 5, // MB
+            maxFilesize: 20, // MB
             createImageThumbnails: false,
             clickable: true,
             // acceptedFiles:".stl,.sldprt,.step,.ico",
@@ -413,7 +424,7 @@ $(document).ready(function(){
     $("#image_form").dropzone({
         url: "/digital/parts/upload-part-image/",
         paramName: "image", // The name that will be used to transfer the file
-        maxFilesize: 5, // MB
+        maxFilesize: 7, // MB
         createImageThumbnails: false,
         clickable: true,
         acceptedFiles:".png,.gif,.jpg",
@@ -448,10 +459,9 @@ $(document).ready(function(){
                     $form.find(".progressBar-inner").css("background-color","red");
                 };
                 for (var i = 0; i < response.images_success.length; i++){
-                    $('#imageCarousel').slick('slickAdd','<img src="' + response.images_success[i].url + '">');
+                    addToCarousel('<img src="' + response.images_success[i].url + '">', function(){$('#imageCarousel').slick('slickGoTo', 0, false)})
                     $(".part-row[data-part-id='" + response.id_part + "']").data("part-images").push(response.images_success[i].url);
                 };
-                setTimeout(function(){$('#imageCarousel').slick('setPosition');},250);
             });
         },
         error:function(file, response){
@@ -980,14 +990,13 @@ $(document).ready(function(){
 		stl_container = document.getElementById('stl-canvas')
         // console.log("CONTAINER IS : " + stl_container)
 		// document.body.appendChild( stl_container );
-		camera = new THREE.PerspectiveCamera( 35, width / height, 1, 1500 );
-		camera.position.set( 18, 25, 68 );
+		camera = new THREE.PerspectiveCamera( 35, width / height, 1, 5000 );
         // camera.position.set( 217, -229, 133 );
-        camera.rotation.set(-0.35,0.24,0.01);
         // camera.rotation.set(90 * Math.PI / 180,90 * Math.PI / 180,90 * Math.PI / 180);
         // camera.rotation.y = 90 * Math.PI / 180;
         // camera.rotation.z = 90 * Math.PI / 180;
         // camera.position.set( 3, 0.15, 3 );
+
 		cameraTarget = new THREE.Vector3( 0, 0, -1 );
         // cameraTarget = new THREE.Vector3( 0, -0.25, 0 );
 		scene = new THREE.Scene();
@@ -1033,6 +1042,13 @@ $(document).ready(function(){
 
 		// ASCII file
 		loader = new THREE.STLLoader();
+        // loader.addEventListener( 'load', function ( event ) {
+        //     console.log(event.content);
+        // });
+        // loader.addEventListener( 'progress', function ( event ) {
+        //     console.log("total" + event.total);
+        //     console.log("progress" + event.loaded);
+        // });
 		// loader.load( filepath, function ( geometry ) {
 		// 	var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
 		// 	var mesh = new THREE.Mesh( geometry, material );
@@ -1152,27 +1168,48 @@ $(document).ready(function(){
 
 
     function load_stl(filepath, data){
+        var $stl_canvas = $('#stl-canvas');
+        var $progressBar = $stl_canvas.find(".progressBar");
+        var $progressBarInner = $stl_canvas.find(".progressBar-inner");
         $('#stl-loading').show();
-        loader.load( filepath, function ( geometry ) {
-            remove_stl();
-            var cog_x = -19, cog_y = -14, cog_z = -33;
-            if (data){
-                cog_x = - data.cog[0];
-                cog_y = - data.cog[1];
-                cog_z = - data.cog[2];
-            };
-            console.log(cog_x);
-            console.log(cog_y);
-            console.log(cog_z);
-            var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
-            mesh = new THREE.Mesh( geometry, material );
-            mesh.position.set( cog_x, cog_y, cog_z );
-            mesh.rotation.set( 0, 0, 0 );
-            mesh.scale.set( 1, 1, 1 );
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            scene.add( mesh );
-            $('#stl-loading').hide();
+        $progressBarInner.css("width","0%");
+        $progressBar.css("opacity",1);
+        loader.load(
+            filepath,
+            function ( geometry ) {
+                remove_stl();
+                geometry.computeBoundingSphere();
+                var centrer_x = -19, centrer_y = -14, centrer_z = -33;
+                // if (data){
+                //     centrer_x = - data.cog[0];
+                //     centrer_y = - data.cog[1];
+                //     centrer_z = - data.cog[2];
+                // };
+                if (geometry.boundingSphere != null){
+                    centrer_x = - geometry.boundingSphere.center.x;
+                    centrer_y = - geometry.boundingSphere.center.y;
+                    centrer_z = - geometry.boundingSphere.center.z;
+                    var dist = geometry.boundingSphere.radius / ( Math.tan( camera.fov * Math.PI / 360 ) );
+                    camera.position.set( 0, 0, geometry.boundingSphere.radius + dist );
+                };
+                var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
+                mesh = new THREE.Mesh( geometry, material );
+
+                mesh.scale.set( 1, 1 , 1 );
+                mesh.position.set( centrer_x, centrer_y, centrer_z );
+                mesh.rotation.set( 0, 0, 0 );
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                scene.add( mesh );
+
+                $('#stl-loading').hide();
+                $progressBar.css('opacity',0);
+        },
+        function(event){
+            // console.log(event);
+            var progress = (event.loaded*100)/event.total;
+            console.log('progress: ' + progress)
+            $progressBarInner.css("width", progress + "%");
         });
     };
 

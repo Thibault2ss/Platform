@@ -28,6 +28,7 @@ urlpatterns = [
     # url(r'^logout/$', auth_views.logout,{'next_page': '/jb'}, name='logout'),
     url(r'^jb/', include('jb.urls')),
     url(r'^account/login/$', JointLoginSignupView.as_view(), name='login_page'),
+    url(r'^account/social/login/cancelled/$', RedirectView.as_view(pattern_name='login_page', permanent=False)),
     url(r'^account/', include('allauth.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^hub/', include('hub.urls')),
