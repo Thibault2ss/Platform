@@ -5,11 +5,24 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Characteristics, PartType, ApplianceFamily, Appliance, Part, PartImage, PartBulkFile, Grade, Environment, ClientPartStatus
+from jb.models import FinalCard
+
+class FinalCard_Inline(admin.TabularInline):
+    model = FinalCard
+    fields = ['techno_material', 'lead_time','unit_price', 'currency']
+    list_display = ('id','techno_material', 'lead_time','unit_price', 'currency')
+    
+class Characteristics_Inline(admin.TabularInline):
+    model = Characteristics
+    fields = ['is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','flame_retardancy', 'is_food_grade','min_temp', 'max_temp', 'temp_unit', 'color']
+    list_display = ('id','is_visual', 'is_transparent','is_rubbery','is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy')
+
 # Register your models here.
 @admin.register(PartType)
 class PartType_Admin(admin.ModelAdmin):
-    fields = ['name', 'industry']
-    list_display = ('id','name','industry')
+    fields = ['name', 'appliance_family']
+    list_display = ('id','name','appliance_family')
+    inlines=[Characteristics_Inline]
 
 @admin.register(ApplianceFamily)
 class ApplianceFamily_Admin(admin.ModelAdmin):
@@ -36,14 +49,14 @@ class Environment_Admin(admin.ModelAdmin):
     fields = ['name','short_description']
     list_display = ('id', 'name','short_description')
 
-@admin.register(Characteristics)
-class Characteristics_Admin(admin.ModelAdmin):
-    # fields = ['color', 'is_visual', 'is_transparent','is_elastic', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy','min_temp', 'max_temp', 'temp_unit', 'max_X', 'max_Y','max_Z','techno_material']
-    list_display = ('id','is_visual', 'is_transparent','is_elastic','is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy')
-    fieldsets = (
-        (None, {'fields': ('is_visual', 'is_transparent','is_elastic', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','flame_retardancy', 'is_food_grade','min_temp', 'max_temp', 'temp_unit', 'color')}),
-        ('FILL ONLY IF CHARACTERISTIC CARD IS LINKED TO A COUPLE TECHNO-MATERIAL', {'fields': ('techno_material','max_X', 'max_Y','max_Z')}),
-    )
+# @admin.register(Characteristics)
+# class Characteristics_Admin(admin.ModelAdmin):
+#     # fields = ['color', 'is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy','min_temp', 'max_temp', 'temp_unit','techno_material']
+#     list_display = ('id','is_visual', 'is_transparent','is_rubbery','is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy')
+#     fieldsets = (
+#         (None, {'fields': ('is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','flame_retardancy', 'is_food_grade','min_temp', 'max_temp', 'temp_unit', 'color')}),
+#         # ('FILL ONLY IF CHARACTERISTIC CARD IS LINKED TO A COUPLE TECHNO-MATERIAL', {'fields': ('techno_material',)}),
+#     )
 
 class PartImage_Inline(admin.TabularInline):
     model = PartImage
@@ -55,10 +68,6 @@ class PartBulkFile_Inline(admin.TabularInline):
     fields = ['created_by','part','file']
     list_display = ('id','file', 'created_by')
 
-# class Characteristics_Inline(admin.TabularInline):
-#     model = Characteristics
-#     fields = ['color', 'is_visual', 'is_transparent','is_elastic', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy','min_temp', 'max_temp', 'temp_unit', 'max_X', 'max_Y','max_Z','techno_material']
-#     list_display = ('id','is_visual', 'is_transparent','is_elastic','is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy')
 
 @admin.register(Part)
 class Part_Admin(admin.ModelAdmin):
@@ -67,10 +76,9 @@ class Part_Admin(admin.ModelAdmin):
     fieldsets = (
         (None, {'fields': ('created_by','organisation','appliance', 'type', 'reference', 'name')}),
         ('Dimensions & Weight', {'fields': ('material','length', 'width', 'height','dimension_unit', 'weight','weight_unit')}),
-        ('Other Characteristics', {'fields': ('characteristics',)}),
         ('Final Card', {'fields': ('final_card',)}),
     )
-    inlines=[PartImage_Inline, PartBulkFile_Inline]
+    inlines=[PartImage_Inline, PartBulkFile_Inline, Characteristics_Inline, FinalCard_Inline]
 
 
 # @admin.register(PartImage)

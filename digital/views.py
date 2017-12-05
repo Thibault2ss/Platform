@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 import os
 from os.path import join
 import numpy
@@ -11,15 +11,16 @@ from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm, PartI
 from users.forms import ProfilePicForm, OrganisationForm, ProfileForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
-from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix
+from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
 
-from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent
+from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent, Characteristics
 from users.models import CustomUser
 from jb.models import FinalCard
 dir_path = os.path.dirname(os.path.realpath(__file__))
+
 # Create your views here.
 @login_required
 def dashboard(request):
@@ -69,8 +70,8 @@ def parts(request):
         'parts_sumup':parts_sumup,
         'formPartBulkFile': PartBulkFileForm(),
         'PartImageForm': PartImageForm(),
-        'formPart': PartForm(created_by=request.user, initial={'dimension_unit': 'mm', "weight_unit":"gr"}),
-        'formCharacteristics': CharacteristicsForm(),
+        'formPart': PartForm(created_by=request.user),
+        'formCharacteristics': CharacteristicsForm(initial={'min_temp':0,'max_temp':70}),
         'formFinalCard':FinalCardForm(),
         'clientPartStatuses':ClientPartStatus.objects.all().order_by('id'),
         'search_string':request.GET.get('search', '')
@@ -545,6 +546,38 @@ def upload_solution_matrix(request):
             "success":success,
             "errors":errors,
             }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/parts/")
+
+@login_required
+def get_best_solution(request):
+    if request.method == 'POST':
+        # initialize default values
+        success = True
+        errors = []
+        techno_material_list=[]
+        matching_criterias={}
+        print request.POST
+        if request.POST.get('id_part'):
+            part = get_object_or_404(Part, id = request.POST.get('id_part'))
+            techno_materials, error_list, matching_criterias = findTechnoMaterial(part)
+            errors += error_list
+            if techno_materials:
+                techno_material_list=techno_materials
+            else:
+                success = False
+                errors.append("NO MATCH FOUND")
+        else:
+            success=False
+            errors.append("NO ID_PART IN REQUEST")
+
+        data={
+            "success":success,
+            "errors":errors,
+            'techno_material_list':serializers.serialize("json", techno_material_list,  use_natural_foreign_keys=True),
+            'matching_criterias':matching_criterias,
+        }
         return JsonResponse(data)
 
     return HttpResponseRedirect("/digital/parts/")

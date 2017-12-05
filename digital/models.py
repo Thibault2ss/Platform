@@ -3,42 +3,44 @@ from __future__ import unicode_literals
 
 from django.db import models
 from sp3d.storage_backends import PrivateMediaStorage
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_save
 from django.dispatch.dispatcher import receiver
 from django.conf import settings
 from django.core import serializers
 # Create your models here.
 
 class Characteristics(models.Model):
-    COLOR_CHOICES = (("NA", "n/a"),("GREEN", "Green"),("WHITE", "White"),("BLACK", "Black"))
+    COLOR_CHOICES = (("NA", "n/a"),("GREEN", "Green"),("WHITE", "White"),("BLACK", "Black"), ("GREY", "Grey"), ("SILVER", "Silver"))
     FLAME_RETARDANT_CHOICES = (("NA", "n/a"),("HB", "HB"),("V0", "V0"),("V1", "V1"),("V2", "V2"))
     TEMPERATURE_UNIT_CHOICES = (("°C", "°C"),("°F", "°F"))
+    part = models.OneToOneField('digital.Part', null=True, blank=True, on_delete=models.CASCADE, related_name='part_characteristics')
+    part_type = models.OneToOneField('PartType', on_delete=models.CASCADE, null=True, blank=True, related_name = 'part_type_characteristics')
+    technology = models.OneToOneField('jb.Technology', on_delete=models.CASCADE, null=True, blank=True, related_name = 'technology_characteristics')
+    material = models.OneToOneField('jb.Material', on_delete=models.CASCADE, null=True, blank=True, related_name = 'material_characteristics')
+    techno_material = models.OneToOneField('jb.CoupleTechnoMaterial', on_delete=models.CASCADE, null=True, blank=True, related_name = 'techno_material_characteristics')
+
     color = models.CharField(max_length=20, choices=COLOR_CHOICES, default="NA")
     is_visual = models.BooleanField("Visual part", default=False, blank=True)
     is_transparent = models.BooleanField("Transparent", default=False, blank=True)
-    is_elastic = models.BooleanField("Elastic", default=False, blank=True)
+    is_rubbery = models.BooleanField("Rubbery Like", default=False, blank=True)
     is_water_resistant = models.BooleanField("Water Resistant", default=False, blank=True)
     is_chemical_resistant = models.BooleanField("Chemical Resistant", default=False, blank=True)
     is_flame_retardant = models.BooleanField("Flame Retardant", default=False, blank=True)
     is_food_grade = models.BooleanField("Food Grade", default=False, blank=True)
     flame_retardancy =  models.CharField(max_length=10, choices=FLAME_RETARDANT_CHOICES, default="NA")
-    min_temp =  models.IntegerField(default=0)
-    max_temp =  models.IntegerField(default=60)
+    min_temp =  models.IntegerField("Minimum Operating Temperature", null=True, blank=True)
+    max_temp =  models.IntegerField("Maximum Operating Temperature", null=True, blank=True)
     temp_unit = models.CharField(max_length=5, choices=TEMPERATURE_UNIT_CHOICES, default="°C")
-    techno_material = models.ForeignKey('jb.CoupleTechnoMaterial', on_delete=models.CASCADE, null=True, blank=True, verbose_name = "Couple Techno-Material (Only if this card is not attached to a part already)")
-    max_X = models.IntegerField("Maximum X (for Couple Techno-Mat only)", null=True, blank=True)
-    max_Y = models.IntegerField("Maximum Y (for Couple Techno-Mat only)", null=True, blank=True)
-    max_Z = models.IntegerField("Maximum Z (for Couple Techno-Mat only)", null=True, blank=True)
+
     def __str__(self):
         return "Characteristics card %s" % (self.id,)
 
     def natural_key(self):
         return {
-            'id':self.id,
             'color':self.color,
             'is_visual':self.is_visual,
             'is_transparent':self.is_transparent,
-            'is_elastic':self.is_elastic,
+            'is_rubbery':self.is_rubbery,
             'is_water_resistant':self.is_water_resistant,
             'is_chemical_resistant':self.is_chemical_resistant,
             'is_flame_retardant':self.is_flame_retardant,
@@ -57,21 +59,41 @@ class Characteristics(models.Model):
             error = 'Wrong Retardancy Level: %s. Instead, assigned HB'%string
             return error, "HB"
 
+# save opposite one to one key
+@receiver(post_save, sender=Characteristics)
+def save_reverse_onetoones(sender, created, instance, **kwargs):
+    if instance.part:
+        instance.part.characteristics = instance
+        instance.part.save()
+    elif instance.material:
+        instance.material.characteristics = instance
+        instance.material.save()
+    elif instance.part_type:
+        instance.part_type.characteristics = instance
+        instance.part_type.save()
+    elif instance.technology:
+        instance.technology.characteristics = instance
+        instance.technology.save()
+    elif instance.techno_material:
+        instance.techno_material.characteristics = instance
+        instance.techno_material.save()
+
 class PartType(models.Model):
     name = models.CharField(max_length=100, default = '')
-    industry = models.ForeignKey('users.Industry', on_delete=models.CASCADE, default=1)
+    appliance_family = models.ForeignKey('ApplianceFamily', on_delete=models.SET_NULL, verbose_name="Appliance Family", null=True)
+    characteristics = models.OneToOneField('Characteristics', on_delete=models.SET_NULL, null=True, blank=True, related_name = 'part_type_characteristics')
 
     def __str__(self):
         return "%s" % (self.name,)
 
     def natural_key(self):
-        return {'id':self.id,'name':self.name, 'industry':self.industry.name}
+        return {'id':self.id,'name':self.name}
     class Meta:
-        unique_together = (('name', 'industry'),)
+        unique_together = (('name', 'appliance_family'),)
 
 class ApplianceFamily(models.Model):
     name = models.CharField(max_length=100, default = '', unique = True)
-    industry = models.ForeignKey('users.Industry', on_delete=models.CASCADE, default=1)
+    industry = models.ForeignKey('users.Industry', on_delete=models.SET_DEFAULT, default=1)
 
     def __str__(self):
         return "%s" % (self.name,)
@@ -83,8 +105,8 @@ class ApplianceFamily(models.Model):
 class Appliance(models.Model):
     name = models.CharField(max_length=200, default = '')
     reference = models.CharField(max_length=200, null = True, unique = True)
-    organisation = models.ForeignKey('users.Organisation', on_delete=models.CASCADE, null=True)
-    family = models.ForeignKey('ApplianceFamily', on_delete=models.CASCADE, null=True)
+    organisation = models.ForeignKey('users.Organisation', on_delete=models.SET_NULL, null=True)
+    family = models.ForeignKey('ApplianceFamily', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return "%s" % (self.name,)
@@ -124,10 +146,10 @@ class PartEvent(models.Model):
         ("STATUS_CHANGE", "status change"),
     )
     date = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True)
     part = models.ForeignKey('Part', on_delete=models.CASCADE, null=True)
     type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES, default="INFO")
-    status = models.ForeignKey('ClientPartStatus', on_delete=models.CASCADE, null=True)
+    status = models.ForeignKey('ClientPartStatus', on_delete=models.SET_NULL, null=True)
     short_description = models.CharField(max_length=100, default = '')
     long_description = models.TextField(default = '')
 
@@ -153,22 +175,22 @@ class Environment(models.Model):
 
 class Part(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
-    type = models.ForeignKey('PartType', on_delete=models.CASCADE, null=True, blank=True)
-    characteristics = models.OneToOneField('Characteristics', on_delete=models.CASCADE, null=True)
-    organisation = models.ForeignKey('users.Organisation', on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True)
+    type = models.ForeignKey('PartType', on_delete=models.SET_NULL, null=True, blank=True)
+    characteristics = models.OneToOneField('Characteristics', null=True, blank=True, on_delete = models.SET_NULL, related_name='part_characteristics')
+    organisation = models.ForeignKey('users.Organisation', on_delete=models.SET_NULL, null=True)
     appliance = models.ManyToManyField(Appliance, blank=True)
     reference = models.CharField(max_length=200, null = True, unique = True)
     name = models.CharField(max_length=200, default = '')
-    material = models.ForeignKey('jb.Material', on_delete=models.CASCADE, null=True, blank=True)
+    material = models.ForeignKey('jb.Material', on_delete=models.SET_NULL, null=True, blank=True)
     length = models.FloatField(max_length=10, null=True, blank=True)
     width = models.FloatField(max_length=10, null=True, blank=True)
     height = models.FloatField(max_length=10, null=True, blank=True)
     weight = models.FloatField(max_length=10, null=True, blank=True)
     dimension_unit = models.CharField(max_length=5, default="mm", choices=[('mm','mm'), ('inch','inch')])
-    weight_unit = models.CharField(max_length=5, null=True, choices=[('gr','gr')], blank=True)
-    status = models.ForeignKey('ClientPartStatus', on_delete=models.CASCADE, default=1)
-    final_card = models.OneToOneField('jb.FinalCard', on_delete=models.CASCADE, null=True, blank=True)
+    weight_unit = models.CharField(max_length=5, default='gr', choices=[('gr','gr')])
+    status = models.ForeignKey('ClientPartStatus', on_delete=models.SET_DEFAULT, default=1)
+    final_card = models.OneToOneField('jb.FinalCard', on_delete=models.SET_NULL, null=True, blank=True, related_name = 'material_final_card')
     notify_status_to_client = models.BooleanField("Notify Part Status to Client", default=False, blank=True)
 
     def __str__(self):
@@ -181,7 +203,7 @@ def get_image_path(instance, filename):
 
 class PartImage(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True)
     part = models.ForeignKey('Part', on_delete=models.CASCADE, null=True)
     image = models.ImageField(storage = PrivateMediaStorage(bucket='sp3d-clients'), upload_to = get_image_path, blank=True)
     thumbnail = models.ImageField(storage = PrivateMediaStorage(bucket='sp3d-clients'), upload_to = get_image_path, blank=True, null=True)
@@ -286,7 +308,7 @@ class PartBulkFile(models.Model):
         ("STL", "STL file"),
     )
     date_created = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True)
     part = models.ForeignKey('Part', on_delete=models.CASCADE, null=True)
     type = models.CharField(max_length=20, choices=FILE_TYPE_CHOICES, default="BULK")
     file = models.FileField(storage = PrivateMediaStorage(bucket='sp3d-clients'), upload_to = get_bulk_path, blank=True)

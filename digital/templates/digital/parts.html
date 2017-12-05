@@ -237,8 +237,8 @@
                                                             <label for="id_is_food_grade_1">Food Grade</label>
                                                         </div>
                                                         <div class="form-group">
-                                                            {{formCharacteristics.is_elastic|attr:"id:id_is_elastic_1"|add_class:"styled-checkbox"|attr:"disabled"}}
-                                                            <label for="id_is_elastic_1">Elastic</label>
+                                                            {{formCharacteristics.is_rubbery|attr:"id:id_is_rubbery_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_rubbery_1">Rubbery Like</label>
                                                         </div>
                                                         <div class="form-group">
                                                             <span class="text-muted" style="font-size:70%;display:block;">Operating Temperature Range</span>
@@ -315,6 +315,7 @@
                                     {% else %}
                                         <button id="button-action-1" class="btn btn-default btn-fill btn-wd disabled" data-status-id="" style="font-weight:900;"></button>
                                     {% endif %}
+                                        <button id="button-get-best-solution" class="btn btn-success btn-fill btn-wd " style="font-weight:900;">Get Solution</button>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="card">

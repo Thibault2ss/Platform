@@ -44,9 +44,6 @@ LOCAL_APP = "http://localhost:5000"
 
 @login_required
 def index(request, error=""):
-    print "TESTTTTT: %s"%error
-    print "USER"
-    print request.user.usertype
     latest_part_list = Part.objects.order_by('-creation_date')
     p=[]
     for part in latest_part_list:
@@ -79,8 +76,8 @@ def index(request, error=""):
         'nb_closed':nb_closed,
         'nb_rework':nb_rework,
     }
-    print "COOKIES"
-    print request.COOKIES
+    # print "COOKIES"
+    # print request.COOKIES
     # print request.session.keys()
     # for key in request.session.keys():
     #     print "%s: %s"%(key, request.session.get(key))

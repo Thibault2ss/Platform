@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^parts/send-recap-mail/$', views.send_recap_mail, name=app_name+'send_recap_mail'),
     url(r'^parts/update-final-card/$', views.update_final_card, name=app_name+'update_final_card'),
     url(r'^parts/update-part-card/$', views.update_part_card, name=app_name+'update_part_card'),
+    url(r'^parts/get-best-solution/$', views.get_best_solution, name=app_name+'get_best_solution'),
     url(r'^upload-solution-matrix/$', views.upload_solution_matrix, name=app_name+'upload_solution_matrix'),
     url(r'^billing/$', views.billing, name=app_name+'billing'),
     url(r'^table/$', views.table, name=app_name+'table'),

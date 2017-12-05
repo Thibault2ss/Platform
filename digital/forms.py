@@ -56,7 +56,7 @@ class PartForm(forms.ModelForm):
     type = forms.ModelChoiceField(queryset=PartType.objects.none())
     class Meta:
         model = Part
-        exclude = ['date_created', 'created_by', 'organisation', 'characteristics', 'status', 'final_card']
+        exclude = ['date_created', 'created_by', 'organisation', 'characteristics', 'status', 'final_card', 'part', 'part_type']
 
     def __init__(self, *args, **kwargs):
         created_by = None
@@ -70,7 +70,7 @@ class PartForm(forms.ModelForm):
             # parts_qs = Parts.objects.filter(organisation = created_by.organisation)
             # self.fields['model'].queryset = Model.objects.filter(model_set__in = parts_qs)
             self.fields['appliance'].queryset = Appliance.objects.filter(organisation = created_by.organisation)
-            self.fields['type'].queryset = PartType.objects.filter(industry = created_by.organisation.industry)
+            self.fields['type'].queryset = PartType.objects.filter(appliance_family__industry = created_by.organisation.industry)
 
     def save(self, characteristics = None):
         part = super(PartForm, self).save(commit=False)
@@ -85,4 +85,4 @@ class PartForm(forms.ModelForm):
 class CharacteristicsForm(forms.ModelForm):
     class Meta:
         model = Characteristics
-        exclude = ['max_X','max_Y','max_Z']
+        exclude = ['part', 'technology', 'material', 'part_type', 'techno_material']

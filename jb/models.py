@@ -8,8 +8,12 @@ from django.dispatch import receiver
 from datetime import datetime
 
 class Technology(models.Model):
+    characteristics = models.OneToOneField('digital.Characteristics', on_delete=models.SET_NULL, null=True, blank=True, related_name = 'technology_characteristics')
     name = models.CharField("Short Technology Name",max_length=100, default = '', unique=True)
-    description = models.TextField("Material Description", default = '', blank=True)
+    description = models.TextField("Technology Description", default = '', blank=True)
+    max_X = models.IntegerField("Maximum Part X (mm)", null=True)
+    max_Y = models.IntegerField("Maximum Part Y (mm)", null=True)
+    max_Z = models.IntegerField("Maximum Part Z (mm)", null=True)
 
     def __str__(self):
         return "%s" % (self.name,)
@@ -18,6 +22,7 @@ class Technology(models.Model):
         return {'id':self.id,'name':self.name}
 
 class Material(models.Model):
+    characteristics = models.OneToOneField('digital.Characteristics', on_delete=models.SET_NULL, null=True, blank=True, related_name = 'material_characteristics')
     MATERIAL_FAMILY_CHOICES = [('metal','metal'), ('plastic','plastic')]
     family= models.CharField("Material Family", max_length=20, choices = MATERIAL_FAMILY_CHOICES, null=True)
     name = models.CharField("Short Material Name",max_length=20, default = '', unique=True)
@@ -32,6 +37,7 @@ class Material(models.Model):
 
 
 class CoupleTechnoMaterial(models.Model):
+    characteristics = models.OneToOneField('digital.Characteristics', on_delete=models.SET_NULL, null=True, blank=True, related_name = 'techno_material_characteristics')
     material= models.ForeignKey(Material, on_delete=models.CASCADE)
     technology = models.ForeignKey(Technology, on_delete=models.CASCADE)
 
@@ -46,6 +52,8 @@ class CoupleTechnoMaterial(models.Model):
 
 class FinalCard(models.Model):
     CURRENCY_CHOICE = [('USD','$US'), ('SGD','$SG'), ('EUR','€'), ('BTC','Bitcoin'), ('ETH','Euthereum')]
+    part = models.OneToOneField('digital.Part', on_delete=models.CASCADE, null=True, blank=True, related_name = 'material_final_card')
+
     unit_price = models.FloatField("Unit Price",max_length=20, default = 0.0)
     currency = models.CharField("Currency", max_length=10, choices = CURRENCY_CHOICE, default="USD")
     lead_time = models.IntegerField("Lead time (days)", default=3)

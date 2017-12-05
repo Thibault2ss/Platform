@@ -150,11 +150,10 @@ $(document).ready(function(){
             $("#id_is_flame_retardant_1").prop("checked", false).prop("checked",characs.is_flame_retardant);
             $("#id_is_chemical_resistant_1").prop("checked", false).prop("checked",characs.is_chemical_resistant);
             $("#id_is_food_grade_1").prop("checked", false).prop("checked",characs.is_food_grade);
-            $("#id_elastic_1").prop("checked", false).prop("checked",characs.is_elastic);
             $("#id_is_transparent_1").prop("checked", false).prop("checked",characs.is_transparent);
             $("#id_is_visual_1").prop("checked", false).prop("checked",characs.is_visual);
             $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
-            $("#id_is_elastic_1").prop("checked", false).prop("checked",characs.is_elastic);
+            $("#id_is_rubbery_1").prop("checked", false).prop("checked",characs.is_rubbery);
             $("#id_color_1").val(characs.color);
             $("#id_flame_retardancy_1").val(characs.flame_retardancy);
         }else{
@@ -164,11 +163,10 @@ $(document).ready(function(){
             $("#id_is_flame_retardant_1").prop("checked", false);
             $("#id_is_chemical_resistant_1").prop("checked", false);
             $("#id_is_food_grade_1").prop("checked", false);
-            $("#id_elastic_1").prop("checked", false);
             $("#id_is_transparent_1").prop("checked", false);
             $("#id_is_visual_1").prop("checked", false);
             $("#id_is_water_resistant_1").prop("checked", false);
-            $("#id_is_elastic_1").prop("checked", false);
+            $("#id_is_rubbery_1").prop("checked", false);
             $("#id_color_1").val('NA');
             $("#id_flame_retardancy_1").val('NA');
         };
@@ -738,11 +736,10 @@ $(document).ready(function(){
                     $("#id_is_flame_retardant").prop("checked", false);
                     $("#id_is_chemical_resistant").prop("checked", false);
                     $("#id_is_food_grade").prop("checked", false);
-                    $("#id_elastic").prop("checked", false);
                     $("#id_is_transparent").prop("checked", false);
                     $("#id_is_visual").prop("checked", false);
                     $("#id_is_water_resistant").prop("checked", false);
-                    $("#id_is_elastic").prop("checked", false);
+                    $("#id_is_rubbery").prop("checked", false);
                     $("#id_color").val('NA');
                     $("#id_flame_retardancy").val('NA');
                     setTimeout(function(){location.reload()},1000);
@@ -936,6 +933,51 @@ $(document).ready(function(){
 // ENDUPDATING PART CARD/////////////////////////////////////////////////////////////////////////
 
 
+
+
+// BUTTON GET SOLUTION###################################################################
+    $("#button-get-best-solution").click(function(){
+        var id_part = $("#part-detail-panel").data("part-id");
+        $.ajax({
+            url: '/digital/parts/get-best-solution/',
+            data: {id_part:id_part},
+            method: 'POST',
+            type: 'POST', // For jQuery < 1.9
+            beforeSend:function(XMLHttpRequest, settings){
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    XMLHttpRequest.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success){
+                    techno_materials = JSON.parse(data.techno_material_list);
+                    console.log('matching_criterias: ');
+                    console.log(data.matching_criterias);
+                    for (var i = 0; i < techno_materials.length; i++){
+                        console.log(techno_materials[i].fields.technology.name + " + " + techno_materials[i].fields.material.name);
+                    }
+                }else{
+                    for (var i = 0; i < data.errors.length; i++){
+                        console.log('ERROR: ' + data.errors[i]);
+                    }
+                    // console.log(data.errors);
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+            },
+            complete:function(jqXHR, textStatus){
+            },
+
+        });
+    });
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+// END BUTTON GET SOLUTION###################################################################
 
 
 
