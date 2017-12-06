@@ -11,7 +11,7 @@ class FinalCard_Inline(admin.TabularInline):
     model = FinalCard
     fields = ['techno_material', 'lead_time','unit_price', 'currency']
     list_display = ('id','techno_material', 'lead_time','unit_price', 'currency')
-    
+
 class Characteristics_Inline(admin.TabularInline):
     model = Characteristics
     fields = ['is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','flame_retardancy', 'is_food_grade','min_temp', 'max_temp', 'temp_unit', 'color']
@@ -23,6 +23,7 @@ class PartType_Admin(admin.ModelAdmin):
     fields = ['name', 'appliance_family']
     list_display = ('id','name','appliance_family')
     inlines=[Characteristics_Inline]
+    search_fields = ['name', 'appliance_family__name']
 
 @admin.register(ApplianceFamily)
 class ApplianceFamily_Admin(admin.ModelAdmin):

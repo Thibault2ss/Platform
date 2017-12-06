@@ -14,18 +14,21 @@ class Material_Admin(admin.ModelAdmin):
     fields = ['name','family', 'description']
     list_display = ('id', 'name','family')
     inlines=[Characteristics_Inline]
+    search_fields = ['name']
 
 @admin.register(Technology)
 class Technology_Admin(admin.ModelAdmin):
     fields = ['name', 'max_X', 'max_Y','max_Z','description']
     list_display = ('id', 'name')
     inlines=[Characteristics_Inline]
+    search_fields = ['name']
 
 @admin.register(CoupleTechnoMaterial)
 class CoupleTechnoMaterial_Admin(admin.ModelAdmin):
     fields = ['technology', 'material']
     list_display = ('id', 'technology', 'material')
     inlines=[Characteristics_Inline]
+    search_fields = ['technology__name','material__name']
 
 # @admin.register(FinalCard)
 # class FinalCard_Admin(admin.ModelAdmin):

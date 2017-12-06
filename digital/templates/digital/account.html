@@ -97,7 +97,7 @@
                                             <div class="form-group">
                                                 {%comment%}{{formOrganisation.as_p}}{%endcomment%}
                                                 <label>Address</label>
-                                                <input type="text" name="address" class="form-control border-input address" placeholder="Company Address" value={{user.organisation.address.raw}}>
+                                                <input type="text" name="address" class="form-control border-input address" placeholder="Company Address" value='{{user.organisation.address}}'>
                                             </div>
                                         </div>
                                     </div>
@@ -171,8 +171,8 @@
 {%block extrascript%}
 {%include 'digital/utils/modal-profile-pic.html'%}
 <!-- include for autocomplete address -->
-<script type="text/javascript" src="{%static 'js/jquery.geocomplete.min.js'%}"></script> -->
-<script type="text/javascript" src="{%static 'address/js/address.js'%}"></script>
+<script type="text/javascript" src="{%static 'js/jquery.geocomplete.min.js'%}"></script>
+{%comment%}<script type="text/javascript" src="{%static 'address/js/address.js'%}"></script>{%endcomment%}
 
 <script src="{% static 'digital/js/account.js' %}?dev={% random_int %}"></script>
 {%endblock extrascript%}

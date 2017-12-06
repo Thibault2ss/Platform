@@ -51,7 +51,7 @@
                     {% if user.email == 'thibault.de-saint-sernin@sp3d.co'%}
                     <div class="row" style="text-align:center;margin-bottom:20px;">
                         <div class="col-lg-12">
-                            <form action="/digital/upload-solution-matrix/" method="post" enctype="multipart/form-data">
+                            <form id="form_solution_matrix" action="/digital/upload-solution-matrix/" method="post" enctype="multipart/form-data">
                                 {%csrf_token%}
                                 <p><input type="file" name="file"></p>
                                 <button type="submit">Submit</button>

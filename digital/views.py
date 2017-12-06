@@ -540,11 +540,12 @@ def upload_solution_matrix(request):
             success = False
             errors.append("No files attached")
         else:
-            errors = translate_matrix(request.FILES.get('file'))
+            errors, warnings = translate_matrix(request.FILES.get('file'))
             print errors
         data={
             "success":success,
             "errors":errors,
+            "warnings":warnings,
             }
         return JsonResponse(data)
 
@@ -557,11 +558,12 @@ def get_best_solution(request):
         success = True
         errors = []
         techno_material_list=[]
-        matching_criterias={}
+        discarded_criterias={}
+        perfect_match=False
         print request.POST
         if request.POST.get('id_part'):
             part = get_object_or_404(Part, id = request.POST.get('id_part'))
-            techno_materials, error_list, matching_criterias = findTechnoMaterial(part)
+            techno_materials, perfect_match, error_list, discarded_criterias = findTechnoMaterial(part)
             errors += error_list
             if techno_materials:
                 techno_material_list=techno_materials
@@ -576,7 +578,8 @@ def get_best_solution(request):
             "success":success,
             "errors":errors,
             'techno_material_list':serializers.serialize("json", techno_material_list,  use_natural_foreign_keys=True),
-            'matching_criterias':matching_criterias,
+            'perfect_match':perfect_match,
+            'discarded_criterias':discarded_criterias,
         }
         return JsonResponse(data)
 

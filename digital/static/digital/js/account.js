@@ -23,7 +23,7 @@ $(document).ready(function(){
     };
     // end init map #########################################################3
 
-    initMap();
+    // initMap();
 // END INIT MAP
 
 
@@ -244,4 +244,16 @@ $(document).ready(function(){
         });
     });
 // END UPDATE COMPANY DATA###########################################################
+
+    // geocomplete###################################################################
+    $("input[name='address']").geocomplete({
+        map: "#map",
+        mapOptions: {
+            zoom: 10
+        },
+        markerOptions: {
+            draggable: true
+        },
+    });
+    // END geocomplete###################################################################
 });

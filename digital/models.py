@@ -84,7 +84,7 @@ class PartType(models.Model):
     characteristics = models.OneToOneField('Characteristics', on_delete=models.SET_NULL, null=True, blank=True, related_name = 'part_type_characteristics')
 
     def __str__(self):
-        return "%s" % (self.name,)
+        return "%s - %s" % (self.name,self.appliance_family.name)
 
     def natural_key(self):
         return {'id':self.id,'name':self.name}

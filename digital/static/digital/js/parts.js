@@ -952,8 +952,13 @@ $(document).ready(function(){
                 console.log(data);
                 if (data.success){
                     techno_materials = JSON.parse(data.techno_material_list);
-                    console.log('matching_criterias: ');
-                    console.log(data.matching_criterias);
+                    if (data.perfect_match){
+                        console.log('PERFECT MATCH !');
+                    }else{
+                        console.log('NOT PERFECT MATCH... Discarded Criterias: ');
+                        console.log(data.discarded_criterias);
+                    };
+
                     for (var i = 0; i < techno_materials.length; i++){
                         console.log(techno_materials[i].fields.technology.name + " + " + techno_materials[i].fields.material.name);
                     }
@@ -1010,6 +1015,37 @@ $(document).ready(function(){
 
     });
 // END PART SEARCH///////////////////////////////////////////////////////////
+
+
+
+
+// UPLOAD SOLUTION MATRIX################################################
+    $("#form_solution_matrix").submit(function(event){
+        event.preventDefault();
+        var $form = $(this);
+        var data = new FormData(this);
+        $.ajax({
+            url: '/digital/upload-solution-matrix/',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            method: 'POST',
+            type: 'POST', // For jQuery < 1.9
+            beforeSend:function(XMLHttpRequest, settings){
+            },
+            success: function(data){
+                console.log(data);
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+            },
+            complete:function(jqXHR, textStatus){
+            },
+        });
+    });
+
+// END UPLOAD SOLUTION MATRIX################################################
 
 
 
