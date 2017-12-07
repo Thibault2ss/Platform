@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
 
-from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent, Characteristics
+from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent, Characteristics, PartType
 from users.models import CustomUser
 from jb.models import FinalCard
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -580,6 +580,35 @@ def get_best_solution(request):
             'techno_material_list':serializers.serialize("json", techno_material_list,  use_natural_foreign_keys=True),
             'perfect_match':perfect_match,
             'discarded_criterias':discarded_criterias,
+        }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/parts/")
+
+
+
+@login_required
+def get_characteristics(request):
+    if request.method == 'POST':
+        # initialize default values
+        success = True
+        errors = []
+        characteristics = None
+        if request.POST.get('id_type'):
+            part_type = get_object_or_404(PartType, id = request.POST.get('id_type'))
+            if part_type.characteristics:
+                characteristics = serializers.serialize("json", [part_type.characteristics],  use_natural_foreign_keys=True)
+            else:
+                success = False
+                errors.append("NO CHARACTERISTICS ATTACHED TO PART TYPE")
+        else:
+            success=False
+            errors.append("NO ID_TYPE IN REQUEST")
+
+        data={
+            "success":success,
+            "errors":errors,
+            'characteristics':characteristics,
         }
         return JsonResponse(data)
 

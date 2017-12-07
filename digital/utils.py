@@ -463,3 +463,8 @@ def findTechnoMaterial(part):
         print kwargs
 
     return list_couple_techno_material, perfect_match, errors, discarded_criterias
+
+
+def part_type_from_name(name):
+    
+    return None

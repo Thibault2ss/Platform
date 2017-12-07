@@ -147,13 +147,13 @@ $(document).ready(function(){
             $("#id_min_temp_1").val(characs.min_temp);
             $("#id_max_temp_1").val(characs.max_temp);
             $("#id_temp_unit_1").val(characs.temp_unit);
-            $("#id_is_flame_retardant_1").prop("checked", false).prop("checked",characs.is_flame_retardant);
-            $("#id_is_chemical_resistant_1").prop("checked", false).prop("checked",characs.is_chemical_resistant);
-            $("#id_is_food_grade_1").prop("checked", false).prop("checked",characs.is_food_grade);
-            $("#id_is_transparent_1").prop("checked", false).prop("checked",characs.is_transparent);
-            $("#id_is_visual_1").prop("checked", false).prop("checked",characs.is_visual);
-            $("#id_is_water_resistant_1").prop("checked", false).prop("checked",characs.is_water_resistant);
-            $("#id_is_rubbery_1").prop("checked", false).prop("checked",characs.is_rubbery);
+            $("#id_is_flame_retardant_1").prop("checked",characs.is_flame_retardant);
+            $("#id_is_chemical_resistant_1").prop("checked",characs.is_chemical_resistant);
+            $("#id_is_food_grade_1").prop("checked",characs.is_food_grade);
+            $("#id_is_transparent_1").prop("checked",characs.is_transparent);
+            $("#id_is_visual_1").prop("checked",characs.is_visual);
+            $("#id_is_water_resistant_1").prop("checked",characs.is_water_resistant);
+            $("#id_is_rubbery_1").prop("checked",characs.is_rubbery);
             $("#id_color_1").val(characs.color);
             $("#id_flame_retardancy_1").val(characs.flame_retardancy);
         }else{
@@ -785,14 +785,58 @@ $(document).ready(function(){
             return appliance_family.test($(this).text());
         }).show();
     });
-    // show flame retarsancy level il is_flame_retardant
-    $("#new_part_form").find("#id_is_flame_retardant").click(function(){
+    // show flame retardancy level il is_flame_retardant
+    $("#new_part_form").find("#id_is_flame_retardant").change(function(){
+        console.log("event fired");
         if(this.checked) {
             $("#fg-flame-retardancy").show();
-            $("#id_flame_retardancy").val("HB");
+            if ($("#id_flame_retardancy").val() == 'NA'){
+                $("#id_flame_retardancy").val("HB");
+            };
         }else{
             $("#fg-flame-retardancy").hide();
             $("#id_flame_retardancy").val("NA");
+        };
+    });
+    // auto fill characteristics
+    $("#new_part_form").find("#id_type").change(function(){
+        var $form = $('#new_part_form');
+        var id_type=$(this).val();
+        if (id_type && parseInt(id_type)!=='NaN'){
+            $.ajax({
+                url: '/digital/parts/get-characteristics/',
+                data: {id_type:id_type},
+                method: 'POST',
+                type: 'POST', // For jQuery < 1.9
+                beforeSend:function(XMLHttpRequest, settings){
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        XMLHttpRequest.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function(data){
+                    console.log(data);
+                    if (data.success && data.characteristics){
+                        var characteristics = JSON.parse(data.characteristics)[0].fields;
+                        var list_ignore = ['material', 'part', 'part_type', 'techno_material', 'technology'];
+                        console.log(characteristics);
+                        for (key in characteristics){
+                            if (!list_ignore.includes(key)){
+                                var value = characteristics[key];
+                                if(typeof(value) === "boolean"){
+                                    $form.find("#id_" + key).prop("checked",value).trigger('change');
+                                }else{
+                                    $form.find("#id_" + key).val(value);
+                                };
+                            };
+                        };
+                    };
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+                },
+                complete:function(jqXHR, textStatus){
+                },
+            });
         };
     });
 //END ADDING NEW PART////////////////////////////////////////////////////////////////////////
