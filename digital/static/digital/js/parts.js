@@ -157,18 +157,7 @@ $(document).ready(function(){
             $("#id_color_1").val(characs.color);
             $("#id_flame_retardancy_1").val(characs.flame_retardancy);
         }else{
-            $("#id_min_temp_1").val(0);
-            $("#id_max_temp_1").val(70);
-            $("#id_temp_unit_1").val('°C');
-            $("#id_is_flame_retardant_1").prop("checked", false);
-            $("#id_is_chemical_resistant_1").prop("checked", false);
-            $("#id_is_food_grade_1").prop("checked", false);
-            $("#id_is_transparent_1").prop("checked", false);
-            $("#id_is_visual_1").prop("checked", false);
-            $("#id_is_water_resistant_1").prop("checked", false);
-            $("#id_is_rubbery_1").prop("checked", false);
-            $("#id_color_1").val('NA');
-            $("#id_flame_retardancy_1").val('NA');
+            resetCharacteristics();
         };
 
         $(".collapse").collapse('hide');
@@ -223,6 +212,26 @@ $(document).ready(function(){
         }, 100);
     });
 // END INIT ORDERS DATA ON CLICK ON ONE ORDER#####################################
+
+
+
+
+// FUNCTION TO RESET CHARACTERISTIC FORM/////////////////////////////////////////
+function resetCharacteristics(){
+    $("[id^=id_min_temp]").val(0);
+    $("[id^=id_max_temp]").val(70);
+    $("[id^=id_temp_unit]").val('°C');
+    $("[id^=id_is_flame_retardant]").prop("checked", false);
+    $("[id^=id_is_chemical_resistant]").prop("checked", false);
+    $("[id^=id_is_food_grade]").prop("checked", false);
+    $("[id^=id_is_transparent]").prop("checked", false);
+    $("[id^=id_is_visual]").prop("checked", false);
+    $("[id^=id_is_water_resistant]").prop("checked", false);
+    $("[id^=id_is_rubbery]").prop("checked", false);
+    $("[id^=id_color]").val('NA');
+    $("[id^=id_flame_retardancy]").val('NA');
+};
+// END FUNCTION TO RESET CHARACTERISTIC FORM/////////////////////////////////////////
 
 
 
@@ -729,19 +738,7 @@ $(document).ready(function(){
                         timer: 1000,
                         delay: 1000,
                     });
-
-                    $("#id_min_temp").val(0);
-                    $("#id_max_temp").val(70);
-                    $("#id_temp_unit").val('°C');
-                    $("#id_is_flame_retardant").prop("checked", false);
-                    $("#id_is_chemical_resistant").prop("checked", false);
-                    $("#id_is_food_grade").prop("checked", false);
-                    $("#id_is_transparent").prop("checked", false);
-                    $("#id_is_visual").prop("checked", false);
-                    $("#id_is_water_resistant").prop("checked", false);
-                    $("#id_is_rubbery").prop("checked", false);
-                    $("#id_color").val('NA');
-                    $("#id_flame_retardancy").val('NA');
+                    resetCharacteristics();
                     setTimeout(function(){location.reload()},1000);
                 } else {
                     $.notify({
@@ -829,6 +826,8 @@ $(document).ready(function(){
                                 };
                             };
                         };
+                    }else{
+                        resetCharacteristics();
                     };
                 },
                 error: function(XMLHttpRequest, textStatus, errorThrown) {
