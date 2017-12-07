@@ -2,8 +2,8 @@ $(document).ready(function(){
 
 // INIT MAP
 // initmap for google maps###################################################
-    function initMap(){
-        var myLatlng = new google.maps.LatLng(1.311033, 103.862287);
+    function initMap(lat,lng){
+        var myLatlng = new google.maps.LatLng(lat, lng);
         var mapOptions = {
           zoom: 13,
           center: myLatlng,
@@ -15,15 +15,16 @@ $(document).ready(function(){
 
         var marker = new google.maps.Marker({
             position: myLatlng,
-            title:"Hello World!"
+            title:"Company !"
         });
 
         // To add the marker to the map, call setMap();
         marker.setMap(map);
     };
     // end init map #########################################################3
-
-    // initMap();
+    if (!is_admin && (typeof latitude_org !== 'undefined') && (typeof longitude_org !== 'undefined') && (parseFloat(latitude_org)!=='NaN') && (parseFloat(longitude_org)!=='NaN')){
+        initMap(longitude_org, latitude_org);
+    };
 // END INIT MAP
 
 
@@ -183,6 +184,7 @@ $(document).ready(function(){
         event.preventDefault();
         var $form = $(this);
         var data = new FormData(this);
+        console.log(data);
         // console.log("received");
         $.ajax({
             url: '/digital/account/update-organisation/',
@@ -245,15 +247,5 @@ $(document).ready(function(){
     });
 // END UPDATE COMPANY DATA###########################################################
 
-    // geocomplete###################################################################
-    $("input[name='address']").geocomplete({
-        map: "#map",
-        mapOptions: {
-            zoom: 10
-        },
-        markerOptions: {
-            draggable: true
-        },
-    });
-    // END geocomplete###################################################################
+
 });

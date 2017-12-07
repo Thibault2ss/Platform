@@ -7,6 +7,7 @@ from django.db.models.signals import pre_delete, post_save
 from django.dispatch.dispatcher import receiver
 from django.conf import settings
 from django.core import serializers
+from storages.backends.s3boto3 import S3Boto3StorageFile
 # Create your models here.
 
 class Characteristics(models.Model):
@@ -103,13 +104,13 @@ class ApplianceFamily(models.Model):
 
 
 class Appliance(models.Model):
-    name = models.CharField(max_length=200, default = '')
-    reference = models.CharField(max_length=200, null = True, unique = True)
+    name = models.CharField(max_length=200, null=True)
+    reference = models.CharField(max_length=200, default='', unique = True)
     organisation = models.ForeignKey('users.Organisation', on_delete=models.SET_NULL, null=True)
     family = models.ForeignKey('ApplianceFamily', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return "%s" % (self.name,)
+        return "%s - %s" % (self.family.name, self.reference)
 
     def natural_key(self):
         return {'id':self.id, 'name':self.name, 'reference':self.reference, 'family':self.family.name}
@@ -215,6 +216,10 @@ class PartImage(models.Model):
         # If there is no image associated with this.
         # do not create thumbnail
         if not self.image:
+            return
+
+        # if the image is not a new image, but is already a S3 file, do not create thumbnail
+        if isinstance(self.image.file, S3Boto3StorageFile):
             return
 
         from PIL import Image

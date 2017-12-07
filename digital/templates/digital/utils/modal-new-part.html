@@ -29,8 +29,12 @@
                   <div id ="new-part-details" class="row text-center collapse" aria-expanded="false">
                       <div class="col-xs-12 col-sm-6">
                           <div class="form-group">
-                              <label for="id_type">Type:</label>
-                              {{formPart.type|add_class:"form-control"|attr:"placeholder:name of part"}}
+                              <label for="id_type">Appliance Type:</label>
+                              {{formPart.appliance_family|add_class:"form-control"}}
+                          </div>
+                          <div class="form-group">
+                              <label for="id_material">Material:</label>
+                              {{formPart.material|add_class:"form-control"}}
                           </div>
                           <div class="form-group">
                               <label for="id_appliance">Fits Appliance:</label>
@@ -39,8 +43,8 @@
                       </div>
                       <div class="col-xs-12 col-sm-6">
                           <div class="form-group">
-                              <label for="id_material">Material:</label>
-                              {{formPart.material|add_class:"form-control"}}
+                              <label for="id_type">Part Type:</label>
+                              {{formPart.type|add_class:"form-control"}}
                           </div>
                           <div class="form-group">
                               <label for="" style="display:block;">L x W x H:</label>

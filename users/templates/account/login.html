@@ -21,16 +21,18 @@
 <!-- initialize variables -->
 <script>var has_signin_error = false;var has_signup_error = false;</script>
 <!-- errors on signin -->
-{%if form.non_field_errors%}<script>var has_signin_error = true</script>{%endif%}
+{%if form.non_field_errors%}{{form.non_field_errors}}<script>var has_signin_error = true</script>{%endif%}
 {% for field in form %}
     {%if field.errors%}
+    {{field.errors}}
     <script>var has_signin_error = true</script>
     {%endif%}
 {%endfor%}
 <!-- errors on signup -->
-{%if signupform.non_field_errors%}<script>var has_signup_error = true</script>{%endif%}
+{%if signupform.non_field_errors%}{{signupform.non_field_errors}}<script>var has_signup_error = true</script>{%endif%}
 {% for field in signupform %}
     {%if field.errors%}
+    {{field.errors}}
     <script>var has_signup_error = true</script>
     {%endif%}
 {%endfor%}

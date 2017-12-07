@@ -58,13 +58,13 @@ class CustomUser(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-    usertype = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
+    usertype = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     first_name = models.CharField(max_length=60, default='')
     last_name = models.CharField(max_length=100, default='')
     date_joined = models.DateTimeField(auto_now_add=True)
-    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE, null=True)
+    organisation = models.ForeignKey('Organisation', on_delete=models.SET_NULL, null=True)
     permissions = models.ManyToManyField('auth.Permission', blank=True)
     profile_pic = models.ImageField(storage = PrivateMediaStorage(bucket='sp3d-users'), upload_to = get_profile_pic_path, null=True, blank=True)
     profile_thumb = models.ImageField(storage = PrivateMediaStorage(bucket='sp3d-users'), upload_to = get_profile_pic_path, blank=True, null=True)
@@ -225,9 +225,9 @@ def get_logo_path(instance, filename):
 class Organisation(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100, default = '', unique = True)
-    industry = models.ForeignKey(Industry, on_delete=models.CASCADE, default=1)
+    industry = models.ForeignKey(Industry, on_delete=models.SET_DEFAULT, default=1)
     logo = models.ImageField(storage = PrivateMediaStorage(bucket='sp3d-users'), upload_to = get_logo_path, null=True, blank=True)
-    address = AddressField(blank=True, null=True)
+    address = AddressField(blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return "%s" % (self.name,)

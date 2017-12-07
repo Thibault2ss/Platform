@@ -772,8 +772,21 @@ $(document).ready(function(){
 
         });
     });
-
-    $("#id_is_flame_retardant").click(function(){
+    // filter according to appliance family choice
+    $("#new_part_form").find("#id_appliance_family").change(function(){
+        var appliance_family;
+        if ($(this).val()){
+            appliance_family = RegExp($(this).find("option[value='" + $(this).val() + "']").text(), 'i');
+        }else{
+            appliance_family = RegExp('','i');
+        };
+        $("#new_part_form").find("#id_type option, #id_appliance option").hide();
+        $("#new_part_form").find("#id_type option, #id_appliance option").filter(function () {
+            return appliance_family.test($(this).text());
+        }).show();
+    });
+    // show flame retarsancy level il is_flame_retardant
+    $("#new_part_form").find("#id_is_flame_retardant").click(function(){
         if(this.checked) {
             $("#fg-flame-retardancy").show();
             $("#id_flame_retardancy").val("HB");

@@ -1,5 +1,5 @@
 from django import forms
-from digital.models import PartBulkFile, Part, Appliance, PartType, Characteristics, PartImage
+from digital.models import PartBulkFile, Part, Appliance, PartType, Characteristics, PartImage, ApplianceFamily
 
 class PartBulkFileForm(forms.ModelForm):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))
@@ -54,6 +54,7 @@ class PartForm(forms.ModelForm):
     # file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True, 'required':True}))
     appliance = forms.ModelMultipleChoiceField(queryset=Appliance.objects.none(), required=False)
     type = forms.ModelChoiceField(queryset=PartType.objects.none())
+    appliance_family = forms.ModelChoiceField(queryset=ApplianceFamily.objects.none(), required=False)
     class Meta:
         model = Part
         exclude = ['date_created', 'created_by', 'organisation', 'characteristics', 'status', 'final_card', 'part', 'part_type']
@@ -71,6 +72,7 @@ class PartForm(forms.ModelForm):
             # self.fields['model'].queryset = Model.objects.filter(model_set__in = parts_qs)
             self.fields['appliance'].queryset = Appliance.objects.filter(organisation = created_by.organisation)
             self.fields['type'].queryset = PartType.objects.filter(appliance_family__industry = created_by.organisation.industry)
+            self.fields['appliance_family'].queryset = ApplianceFamily.objects.filter(industry = created_by.organisation.industry)
 
     def save(self, characteristics = None):
         part = super(PartForm, self).save(commit=False)
