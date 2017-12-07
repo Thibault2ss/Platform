@@ -17,6 +17,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from digital.models import ClientPartStatus
 import csv
 from django.db.models import Q
+import re, math
+from collections import Counter
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 DEFAULT_NB_PER_PAGE = 20
@@ -466,5 +468,33 @@ def findTechnoMaterial(part):
 
 
 def part_type_from_name(name):
-    
-    return None
+    if not name:return None
+    result = {'cosine':0.0}
+    part_types = PartType.objects.all()
+    for part_type in part_types:
+        dic = part_type.__dict__
+        cosine = get_cosine(text_to_vector("%s %s"%(part_type.name, part_type.appliance_family.name)), text_to_vector(name))
+        if cosine and cosine > result['cosine']:
+            result = {'part_type':part_type, 'cosine':cosine}
+
+    if not 'part_type' in result:result = None
+    return result
+
+WORD = re.compile(r'\w+')
+
+def get_cosine(vec1, vec2):
+    intersection = set(vec1.keys()) & set(vec2.keys())
+    numerator = sum([vec1[x] * vec2[x] for x in intersection])
+
+    sum1 = sum([vec1[x]**2 for x in vec1.keys()])
+    sum2 = sum([vec2[x]**2 for x in vec2.keys()])
+    denominator = math.sqrt(sum1) * math.sqrt(sum2)
+
+    if not denominator:
+        return 0.0
+    else:
+        return float(numerator) / denominator
+
+def text_to_vector(text):
+    words = WORD.findall(text.lower())
+    return Counter(words)

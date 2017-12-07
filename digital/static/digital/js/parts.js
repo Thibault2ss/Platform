@@ -784,7 +784,6 @@ function resetCharacteristics(){
     });
     // show flame retardancy level il is_flame_retardant
     $("#new_part_form").find("#id_is_flame_retardant").change(function(){
-        console.log("event fired");
         if(this.checked) {
             $("#fg-flame-retardancy").show();
             if ($("#id_flame_retardancy").val() == 'NA'){
@@ -813,17 +812,14 @@ function resetCharacteristics(){
                 success: function(data){
                     console.log(data);
                     if (data.success && data.characteristics){
-                        var characteristics = JSON.parse(data.characteristics)[0].fields;
-                        var list_ignore = ['material', 'part', 'part_type', 'techno_material', 'technology'];
+                        var characteristics = data.characteristics;
                         console.log(characteristics);
                         for (key in characteristics){
-                            if (!list_ignore.includes(key)){
-                                var value = characteristics[key];
-                                if(typeof(value) === "boolean"){
-                                    $form.find("#id_" + key).prop("checked",value).trigger('change');
-                                }else{
-                                    $form.find("#id_" + key).val(value);
-                                };
+                            var value = characteristics[key];
+                            if(typeof(value) === "boolean"){
+                                $form.find("#id_" + key).prop("checked",value).trigger('change');
+                            }else{
+                                $form.find("#id_" + key).val(value);
                             };
                         };
                     }else{
@@ -836,9 +832,59 @@ function resetCharacteristics(){
                 complete:function(jqXHR, textStatus){
                 },
             });
+        }else{
+            resetCharacteristics();
         };
     });
 //END ADDING NEW PART////////////////////////////////////////////////////////////////////////
+
+
+
+
+// GET PART TYPE bASED ON NAME#############################################################
+    $("#id_name").change(function(){
+        var part_name=$(this).val();
+        var $form=$(this).closest("form");
+        $.ajax({
+            url: '/digital/parts/get-part-type/',
+            data: {part_name:part_name},
+            method: 'POST',
+            type: 'POST', // For jQuery < 1.9
+            beforeSend:function(XMLHttpRequest, settings){
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    XMLHttpRequest.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success && data.characteristics){
+                    var characteristics = data.characteristics;
+                    var id_part_type = data.id_part_type;
+                    var id_appliance_family = data.id_appliance_family;
+                    console.log(characteristics);
+                    $form.find("#id_appliance_family").val(id_appliance_family).trigger('change');
+                    $form.find("#id_type").val(id_part_type);
+                    for (key in characteristics){
+                        var value = characteristics[key];
+                        if(typeof(value) === "boolean"){
+                            $form.find("#id_" + key).prop("checked",value).trigger('change');
+                        }else{
+                            $form.find("#id_" + key).val(value);
+                        };
+                    };
+                }else{
+                    resetCharacteristics();
+                };
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+            },
+            complete:function(jqXHR, textStatus){
+            },
+        });
+
+    });
+// END GET PART TYPE bASED ON NAME#############################################################
 
 
 

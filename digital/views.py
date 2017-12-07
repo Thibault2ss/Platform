@@ -11,7 +11,7 @@ from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm, PartI
 from users.forms import ProfilePicForm, OrganisationForm, ProfileForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
-from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial
+from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial, part_type_from_name
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
@@ -561,7 +561,7 @@ def get_best_solution(request):
         discarded_criterias={}
         perfect_match=False
         print request.POST
-        if request.POST.get('id_part'):
+        if request.POST.get('id_part', None):
             part = get_object_or_404(Part, id = request.POST.get('id_part'))
             techno_materials, perfect_match, error_list, discarded_criterias = findTechnoMaterial(part)
             errors += error_list
@@ -594,10 +594,10 @@ def get_characteristics(request):
         success = True
         errors = []
         characteristics = None
-        if request.POST.get('id_type'):
+        if request.POST.get('id_type', None):
             part_type = get_object_or_404(PartType, id = request.POST.get('id_type'))
             if part_type.characteristics:
-                characteristics = serializers.serialize("json", [part_type.characteristics],  use_natural_foreign_keys=True)
+                characteristics = part_type.characteristics.natural_key()
             else:
                 success = False
                 errors.append("NO CHARACTERISTICS ATTACHED TO PART TYPE")
@@ -608,6 +608,40 @@ def get_characteristics(request):
         data={
             "success":success,
             "errors":errors,
+            'characteristics':characteristics,
+        }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/parts/")
+
+
+
+def get_part_type(request):
+    if request.method == 'POST':
+        # initialize default values
+        success = True
+        errors = []
+        id_part_type = None
+        id_appliance_family = None
+        characteristics = None
+        if request.POST.get('part_name', None):
+            part_type = part_type_from_name(request.POST.get('part_name'))
+            if part_type:
+                id_part_type = part_type['part_type'].id
+                id_appliance_family = part_type['part_type'].appliance_family.id
+                characteristics = part_type['part_type'].characteristics.natural_key()
+            else:
+                success=False
+                errors.append("PAR NAME DID NOT MATCH ANY PART")
+        else:
+            success=False
+            errors.append("NO PART_NAME IN REQUEST")
+
+        data={
+            "success":success,
+            "errors":errors,
+            'id_part_type':id_part_type,
+            'id_appliance_family':id_appliance_family,
             'characteristics':characteristics,
         }
         return JsonResponse(data)
