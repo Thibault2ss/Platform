@@ -19,9 +19,10 @@
                       <label for="id_reference">Reference:</label>
                       {{formPart.reference|add_class:"form-control"|attr:"placeholder:unique identifier of part"}}
                   </div>
-                  <div class="form-group">
+                  <div class="form-group" style="position:relative;">
                       <label for="id_name">Name:</label>
                       {{formPart.name|add_class:"form-control"|attr:"placeholder:name of part"}}
+                      <i class="fa fa-refresh" id="find-part-type" style="position:absolute;bottom:15px;right:15px;cursor:pointer;display:none;"></i>
                   </div>
                   <div class="row subcategory" data-toggle="collapse" href="#new-part-details">
                       <h5><i class="ti-arrow-right"></i>Details</h5>

@@ -794,6 +794,8 @@ function resetCharacteristics(){
             $("#id_flame_retardancy").val("NA");
         };
     });
+
+
     // auto fill characteristics
     $("#new_part_form").find("#id_type").change(function(){
         var $form = $('#new_part_form');
@@ -841,9 +843,22 @@ function resetCharacteristics(){
 
 
 
+// refresh button appear on key down
+    $("#new_part_form").find("#id_name").keyup(function(){
+        if ($(this).val()){
+            $("#find-part-type").show().removeClass("rotate-infinite");
+        }else{
+            $("#find-part-type").hide();
+        }
+    });
+
+
+
 // GET PART TYPE bASED ON NAME#############################################################
-    $("#id_name").change(function(){
-        var part_name=$(this).val();
+    $("#find-part-type").click(function(){
+        $self = $(this);
+        $self.addClass("rotate-infinite");
+        var part_name=$("#id_name").val();
         var $form=$(this).closest("form");
         $.ajax({
             url: '/digital/parts/get-part-type/',
@@ -880,6 +895,7 @@ function resetCharacteristics(){
                 console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
             },
             complete:function(jqXHR, textStatus){
+                $self.hide().removeClass("rotate-infinite");
             },
         });
 
