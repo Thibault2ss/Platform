@@ -106,6 +106,8 @@
                         </div>
                     </div>
                 </div>
+
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card">
@@ -124,6 +126,28 @@
                                     <hr>
                                     <div class="stats">
                                         <i class="ti-timer"></i> Live Analysis
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card ">
+                            <div class="header">
+                                <h4 class="title">Family Distribution</h4>
+                                <p class="category">Distribution of parts per appliance family</p>
+                            </div>
+                            <div class="content">
+                                <div id="applianceFamilyBarChart" class="ct-chart"></div>
+
+                                <div class="footer">
+                                    <div class="chart-legend" style="opacity:0;">
+                                        <i class="fa fa-circle text-info"></i> Plastic Parts
+                                        <i class="fa fa-circle text-warning"></i> Metal Parts
+                                    </div>
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="ti-check"></i> Data information certified
                                     </div>
                                 </div>
                             </div>
@@ -151,31 +175,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <div class="col-md-6">
-                        <div class="card ">
-                            <div class="header">
-                                <h4 class="title">Part Materials</h4>
-                                <p class="category">Bar chart of all parts materials</p>
-                            </div>
-                            <div class="content">
-                                <div id="materialBarChart" class="ct-chart"></div>
-
-                                <div class="footer">
-                                    <div class="chart-legend">
-                                        <i class="fa fa-circle text-info"></i> Plastic Parts
-                                        <i class="fa fa-circle text-warning"></i> Metal Parts
-                                    </div>
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="ti-check"></i> Data information certified
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="card">
                             <div class="header">
                                 <h4 class="title">Parts addition</h4>
@@ -198,6 +198,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 {%endblock content%}
@@ -207,6 +208,7 @@
     var parts_plastic = {{parts_sumup.parts_plastic}};
     var parts_metal = {{parts_sumup.parts_metal}};
     var parts_total = {{parts_sumup.parts_total}};
+    var appliance_family_distribution={{family_ditribution|safe}};
     $(document).ready(function(){
         demo.initChartist();
         $.notify({

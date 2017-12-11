@@ -8,13 +8,15 @@ import numpy
 from stl import mesh
 from django.core import serializers
 from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm, PartImageForm
-from users.forms import ProfilePicForm, OrganisationForm, ProfileForm
+from users.forms import ProfilePicForm, OrganisationForm, ProfileForm, OrganisationLogoForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
-from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial, part_type_from_name
+from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial, part_type_from_name, part_type_prevision, getApplianceFamilyDistribution
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
+from notifications.signals import notify
+from notifications.models import Notification
 
 from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent, Characteristics, PartType
 from users.models import CustomUser
@@ -25,10 +27,11 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 @login_required
 def dashboard(request):
     parts_sumup = getPartSumUp(request.user.organisation)
-    print parts_sumup
+    family_ditribution = getApplianceFamilyDistribution(request.user.organisation)
     context = {
         'page':"dashboard",
         'parts_sumup':parts_sumup,
+        'family_ditribution':json.dumps(list(family_ditribution)),
     }
     # total_parts_indus = Parts.objects.filter()
     return render(request, 'digital/dashboard.html', context)
@@ -240,6 +243,39 @@ def upload_profile_pic(request):
 
     return HttpResponseRedirect("/digital/account/")
 
+
+
+@login_required
+def upload_company_logo(request):
+    if request.method == 'POST':
+        # initialize default values
+        success = True
+        errors = []
+        thumbnail=''
+        print request.POST
+        print request.FILES
+        _file = request.FILES.get('company_logo', False)
+        if request.FILES == None and _file:
+            success = False
+            errors.append("No files attached")
+        else:
+            form = OrganisationLogoForm(request.POST, request.FILES, instance=request.user.organisation)
+            if form.is_valid():
+                print "FORM IS VALID"
+                _organisation = form.save()
+                thumbnail = _organisation.logo.url
+            else:
+                print "FORM IS NOT VALID"
+                success = False
+                errors.append("form with file %s is not valid"%_image)
+        data={
+            "success":success,
+            "errors":errors,
+            "thumbnail":thumbnail,
+            }
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/account/")
 
 
 
@@ -532,15 +568,18 @@ def upload_solution_matrix(request):
         # initialize default values
         success = True
         errors = []
-        files_success=[]
-        files_failure=[]
+        warnings=[]
         print request.POST
         print request.FILES
         if request.FILES == None:
             success = False
             errors.append("No files attached")
         else:
-            errors, warnings = translate_matrix(request.FILES.get('file'))
+            filename, file_extension = os.path.splitext('%s'%request.FILES.get('file'))
+            if file_extension == ".csv" and filename == "type_prevision":
+                errors, warnings = part_type_prevision(request.FILES.get('file'))
+            else:
+                errors, warnings = translate_matrix(request.FILES.get('file'))
             print errors
         data={
             "success":success,
@@ -615,7 +654,7 @@ def get_characteristics(request):
     return HttpResponseRedirect("/digital/parts/")
 
 
-
+@login_required
 def get_part_type(request):
     if request.method == 'POST':
         # initialize default values
@@ -646,4 +685,54 @@ def get_part_type(request):
         }
         return JsonResponse(data)
 
+    return HttpResponseRedirect("/digital/parts/")
+
+
+
+
+
+@login_required
+def team_notification(request):
+    if request.method == 'POST':
+        # initialize default values
+        data={
+            "success":True,
+            "errors":[],
+        }
+        id_recipient = request.POST.get('notif-recipient',None)
+        verb = request.POST.get('notif-verb',None)
+        level = request.POST.get('notif-level',None)
+        description = request.POST.get('notif-description',None)
+        if id_recipient:
+            try:
+                recipient = CustomUser.objects.get(id=id_recipient)
+                if not recipient.organisation == request.user.organisation:
+                    data["success"] = False
+                    data["errors"].append("This person is NOT in your team")
+                    return JsonResponse(data)
+            except CustomUser.DoesNotExist:
+                data["success"] = False
+                data["errors"].append("Reciptent does not exist in database")
+                return JsonResponse(data)
+
+
+        if recipient and verb and description and level:
+            notify.send(
+                request.user,
+                recipient = recipient,
+                verb = verb,
+                # action_object= new_order,
+                # target = new_order,
+                level=level,
+                description=description,
+                public = False,
+                # target_path = "/jb/orders/order-detail/%s/"%new_order.id,
+                # quantity=2
+            )
+            success = True
+        else:
+            success = False
+            errors.append("Some information is missing or other error")
+
+        return JsonResponse(data)
     return HttpResponseRedirect("/digital/parts/")

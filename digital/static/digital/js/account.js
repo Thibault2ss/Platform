@@ -38,7 +38,7 @@ $(document).ready(function(){
     $("#profile_pic_form").dropzone({
         url: "/digital/account/upload-profile-pic/",
         paramName: "profile_pic", // The name that will be used to transfer the file
-        maxFiles: 2,
+        maxFiles: 1,
         maxFilesize: 2, // MB
         createImageThumbnails: false,
         clickable: true,
@@ -104,6 +104,82 @@ $(document).ready(function(){
 
 
 // END UPLOAD PROFILE PICTURE###########################################################
+
+
+
+
+// UPLOAD COMPANY LOGO###########################################################
+
+    $("#company_logo_form").dropzone({
+        url: "/digital/account/upload-company-logo/",
+        paramName: "logo", // The name that will be used to transfer the file
+        maxFiles: 1,
+        maxFilesize: 2, // MB
+        createImageThumbnails: false,
+        clickable: true,
+        acceptedFiles:".png,.jpg,.gif",
+        accept: function(file, done) {
+            if (file.name == "justin.jpg") {
+              done("Naha, you don't.");
+            }
+            else { done(); }
+        },
+        init: function () {
+            var $form = $("#company_logo_form");
+            this.on("sending", function(file, xhr, formData) {
+            //    formData.append("csrfmiddlewaretoken", csrftoken);
+                $form.find(".progressBar-inner").css("background-color","#6dbad8");
+                $form.find(".progressBar").css("opacity",1);
+                $form.find(".remove-file").removeClass("visible");
+            });
+            this.on('uploadprogress',function(file, progress, bytesSent){
+                $form.find(".progressBar-inner").css("width", progress + "%");
+            });
+            this.on('complete', function () {
+                setTimeout(function(){$form.find(".progressBar").css("opacity",0)}, 1000);
+                setTimeout(function(){$form.find(".progressBar-inner").css("width","0%")}, 1200);
+            });
+            this.on("success", function(file, response) {
+                console.log(response);
+                $('#modalCompanyLogo').modal('hide');
+                if (response.success){
+                    $form.find(".progressBar-inner").css("background-color","green");
+                    $(".organisation-logo").find("img").attr("src", response.thumbnail);
+                    $('.logo-company-container').css('background-image', "url(" + response.thumbnail + ")");
+                } else {
+                    $form.find(".progressBar-inner").css("background-color","red");
+                    $.notify({
+                        icon: 'ti-face-sad',
+                        message: "Picture Upload failed"
+                    },{
+                        type: 'danger',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                };
+            });
+        },
+        error:function(file, response){
+            console.log(response);
+            $('#modalCompanyLogo').modal('hide');
+            $("#company_logo_form").find(".progressBar-inner").css("background-color","red");
+            $.notify({
+                icon: 'ti-face-sad',
+                message: "Picture Upload failed"
+            },{
+                type: 'danger',
+                timer: 1000,
+                delay: 1000,
+            });
+        },
+    });
+
+    $("#modalCompanyLogo .modal-body").click(function(){
+        $(this).closest(".dropzone").click();
+    });
+
+
+// END UPLOAD COMPANY LOGO###########################################################
 
 
 
@@ -247,5 +323,85 @@ $(document).ready(function(){
     });
 // END UPDATE COMPANY DATA###########################################################
 
+
+
+
+
+
+
+// SEND NOTIFICATION TO TEAM MEMBER##########################################################
+    $(".btn-notif-team").click(function(){
+        $("#form_notification").find("input[name='notif-verb']").attr("value",$(this).data("verb"));
+        $("#form_notification").find("input[name='notif-recipient']").attr("value",$(this).data("recipient"));
+    });
+    $("#form_notification").submit(function(event){
+        event.preventDefault();
+        var $modal = $(this).closest(".modal");
+        var $form = $(this);
+        var id_recipient = $form.find("input[name='notif-recipient']").val();
+        var verb = $form.find("input[name='notif-verb']").val();
+        console.log(id_recipient);
+        console.log(verb);
+        if (id_recipient && verb){
+            var data = new FormData(this);
+            // console.log("received");
+            $.ajax({
+                url: '/digital/team-notification/',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST', // For jQuery < 1.9
+                beforeSend:function(XMLHttpRequest, settings){
+                },
+                success: function(data){
+                    console.log(data);
+                    if (data.success){
+                        $.notify({
+                            icon: 'ti-check',
+                            message: "Message Sent"
+                        },{
+                            type: 'success',
+                            timer: 1000,
+                            delay: 1000,
+                        });
+                    } else {
+                        $.notify({
+                            icon: 'ti-face-sad',
+                            message: "Sorry, message failed"
+                        },{
+                            type: 'danger',
+                            timer: 1000,
+                            delay: 1000,
+                        });
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    $.notify({
+                        icon: 'ti-face-sad',
+                        message: "Sorry, update failed"
+                    },{
+                        type: 'danger',
+                        timer: 1000,
+                        delay: 1000,
+                    });
+                    console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+                },
+                complete:function(jqXHR, textStatus){
+                    $form.find("input[name='notif-recipient']").val("");
+                    $form.find("input[name='notif-description']").val("");
+                    $modal.modal('hide');
+                },
+            });
+        };
+    });
+
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+// END SEND NOTIFICATION TO TEAM MEMBER###########################################################
 
 });

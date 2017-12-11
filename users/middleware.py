@@ -22,5 +22,4 @@ class RestrictionMiddleware(object):
                 if request.path.startswith(url):
                     # raise PermissionDenied
                     return HttpResponseRedirect('/account/login/')
-        print "THAT"
         return self.get_response(request)

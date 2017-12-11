@@ -6,6 +6,7 @@ import json
 import random
 from copy import copy
 import types
+from django.conf import settings
 
 register = template.Library()
 
@@ -15,6 +16,8 @@ def silence_without_field(fn):
             return ""
         return fn(field, attr)
     return wrapped
+
+
 
 @register.filter(name='get_due_date_string')
 def get_due_date_string(value):
@@ -76,6 +79,10 @@ def dict_list(file_instance_list):
 @register.simple_tag
 def random_int():
     return random.randint(1, 5000)
+
+@register.simple_tag
+def debug():
+    return settings.DEBUG
 
 def _process_field_attributes(field, attr, process):
 

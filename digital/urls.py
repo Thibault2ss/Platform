@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^$', views.dashboard, name=app_name + 'dashboard'),
     url(r'^account/$', views.account, name=app_name+'account'),
     url(r'^account/upload-profile-pic/$', views.upload_profile_pic, name=app_name+'upload_profile_pic'),
+    url(r'^account/upload-company-logo/$', views.upload_company_logo, name=app_name+'upload_company_logo'),
     url(r'^account/update-profile/$', views.update_profile, name=app_name+'update_profile'),
     url(r'^account/update-organisation/$', views.update_organisation, name=app_name+'update_organisation'),
     url(r'^qualification/$', views.qualification, name=app_name+'qualification'),
@@ -33,5 +34,6 @@ urlpatterns = [
     url(r'^typography/$', views.typography, name=app_name+'typography'),
     url(r'^icons/$', views.icons, name=app_name+'icons'),
     url(r'^maps/$', views.maps, name=app_name+'maps'),
+    url(r'^team-notification/$', views.team_notification, name=app_name+'team_notification'),
 
 ]

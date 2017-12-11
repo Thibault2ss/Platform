@@ -7,29 +7,10 @@
 <link href="{% static 'digital/css/slick-theme.css' %}?dev={% random_int %}" rel="stylesheet" />
 {% endblock extrahead %}
 {% block navbar_toggle%}
-    <li class="button-back" href="#partsCarousel" data-slide="prev" style='display:none'>
-        <i class="ti-arrow-left"></i>
-    </li>
 {% endblock %}
 {% block navbar_right %}
-    <li style='margin: 15px'>
-        <form class="form-part-search" action="" method="get" enctype="multipart/form-data">
-            {%csrf_token%}
-            <div class="input-group" style='max-width:250px;margin:0;'>
-                <input type='text' class='form-control part-search' name="search" placeholder="Search Part" value='{{search_string}}'>
-                    <span class="btn-reset-search ti-close" {%if not search_string%}style='display:none'{%endif%}></span>
-
-                <div class="input-group-btn">
-                    <button class="btn btn-primary btn-search-part" type="submit">
-                        <span class="ti-search"></span>
-                    </button>
-                </div>
-            </div>
-        </form>
-    </li>
 {% endblock %}
 {%block content%}
-
 <div id="partsCarousel" class="carousel slide" data-interval="false" style="height:100%;">
     <div class="carousel-inner" style="height:100%;overflow-y:scroll;">
         <div class="item active" id="partsCarousel-slide1">
@@ -43,9 +24,6 @@
                             <button class="btn btn-status-filter btn-danger {%if id_status == '3'%}btn-fill{%endif%}" value="3"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_disqualified}}</span> Disqualified</button>
                             <button class="btn btn-status-filter btn-success {%if id_status == '4'%}btn-fill{%endif%}" value="4"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_industrialized}}</span> Digitalized</button>
                             <!-- <button class="btn btn-default" data-toggle="modal" data-target="#modalNewPart">+</button> -->
-                            {% if user|has_perm:'add_part' or user.is_admin %}
-                            <div class="button-add-part" data-toggle="modal" data-target="#modalNewPart"><i class="ti-plus"></i></div>
-                            {% endif %}
                         </div>
                     </div>
                     {% if user.email == 'thibault.de-saint-sernin@sp3d.co'%}
@@ -59,11 +37,31 @@
                         </div>
                     </div>
                     {%endif%}
+                    <div class="row" style="margin-bottom:10px;display:flex;justify-content:flex-end;align-items:center;">
+                        <!-- <div class="col-lg-12" style='text-align:right;'> -->
+                            <form class="form-part-search" action="" method="get" enctype="multipart/form-data">
+                                {%csrf_token%}
+                                <div class="input-group" style='max-width:250px;margin:0;'>
+                                    <input type='text' class='form-control part-search' name="search" placeholder="Search Part" value='{{search_string}}'>
+                                        <span class="btn-reset-search ti-close" {%if not search_string%}style='display:none'{%endif%}></span>
+
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-primary btn-search-part" type="submit">
+                                            <span class="ti-search"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            {% if user|has_perm:'add_part' or user.is_admin %}
+                            <div class="button-add-part" data-toggle="modal" data-target="#modalNewPart"><i class="ti-plus"></i></div>
+                            {% endif %}
+                        <!-- </div> -->
+                    </div>
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="content">
-                                    <ul class="list-unstyled team-members">
+                                    <ul class="list-unstyled">
                                         {% for part in parts %}
                                         <li class="part-row" href="#partsCarousel" style="padding:5px 0px;"
                                             data-part="{{part|model_to_dict}}"
@@ -73,8 +71,8 @@
                                             data-slide="next">
                                             <div class="row">
                                                 <div class="col-xs-9" style="display:flex;align-items:center;">
-                                                    <div class="avatar" style="margin-right:20px;">
-                                                        <img src="{%if part.images %}{{part.images.0.thumbnail.url}}{%else%}{% static 'digital/img/cubes.png' %}{%endif%}" alt="Circle Image" class="img-circle img-no-padding img-responsive" style="height:100%;width:100%">
+                                                    <div class="part-thumb-image" style="margin-right:20px;height:70px;width:70px;">
+                                                        <img data-src="{%if part.images %}{{part.images.0.thumbnail.url}}{%else%}{% static 'digital/img/cubes.png' %}{%endif%}" alt="" class="img-circle img-no-padding img-responsive" style="height:100%;width:100%">
                                                     </div>
                                                     <div>
                                                         <span class="text-muted"><small>name: </small></span>{{part.name}}<br>
@@ -114,6 +112,9 @@
             </div>
         </div>
         <div class="item" id="partsCarousel-slide2">
+            <div class="button-back" href="#partsCarousel" data-slide="prev" style='display:none'>
+                <i class="ti-arrow-left"></i>
+            </div>
             <div class="content" id="part-detail-panel" data-part-id="" style="position:relative;">
                 <div class="container-fluid">
                     <div class="row">
@@ -414,6 +415,9 @@
 {%endblock content%}
 
 {%block extrascript%}
+{% if user.is_admin %}
+<button class="btn btn-warning dropdown-toggle btn-fill btn-wd recap-mail-button" style="font-weight:900;position:fixed;bottom:20px;right:100px;z-index:10;">Recap Mail</button>
+{% endif %}
 {%include 'digital/utils/modal-new-part.html'%}
 <script src="{% static 'digital/js/three/three.min.js' %}"></script>
 <script src="{% static 'digital/js/three/loaders/STLLoader1.js' %}"></script>
@@ -421,6 +425,7 @@
 <script src="{% static 'digital/js/three/libs/stats.min.js' %}"></script>
 <script src="{% static 'digital/js/three/libs/TrackballControls.js' %}"></script>
 <script src="{% static 'digital/js/slick.min.js' %}?dev={% random_int %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-lazyload/8.5.2/lazyload.min.js"></script>
 <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;sensor=false"></script> -->
 
 <script>

@@ -50,7 +50,9 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
+    {%if debug%}
     {%include 'digital/utils/ga.html'%}
+    {%endif%}
 </head>
 <body>
 
@@ -63,17 +65,16 @@
 	-->
 
     	<div class="sidebar-wrapper">
-            <div class="logo">
+            <div class="logo" style="padding:0px;">
                 <a href="/digital/parts/" class="simple-text">
-
-                    {% if user.organisation.logo %}
-                    <img src="{{ user.organisation.logo.url }}"></img>
-                    {% else %}
-                    <img src="{% static 'digital/icons/3donly.png' %}"></img>
-                    {%endif%}
+                    <img src="{% static 'digital/icons/spareparts3d.png' %}" style="-webkit-filter: brightness(0) invert(0.95);filter: brightness(0) invert(0.95);"></img>
                 </a>
             </div>
-
+            {% if user.organisation.logo %}
+            <div class="logo organisation-logo" style="padding:0;">
+                    <img src="{{ user.organisation.logo.url }}" style="max-height: 100%;"></img>
+            </div>
+            {%endif%}
             <ul class="nav">
                 <!-- <li class="{% if page == 'qualification' %}active{% endif %}">
                     <a href="/digital/qualification/">
@@ -87,9 +88,29 @@
                         <p>Dashboard</p>
                     </a>
                 </li> -->
+                <div class="profile-menu collapsed" style="border:0px;display:flex;align-items:center;cursor:pointer;" data-toggle="collapse" href="#profile-menu-collapse">
+                    {%if user.profile_thumb%}
+                    <div class='user-pic' style="background-image: url({{user.profile_thumb.url}});"></div>
+                    {%else%}
+                    <div class='user-pic' style="background-image: url({% static 'digital/img/faces/face-default.png' %});"></div>
+                    {% endif %}
+                    <div style="margin-left:20px;">
+                        <span style="font-weight:700;font-size:1.3rem;color:#fff;">{{user.first_name}}</span><br>
+                        <span style="font-weight:500;font-size:1.3rem;color:#fff;opacity:0.8;">{{user.organisation.name}}</span>
+                    </div>
+                    <b class="caret" style="margin-left:15px;color:#f1f1f1"></b>
+                </div>
+
+                <div id="profile-menu-collapse" class="collapse" aria-expanded="false">
+                      <li class="sub-menu logout">
+                          <a href="javascript:logout()" style="display:block;padding:10px 25px 10px 25px;">
+                              <p><i class="fa fa-sign-out"></i>Sign Out</p>
+                        </a>
+                    </li>
+                </div>
                 <li class="{% if page == 'account' %}active{% endif %}">
                     <a href="/digital/account/">
-                        <i class="ti-user"></i>
+                        <i class="fa fa-user"></i>
                         <p>Account</p>
                     </a>
                 </li>
@@ -105,43 +126,52 @@
                         <p>Parts</p>
                     </a>
                 </li>
-                <!-- <li class="{% if page == 'billing' %}active{% endif %}">
-                    <a href="/digital/billing/">
-                        <i class="ti-money"></i>
-                        <p>Billing</p>
+                <li class="">
+                    <a href="#">
+                        <i class="fa fa-bell"></i>
+                        <p>Notifications</p>
+                        <span class="label label-warning pull-right" style="font-size:1.1rem;">soon ...</span>
                     </a>
                 </li>
-                <li class="{% if page == 'table' %}active{% endif %}">
+
+                <li class="{% if page == 'billing' %}active{% endif %}">
+                    <a href="#">
+                        <i class="fa fa-credit-card"></i>
+                        <p>Billing</p>
+                        <span class="label label-warning pull-right" style="font-size:1.1rem;">soon ...</span>
+                    </a>
+                </li>
+                <!-- <li class="{% if page == 'table' %}active{% endif %}">
                     <a href="/digital/table/">
                         <i class="ti-view-list-alt"></i>
                         <p>Table List</p>
                     </a>
-                </li>
-                <li class="{% if page == 'typography' %}active{% endif %}">
+                </li> -->
+                <!-- <li class="{% if page == 'typography' %}active{% endif %}">
                     <a href="/digital/typography/">
                         <i class="ti-text"></i>
                         <p>Typography</p>
                     </a>
-                </li>
-                <li class="{% if page == 'icons' %}active{% endif %}">
+                </li> -->
+                <!-- <li class="{% if page == 'icons' %}active{% endif %}">
                     <a href="/digital/icons/">
                         <i class="ti-pencil-alt2"></i>
                         <p>Icons</p>
                     </a>
-                </li>
-                <li class="{% if page == 'maps' %}active{% endif %}">
+                </li> -->
+                <!-- <li class="{% if page == 'maps' %}active{% endif %}">
                     <a href="/digital/maps/">
                         <i class="ti-map"></i>
                         <p>Maps</p>
                     </a>
-                </li>
-                <li class="{% if page == 'notifications' %}active{% endif %}">
+                </li> -->
+                <!-- <li class="{% if page == 'notifications' %}active{% endif %}">
                     <a href="/digital/notifications/">
                         <i class="ti-bell"></i>
                         <p>Notifications</p>
                     </a>
-                </li>
-				<li class="active-pro">
+                </li> -->
+				<!-- <li class="active-pro">
                     <a href="#">
                         <i class="ti-export"></i>
                         <p>Upload Parts</p>
@@ -178,12 +208,8 @@
 								<p>Stats</p>
                             </a>
                         </li> -->
-                        {% if user.is_admin %}
-                        <li>
-                            <button class="btn btn-warning dropdown-toggle btn-fill btn-wd recap-mail-button" style="font-weight:900;">Recap Mail</button>
-                        </li>
-                        {% endif %}
-                        <li class="dropdown">
+
+                        <!-- <li class="dropdown">
                               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     <i class="ti-bell"></i>
                                     <p class="notification"></p>
@@ -193,14 +219,14 @@
                               <ul class="dropdown-menu">
                                 <li><a href="#">No New Notifications</a></li>
                               </ul>
-                        </li>
-						<li>
+                        </li> -->
+						<!-- <li>
                             <a href="#">
 								<i class="ti-settings"></i>
 								<p>Settings</p>
                             </a>
-                        </li>
-                        <li class="dropdown">
+                        </li> -->
+                        <!-- <li class="dropdown">
                               <a href="#" style="margin:0" class="dropdown-toggle" data-toggle="dropdown">
                                   <div style="display:flex;align-items:center;">
                                     {%if user.profile_thumb%}
@@ -214,16 +240,17 @@
                               <ul class="dropdown-menu">
                                 <li><a href="javascript:logout()"><i class="ti-close" style="margin-right:15px"></i>Sign Out</a></li>
                               </ul>
-                        </li>
+                        </li> -->
                     </ul>
 
                 </div>
             </div>
         </nav>
 
-
+        <div class="main-panel-content">
         {%block content%}
         {%endblock content%}
+    </div>
 
 
         <!-- <footer class="footer">

@@ -82,6 +82,7 @@ def save_reverse_onetoones(sender, created, instance, **kwargs):
 class PartType(models.Model):
     name = models.CharField(max_length=100, default = '')
     appliance_family = models.ForeignKey('ApplianceFamily', on_delete=models.SET_NULL, verbose_name="Appliance Family", null=True)
+    keywords = models.CharField(max_length=200, default = '')
     characteristics = models.OneToOneField('Characteristics', on_delete=models.SET_NULL, null=True, blank=True, related_name = 'part_type_characteristics')
 
     def __str__(self):

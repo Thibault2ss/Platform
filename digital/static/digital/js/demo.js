@@ -357,6 +357,7 @@ demo = {
         parts_plastic = parseInt(parts_plastic);
         parts_metal = parseInt(parts_metal);
         parts_total = parseInt(parts_total);
+        console.log(appliance_family_distribution);
         if (parts_total == 0){parts_total=1};//safety
         // console.log(parts_plastic);
         // console.log(parts_metal);
@@ -434,42 +435,52 @@ demo = {
         });
 
 
-        //      bar chart
-            var dataViews = {
-              labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+
+        // APPLIANCE FAMILY BAR CHART##############################################################################
+        var app_fam_labels = [];
+        var serie = [];
+        for (var i = 0; i<appliance_family_distribution.length; i++){
+            app_fam_labels.push(appliance_family_distribution[i].type__appliance_family__name);
+            serie.push(appliance_family_distribution[i].count);
+        };
+        var dataViews = {
+            labels: app_fam_labels,
               series: [
-                [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895],
-                [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895]
+                 serie
               ]
-            };
+        };
 
-            var optionsViews = {
-              seriesBarDistance: 10,
-              classNames: {
-                bar: 'ct-bar'
-              },
-              axisX: {
-                showGrid: false,
+        var optionsViews = {
+            height: "250px",
+            seriesBarDistance: 10,
+            reverseData: true,
+            horizontalBars: true,
+          classNames: {
+            bar: 'ct-bar'
+          },
+          axisY: {
+              offset: 70
+          },
+          axisX: {
+            showGrid: true,
+            divisor:2
+          },
 
-              },
-              height: "250px"
+        };
 
-            };
+        var responsiveOptionsViews = [
+          ['screen and (max-width: 640px)', {
+            seriesBarDistance: 5,
+            axisX: {
+              labelInterpolationFnc: function (value) {
+                return value[0];
+              }
+            }
+          }]
+        ];
 
-            var responsiveOptionsViews = [
-              ['screen and (max-width: 640px)', {
-                seriesBarDistance: 5,
-                axisX: {
-                  labelInterpolationFnc: function (value) {
-                    return value[0];
-                }
-                }
-              }]
-            ];
-            var materialBarChart = document.getElementById('materialBarChart');
-            if (materialBarChart !== null){
-                Chartist.Bar('#materialBarChart', dataViews, optionsViews, responsiveOptionsViews);
-            };
+        var chart_family = Chartist.Bar('#applianceFamilyBarChart', dataViews,optionsViews, responsiveOptionsViews);
+        // END APPLIANCE FAMILY BAR CHART##############################################################################
 
     },
 	showNotification: function(from, align){
@@ -588,69 +599,6 @@ demo = {
           series: [62, 32, 6]
         });
 
-    //      bar chart
-        var dataViews = {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-          series: [
-            [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895]
-          ]
-        };
-
-        var optionsViews = {
-          seriesBarDistance: 10,
-          classNames: {
-            bar: 'ct-bar'
-          },
-          axisX: {
-            showGrid: false,
-
-          },
-          height: "250px"
-
-        };
-
-        var responsiveOptionsViews = [
-          ['screen and (max-width: 640px)', {
-            seriesBarDistance: 5,
-            axisX: {
-              labelInterpolationFnc: function (value) {
-                return value[0];
-              }
-            }
-          }]
-        ];
-
-        Chartist.Bar('#materialBarChart', dataViews, optionsViews, responsiveOptionsViews);
-
-    //     multiple bars chart
-        var data = {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-          series: [
-            [542, 543, 520, 680, 653, 753, 326, 434, 568, 610, 756, 895],
-            [230, 293, 380, 480, 503, 553, 600, 664, 698, 710, 736, 795]
-          ]
-        };
-
-        var options = {
-            seriesBarDistance: 10,
-            axisX: {
-                showGrid: false
-            },
-            height: "245px"
-        };
-
-        var responsiveOptions = [
-          ['screen and (max-width: 640px)', {
-            seriesBarDistance: 5,
-            axisX: {
-              labelInterpolationFnc: function (value) {
-                return value[0];
-              }
-            }
-          }]
-        ];
-
-        Chartist.Line('#chartActivity', data, options, responsiveOptions);
 
     }
 

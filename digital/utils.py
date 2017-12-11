@@ -6,7 +6,7 @@ from django.template.loader import get_template
 from django.core.mail import send_mail, EmailMultiAlternatives, EmailMessage
 from digital.models import Part, PartImage, PartBulkFile, Characteristics, PartType, ApplianceFamily
 from jb.models import CoupleTechnoMaterial, Technology, Material
-from django.db.models import Case, IntegerField, Sum, When, Q
+from django.db.models import Case, IntegerField, Sum, When, Q, Count
 from django.shortcuts import get_object_or_404
 import tempfile
 from stl import mesh
@@ -19,6 +19,7 @@ import csv
 from django.db.models import Q
 import re, math
 from collections import Counter
+from os.path import join
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 DEFAULT_NB_PER_PAGE = 20
@@ -120,6 +121,10 @@ def getPartSumUp(organisation):
             parts_sumup[key]=0
     return parts_sumup
 
+def getApplianceFamilyDistribution(organisation):
+    distribution =  Part.objects.filter(organisation = organisation).values('type__appliance_family__name').annotate(count=Count('type__appliance_family__name')).order_by('-count')
+    return distribution
+
 def getOrganisationCapacity(organisation):
     images = PartImage.objects.filter
 
@@ -161,6 +166,60 @@ def getfiledata(file):
     return type, json.dumps(data)
 
 
+
+
+
+
+
+
+def part_type_prevision(file):
+    error_list=[]
+    warning_list=[]
+    filename, file_extension = os.path.splitext('%s'%file)
+
+    # check file extension
+    if not file_extension.lower() == '.csv':
+        error_list.append("WRONG FILE EXTENSION")
+        return error_list,
+
+    fieldnames = ['name_eng','hierarchy']
+
+    temp = tempfile.NamedTemporaryFile(delete = False)
+    for chunk in file.chunks():
+        temp.write(chunk)
+    temp.close()
+
+    # copy csv in temporary file
+    final_file = open(join(dir_path, "part_type_prevision.csv"),'wb+')
+
+
+
+    # treat temporary file to populate database
+    with open(temp.name, 'rb+') as csvfile:
+        reader = csv.DictReader(csvfile, fieldnames = fieldnames)
+        for index, row in enumerate(reader, start=1):
+            if index == 1:continue
+            print index
+            if row.get('name_eng',None):
+                # yolo = part_type_from_name(row['name_eng'])
+                yolo = part_type_from_name_1(row['name_eng'], row['hierarchy'] )
+
+                part_type_name = yolo['part_type'].name if yolo['part_type'] else "Unknown"
+                appliance_family = yolo['appliance_family'].name if yolo['appliance_family'] else "Unknown"
+                intersection = yolo['intersection']
+                line = '%s\t%s\t%s\t%s\t%s\n'%(index, row['name_eng'].decode('latin'),part_type_name, appliance_family, intersection)
+                line = line.encode('utf-8')
+                final_file.write(line)
+
+    final_file.close()
+    os.unlink(temp.name)
+    return None, None
+
+
+
+
+
+
 def translate_matrix(file):
     error_list=[]
     warning_list=[]
@@ -169,7 +228,7 @@ def translate_matrix(file):
     # check file extension
     if not file_extension.lower() == '.csv':
         error_list.append("WRONG FILE EXTENSION")
-        return error_list
+        return error_list, warning_list
 
 
     # check file name
@@ -183,11 +242,11 @@ def translate_matrix(file):
         fieldnames = ['technology','max_X', 'max_Y','max_Z','description','f','g','h','i','j','is_visual','is_transparent','is_rubbery','is_water_resistant','is_chemical_resistant',
             'is_flame_retardant','is_food_grade','flame_retardancy','min_temp','max_temp']
     elif filename.lower() == 'part_types':
-        fieldnames = ['part_type','appliance_family', 'c','d','e','f','g','h','i','j','is_visual','is_transparent','is_rubbery','is_water_resistant','is_chemical_resistant',
+        fieldnames = ['part_type','appliance_family', 'keywords','d','e','f','g','h','i','j','is_visual','is_transparent','is_rubbery','is_water_resistant','is_chemical_resistant',
             'is_flame_retardant','is_food_grade','flame_retardancy','min_temp','max_temp']
     else:
         error_list.append("WRONG FILE NAME")
-        return error_list
+        return error_list, warning_list
 
 
     # copy csv in temporary file
@@ -321,10 +380,12 @@ def CleanCSV(dic):
         try:
             temp_appliance_family = ApplianceFamily.objects.get(name=dic['appliance_family'])
             cleaned_dic['part_type'] = PartType.objects.get(name=dic['part_type'], appliance_family = temp_appliance_family)
+            cleaned_dic['part_type'].keywords = dic['keywords']
+            cleaned_dic['part_type'].save()
         except ApplianceFamily.DoesNotExist:
             error['appliance_family'] = 'No match on appliance family %s'%dic['appliance_family']
         except PartType.DoesNotExist:
-            part_type = PartType(name= dic['part_type'], appliance_family = temp_appliance_family)
+            part_type = PartType(name= dic['part_type'], appliance_family = temp_appliance_family, keywords = dic['keywords'])
             part_type.save()
             cleaned_dic['part_type'] = part_type
 
@@ -467,20 +528,84 @@ def findTechnoMaterial(part):
     return list_couple_techno_material, perfect_match, errors, discarded_criterias
 
 
+
+
+def part_type_from_name_1(name, hierarchy):
+    if not name:return None
+    result = {'intersection':0, 'intersection_f':0, 'part_type': None, 'appliance_family':None}
+    name_vector = text_to_vector(name)
+    try:
+        family_code = hierarchy.split('-')[1]
+    except IndexError:
+        family_code = ""
+
+    # match with appliance type first
+    if family_code:
+        result['appliance_family'] = ApplianceFamily.objects.filter(name__istartswith = family_code).first()
+    if not result['appliance_family']:
+        appliances_f = ApplianceFamily.objects.all()
+        for appliance_f in appliances_f:
+            intersection = get_intersection(text_to_vector(appliance_f.name), name_vector)
+            if intersection and intersection > result['intersection_f']:
+                result['appliance_family'] = appliance_f
+                result['intersection_f'] = intersection
+
+
+    if result['appliance_family']:
+        part_types = PartType.objects.filter(appliance_family = result['appliance_family'])
+    else:
+        part_types = PartType.objects.all()
+
+    for part_type in part_types:
+        intersection = get_intersection(text_to_vector(part_type.name + part_type.keywords), name_vector)
+        if intersection and intersection > result['intersection']:
+            result['part_type'] = part_type
+            result['intersection']=intersection
+
+    return result
+
+
+
+
+
 def part_type_from_name(name):
     if not name:return None
     result = {'cosine':0.0}
-    part_types = PartType.objects.all()
+    name_vector = text_to_vector(name)
+    appliance_family = None
+
+
+    # match with appliance type first
+    appliance_f_cos = 0
+    appliances_f = ApplianceFamily.objects.all()
+    for appliance_f in appliances_f:
+        cosine = get_cosine(text_to_vector(appliance_f.name), name_vector)
+        if cosine and cosine > appliance_f_cos:
+            appliance_family = appliance_f
+            appliance_f_cos = cosine
+
+
+
+    if appliance_family:
+        part_types = PartType.objects.filter(appliance_family = appliance_family)
+    else:
+        part_types = PartType.objects.all()
+
     for part_type in part_types:
-        dic = part_type.__dict__
-        cosine = get_cosine(text_to_vector("%s %s"%(part_type.name, part_type.appliance_family.name)), text_to_vector(name))
+        cosine = get_cosine(text_to_vector(part_type.name + part_type.keywords), name_vector)
         if cosine and cosine > result['cosine']:
-            result = {'part_type':part_type, 'cosine':cosine}
+            result = {'part_type':part_type, 'appliance_family':appliance_family, 'cosine':cosine}
 
     if not 'part_type' in result:result = None
     return result
 
+
 WORD = re.compile(r'\w+')
+
+def get_intersection(vec1, vec2):
+    intersection = set(vec1.keys()) & set(vec2.keys())
+    return len(intersection)
+
 
 def get_cosine(vec1, vec2):
     intersection = set(vec1.keys()) & set(vec2.keys())

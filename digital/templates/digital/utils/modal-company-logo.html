@@ -1,7 +1,7 @@
 {% load digital_filters %}
-<div id="modalProfilePic" class="modal fade modal-drop-pic" role="dialog">
+<div id="modalCompanyLogo" class="modal fade modal-drop-pic" role="dialog">
   <div class="modal-dialog">
-      <form enctype="multipart/form-data" action="" method="post" id="profile_pic_form" class="dropzone">
+      <form enctype="multipart/form-data" action="" method="post" id="company_logo_form" class="dropzone">
           {%csrf_token%}
           <input type="hidden" class="id_part" name="part" required="">
           <div class="dz-default dz-message"><span></span></div>
@@ -10,7 +10,7 @@
             <div class="modal-body">
                 <div>
                     <div><span class='ti-camera' style="font-size:3rem;"></span></div>
-                    <div><span>Drop Picture</span></div>
+                    <div><span>Drop Logo</span></div>
                     <div class="progressBar">
                         <div class="progressBar-inner"></div>
                     </div>

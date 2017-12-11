@@ -115,6 +115,11 @@ class ProfilePicForm(forms.ModelForm):
         model = CustomUser
         fields = ['profile_pic']
 
+class OrganisationLogoForm(forms.ModelForm):
+    class Meta:
+        model = Organisation
+        fields = ['logo']
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser

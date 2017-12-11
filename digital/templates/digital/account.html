@@ -15,11 +15,11 @@
                                 <div class="user">
                                     {%if user.profile_thumb%}
                                     <div class="avatar border-white" style="display:inline-block; background-image: url({{user.profile_thumb.url}});">
-                                        <div class='avatar-black-filter' data-toggle="modal" data-target="#modalProfilePic"><span class='ti-camera'></span></div>
+                                        <div class='black-filter' data-toggle="modal" data-target="#modalProfilePic"><span class='ti-camera'></span></div>
                                     </div>
                                     {%else%}
                                     <div class="avatar border-white" style="display:inline-block; background-image: url({% static 'digital/img/faces/face-default.png' %});">
-                                        <div class='avatar-black-filter' data-toggle="modal" data-target="#modalProfilePic"><span class='ti-camera'></span></div>
+                                        <div class='black-filter' data-toggle="modal" data-target="#modalProfilePic"><span class='ti-camera'></span></div>
                                     </div>
                                     {% endif %}
                                   <h4 class="title">{{user.first_name}} {{user.last_name}}<br />
@@ -73,7 +73,12 @@
                                             </div>
 
                                             <div class="col-xs-3 text-right">
-                                                <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
+                                                <btn class="btn btn-sm btn-success btn-icon btn-notif-team"
+                                                    data-recipient="{{member.id}}"
+                                                    data-verb="Team Message"
+                                                    data-toggle="modal" data-target="#modalNotif">
+                                                    <i class="fa fa-envelope"></i>
+                                                </btn>
                                             </div>
                                         </div>
                                     </li>
@@ -129,7 +134,18 @@
                                 <form id="form-update-company" action="" enctype="multipart/form-data">
                                     {%csrf_token%}
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-md-4" style="position:relative;">
+                                            {%if user.organisation.logo%}
+                                            <div class="logo-company-container" style="display:inline-block; background-image: url({{user.organisation.logo.url}});">
+                                                <div class='black-filter' data-toggle="modal" data-target="#modalCompanyLogo"><span class='ti-camera'></span></div>
+                                            </div>
+                                            {%else%}
+                                            <div class="avatar border-white" style="display:inline-block; background-image: url({% static 'digital/img/faces/face-default.png' %});">
+                                                <div class='black-filter' data-toggle="modal" data-target="#modalCompanyLogo"><span class='ti-camera'></span></div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-8">
                                             <div class="form-group">
                                                 <label>Address</label>
                                                 {{formOrganisation.address|add_class:"form-control border-input"}}
@@ -164,6 +180,8 @@
 
 {%block extrascript%}
 {%include 'digital/utils/modal-profile-pic.html'%}
+{%include 'digital/utils/modal-company-logo.html'%}
+{%include 'digital/utils/modal-notif.html'%}
 <!-- include for autocomplete address -->
 <script type="text/javascript" src="{%static 'js/jquery.geocomplete.min.js'%}"></script>
 <script type="text/javascript" src="{%static 'digital/js/address.js'%}"></script>

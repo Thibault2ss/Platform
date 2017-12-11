@@ -65,7 +65,7 @@
 .sidebar .nav > li.active-pro a{
     background: rgba(255, 255, 255, 0.14);
     opacity: 1;
-    color: #FFFFFF;
+    color: #fefefe;
 }
 
 .table-upgrade td:nth-child(2),
@@ -74,7 +74,7 @@
 }
 
 .user-pic{
-    /*border: 5px solid #FFFFFF;*/
+    /*border: 5px solid #fefefe;*/
     width: 54px;
     height: 54px;
     border-radius: 50%;
@@ -87,7 +87,7 @@
     background-position: center center;
 }
 .user-pic img{
-    /*border: 5px solid #FFFFFF;*/
+    /*border: 5px solid #fefefe;*/
     min-height: 100%;
     min-width: 100%;
 }
@@ -104,6 +104,7 @@
     font-size:2.5rem !important;
     cursor:pointer;
     padding:9px 10px 10px 12px;
+    margin-left:15px;
     /*margin:20px;*/
     /*z-index:10;*/
     -webkit-box-shadow: 2px 2px 3px rgba(17, 16, 15, 0.1);
@@ -370,7 +371,7 @@
 }
 .unit-input{
     display:inline-block;
-    max-width:75px;
+    max-width:90px;
 }
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -394,7 +395,7 @@ input[type=number]::-webkit-outer-spin-button {
   vertical-align: text-top;
   width: 20px;
   height: 20px;
-  background: #ffffff;
+  background: #fefefe;
   border: solid 1px #a7a7a7;
   border-radius: 2px;
   -webkit-transition: all 0.2s linear 0s;
@@ -530,7 +531,7 @@ ul, li{
 .btn-reset-search{
     position:absolute;
     z-index:5;
-    top:9px;
+    top:12px;
     right:47px;
     color:#ca4e4e;
     cursor:pointer;
@@ -538,12 +539,12 @@ ul, li{
 .btn-reset-search:hover{
     color: #b73434;
 }
-#modalProfilePic{
+.modal-drop-pic{
     color:#fff;
     font-weight: 900;
     font-size: 2rem;
 }
-#modalProfilePic .modal-body{
+.modal-drop-pic .modal-body{
     background-color:#263C61;
     height:350px;
     display:flex;
@@ -552,11 +553,11 @@ ul, li{
     text-align: center;
     cursor:pointer;
 }
-#modalProfilePic .modal-dialog{
+.modal-drop-pic .modal-dialog{
     margin-top:30vh;
     width:350px
 }
-#modalProfilePic .dz-drag-hover .modal-body{
+.modal-drop-pic .dz-drag-hover .modal-body{
     background-color:#1b283e;
 }
 @-webkit-keyframes rotating /* Safari and Chrome */ {
@@ -594,3 +595,13 @@ ul, li{
   -o-animation: rotating 2s linear infinite;
   animation: rotating 2s linear infinite;
 }
+.part-thumb-image img{
+    border: 0;
+	opacity: 0;
+    transition: opacity 1s;
+}
+.part-thumb-image img.initial,
+.part-thumb-image img.loaded,
+.part-thumb-image img.error {
+    opacity: 1;
+    }

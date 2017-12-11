@@ -8,6 +8,9 @@ $(document).ready(function(){
 // end ORDER TYPE TOGGLING ######################################
 
 
+// LAZY LOAD OF PICTURES
+var myLazyLoad = new LazyLoad();
+
 
 // REMOVE CAROUSEL AUTO SLIDE#####################################
     $('#partsCarousel').carousel({
@@ -636,11 +639,11 @@ function resetCharacteristics(){
             var date = new Date(event.date);
             date = date.getDate() + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
             var short_description = event.short_description;
-            var label_type, label_class, label_text, last, warning;
+            var label_type, label_class, label_short_description, label_first_name, label_text, last, warning;
             warning = false;
             if (events[i].fields.type == "STATUS_CHANGE"){
                 label_type = "label";
-                if (event.status.id == 2){
+                if (event.status.id == 2 && event.status){
                     label_class = "warning";
                 } else if(event.status.id == 3){
                     label_class = "danger";
@@ -658,8 +661,10 @@ function resetCharacteristics(){
                 label_class = "default";
                 label_text = 'Info'
             };
-            if (i == events.length - 1){last = true}else{last = false};
-            $("#timeline-card").append(get_HTML_Timeline(date, label_type, label_class, label_text, event.short_description, event.created_by.first_name, last = last, warning = warning));
+            last = (i == events.length - 1) ? true : false;
+            label_short_description = event.short_description ? event.short_description:"Description Missing";
+            label_first_name = event.created_by.first_name ? event.created_by.first_name:"Unknown";
+            $("#timeline-card").append(get_HTML_Timeline(date, label_type, label_class, label_text, label_short_description, label_first_name, last = last, warning = warning));
 
         };
 
@@ -1295,7 +1300,7 @@ function resetCharacteristics(){
 		// Lights
 		scene.add( new THREE.HemisphereLight( 0x443333, 0x111122 ) );
 		addShadowedLight( 1, 1, 1, 0xffffff, 1.35 );
-		addShadowedLight( 0.5, 1, -1, 0xffaa00, 1 );
+		addShadowedLight( 0.5, 1, -1, 0xffffff, 1 );
 
 		// renderer
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -1388,7 +1393,7 @@ function resetCharacteristics(){
                     var dist = geometry.boundingSphere.radius / ( Math.tan( camera.fov * Math.PI / 360 ) );
                     camera.position.set( 0, 0, geometry.boundingSphere.radius + dist );
                 };
-                var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
+                var material = new THREE.MeshPhongMaterial( { color: 0x2B5E7F, specular: 0x111111, shininess: 200 } );
                 mesh = new THREE.Mesh( geometry, material );
 
                 mesh.scale.set( 1, 1 , 1 );
