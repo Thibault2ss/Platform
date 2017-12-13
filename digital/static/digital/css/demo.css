@@ -62,11 +62,6 @@
     width: 100%;
     bottom: 10px;
 }
-.sidebar .nav > li.active-pro a{
-    background: rgba(255, 255, 255, 0.14);
-    opacity: 1;
-    color: #fefefe;
-}
 
 .table-upgrade td:nth-child(2),
 .table-upgrade td:nth-child(3){

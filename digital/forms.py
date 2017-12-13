@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django import forms
 from digital.models import PartBulkFile, Part, Appliance, PartType, Characteristics, PartImage, ApplianceFamily
 

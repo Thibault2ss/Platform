@@ -69,8 +69,18 @@ h6, .h6 {
   text-transform: uppercase; }
 
 p {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.4em; }
+
+.fw-500{
+    font-weight: 500;
+}
+.fw-600{
+    font-weight: 600;
+}
+.fw-700{
+    font-weight: 700;
+}
 
 h1 small, h2 small, h3 small, h4 small, h5 small, h6 small, .h1 small, .h2 small, .h3 small, .h4 small, .h5 small, .h6 small, h1 .small, h2 .small, h3 .small, h4 .small, h5 .small, h6 .small, .h1 .small, .h2 .small, .h3 .small, .h4 .small, .h5 .small, .h6 .small {
   color: #9A9A9A;
@@ -79,6 +89,18 @@ h1 small, h2 small, h3 small, h4 small, h5 small, h6 small, .h1 small, .h2 small
 
 h1 small, h2 small, h3 small, h1 .small, h2 .small, h3 .small {
   font-size: 60%; }
+
+.nav-pills>li>a{
+  border-radius: 2px;
+}
+.list-group-item:first-child{
+    border-top-left-radius:2px;
+    border-top-right-radius:2px;
+}
+.list-group-item:last-child{
+    border-bottom-right-radius: 2px;
+￼    border-bottom-left-radius: 2px;
+}
 
 .title-uppercase {
   text-transform: uppercase; }
@@ -106,6 +128,19 @@ blockquote small {
 
 .text-danger, .text-danger:hover {
   color: #B33C12; }
+
+.badge-info{
+    background-color: #3091B2;
+}
+.badge-success{
+    background-color: #42A084;
+}
+.badge-warning{
+    background-color: #BB992F;
+}
+.badge-error, .badge-danger{
+    background-color: #B33C12;
+}
 
 .glyphicon {
   line-height: 1; }
@@ -308,20 +343,12 @@ hr {
       background-color: #194460;
       border-color: #58CB7C;
  }
- .sidebar .nav li.logout,
-    .off-canvas-sidebar .nav li.logout,
-     .sidebar .nav li.logout,
-    .off-canvas-sidebar .nav li.logout{
-      background-color: #194460;
-      border-color: #194460;
 
- }
  .sidebar .nav li.logout:hover,
     .off-canvas-sidebar .nav li.logout:hover,
      .sidebar .nav li.logout.active,
     .off-canvas-sidebar .nav li.logout.active{
       border-color: #f44242;
-      background-color: #2B5E7F;
  }
      .sidebar .nav li > a,
     .off-canvas-sidebar .nav li > a{
@@ -2929,4 +2956,22 @@ textarea.form-control {
 @media (min-width: 768px){
 .modal-dialog{
     width:680px;
+}}
+.notif-header:hover{
+    cursor:pointer;
+}
+.notification:hover{
+    background-color: #f6faff;
+}
+.notifications-container h5{
+    display:inline-block;
+    font-weight: 600;
+    margin-bottom:0px;
+    margin-top:0px;
+}
+.notifications-container p{
+    margin-top:15px;
+}
+.notifications-container i{
+    margin-right:10px;
 }

@@ -11,12 +11,19 @@ from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm, PartI
 from users.forms import ProfilePicForm, OrganisationForm, ProfileForm, OrganisationLogoForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
-from digital.utils import getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial, part_type_from_name, part_type_prevision, getApplianceFamilyDistribution
+from digital.utils import upload_bulk_parts, getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial, part_type_from_name, part_type_prevision, getApplianceFamilyDistribution
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
 from notifications.signals import notify
 from notifications.models import Notification
+import locale
+import sys
+print(str(locale.getlocale()))
+print(str(locale.getdefaultlocale()))
+print(str(sys.getfilesystemencoding()))
+print(str(sys.getdefaultencoding()))
+print(str(sys.getdefaultencoding()))
 
 from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent, Characteristics, PartType
 from users.models import CustomUser
@@ -85,8 +92,13 @@ def billing(request):
     context = {
         'page':"billing",
     }
-    print "YES"
     return render(request, 'digital/billing.html', context)
+@login_required
+def analysis(request):
+    context = {
+        'page':"analysis",
+    }
+    return render(request, 'digital/analysis.html', context)
 @login_required
 def table(request):
     context = {
@@ -113,8 +125,12 @@ def maps(request):
     return render(request, 'digital/maps.html', context)
 @login_required
 def notifications(request):
+    notifications = Notification.objects.filter(recipient=request.user)
+    notifications_sent = Notification.objects.filter(actor_content_type__model="customuser",actor_object_id = request.user.id )
     context = {
         'page':"notifications",
+        'notifications':notifications,
+        'notifications_sent':notifications_sent,
     }
     return render(request, 'digital/notifications.html', context)
 @login_required
@@ -580,7 +596,7 @@ def upload_solution_matrix(request):
                 errors, warnings = part_type_prevision(request.FILES.get('file'))
             else:
                 errors, warnings = translate_matrix(request.FILES.get('file'))
-            print errors
+            print "errors: %s"%errors
         data={
             "success":success,
             "errors":errors,
@@ -736,3 +752,51 @@ def team_notification(request):
 
         return JsonResponse(data)
     return HttpResponseRedirect("/digital/parts/")
+
+
+
+
+
+@login_required
+def mark_notif_as_read(request):
+    try:
+        id_notif = request.GET.get('id_notif', None)
+        notif = Notification.objects.get(id=id_notif)
+        print "notif: %s"%notif
+        notif.mark_as_read()
+        data = {
+            "success": "notification %s marked as read successfully"%notif.id
+        }
+    except ValueError as err:
+        data = {
+            "error": err
+        }
+    except Exception as e:
+        data = {
+            "error": "%s"%e
+        }
+    return JsonResponse(data)
+
+
+
+
+@login_required
+def bulk_parts_upload(request):
+    if request.method == 'POST' and request.user.is_admin:
+        # initialize default values
+        data={
+            "success":True,
+            "errors":[],
+            "warnings":[],
+        }
+        print request.POST
+        print request.FILES
+        if not request.FILES.get('file', None):
+            data["success"] = False
+            data["errors"].append("No files attached, or wrong file input name")
+        else:
+            data["errors"], data["warnings"] = upload_bulk_parts(request.FILES.get('file'), request.user)
+            print data["errors"]
+        return JsonResponse(data)
+
+    return HttpResponseRedirect("/digital/analysis/")

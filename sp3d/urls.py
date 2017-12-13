@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """part_management URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -33,6 +34,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^hub/', include('hub.urls')),
     url(r'^digital/', include('digital.urls')),
-    url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
+    url(r'^inbox/notifications/', include(notifications.urls, namespace='notifications')),
     url(r'^', RedirectView.as_view(pattern_name='login_page', permanent=False)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -50,14 +50,14 @@ class Environment_Admin(admin.ModelAdmin):
     fields = ['name','short_description']
     list_display = ('id', 'name','short_description')
 
-# @admin.register(Characteristics)
-# class Characteristics_Admin(admin.ModelAdmin):
-#     # fields = ['color', 'is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy','min_temp', 'max_temp', 'temp_unit','techno_material']
-#     list_display = ('id','is_visual', 'is_transparent','is_rubbery','is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy')
-#     fieldsets = (
-#         (None, {'fields': ('is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','flame_retardancy', 'is_food_grade','min_temp', 'max_temp', 'temp_unit', 'color')}),
-#         # ('FILL ONLY IF CHARACTERISTIC CARD IS LINKED TO A COUPLE TECHNO-MATERIAL', {'fields': ('techno_material',)}),
-#     )
+@admin.register(Characteristics)
+class Characteristics_Admin(admin.ModelAdmin):
+    # fields = ['color', 'is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy','min_temp', 'max_temp', 'temp_unit','techno_material']
+    list_display = ('id','is_visual', 'is_transparent','is_rubbery','is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy')
+    fieldsets = (
+        (None, {'fields': ('is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','flame_retardancy', 'is_food_grade','min_temp', 'max_temp', 'temp_unit', 'color')}),
+        # ('FILL ONLY IF CHARACTERISTIC CARD IS LINKED TO A COUPLE TECHNO-MATERIAL', {'fields': ('techno_material',)}),
+    )
 
 class PartImage_Inline(admin.TabularInline):
     model = PartImage

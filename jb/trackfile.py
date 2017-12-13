@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import ast
 from datetime import datetime

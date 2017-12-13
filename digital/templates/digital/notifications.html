@@ -1,86 +1,157 @@
 {%extends 'digital/base.html'%}
+{% load static %}
+{% load digital_filters %}
 {%block content%}
 
         <div class="content">
             <div class="container-fluid">
-                <div class="card">
-                    <div class="header">
-                        <h4 class="title">Notifications</h4>
-                        <p class="category">Handcrafted by our friend <a target="_blank" href="https://github.com/mouse0270">Robert McIntosh</a>. Please checkout the <a href="http://bootstrap-notify.remabledesigns.com/" target="_blank">full documentation.</a></p>
-
-                    </div>
-                    <div class="content">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5>Notifications Style</h5>
-                                <div class="alert alert-info">
-                                    <span>This is a plain notification</span>
-                                </div>
-                                <div class="alert alert-info">
-                                    <button type="button" aria-hidden="true" class="close">×</button>
-                                    <span>This is a notification with close button.</span>
-                                </div>
-                                <div class="alert alert-info alert-with-icon" data-notify="container">
-                                    <button type="button" aria-hidden="true" class="close">×</button>
-                                    <span data-notify="icon" class="ti-bell"></span>
-                                    <span data-notify="message">This is a notification with close button and icon.</span>
-                                </div>
-                                <div class="alert alert-info alert-with-icon" data-notify="container">
-                                    <button type="button" aria-hidden="true" class="close">×</button>
-                                    <span data-notify="icon" class="ti-pie-chart"></span>
-                                    <span data-notify="message">This is a notification with close button and icon and have many lines. You can see that the icon and the close button are always vertically aligned. This is a beautiful notification. So you don't have to worry about the style.</span>
-                                </div>
+                <div class="row">
+                    <div class="col-md-12 col-lg-6">
+                        <div class="card">
+                            <div class="header">
+                                <h4 class="title">Received</h4>
                             </div>
-                            <div class="col-md-6">
-                                <h5>Notification states</h5>
-                                <div class="alert alert-info">
-                                    <button type="button" aria-hidden="true" class="close">×</button>
-                                    <span><b> Info - </b> This is a regular notification made with ".alert-info"</span>
-                                </div>
-                                <div class="alert alert-success">
-                                    <button type="button" aria-hidden="true" class="close">×</button>
-                                    <span><b> Success - </b> This is a regular notification made with ".alert-success"</span>
-                                </div>
-                                <div class="alert alert-warning">
-                                    <button type="button" aria-hidden="true" class="close">×</button>
-                                    <span><b> Warning - </b> This is a regular notification made with ".alert-warning"</span>
-                                </div>
-                                <div class="alert alert-danger">
-                                    <button type="button" aria-hidden="true" class="close">×</button>
-                                    <span><b> Danger - </b> This is a regular notification made with ".alert-danger"</span>
+                            <div class="content">
+                                <div class="row">
+                                    <div class="col-md-3 text-center">
+                                        <ul class="nav nav-pills nav-stacked fw-600" style="font-size:14px;">
+                                            <li class="active"><a data-toggle="tab" href="#tab-team-notif" role="tab" aria-controls="tab-team-notif" aria-selected="true">Team</a></li>
+                                            <li><a data-toggle="tab" href="#tab-sp3d-notif" role="tab" aria-controls="tab-sp3d-notif" aria-selected="false">Spare Parts 3D</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="tab-content notifications-container">
+                                            <div class="tab-pane fade active in" id="tab-team-notif" role="tabpanel" aria-labelledby="Team Notifications">
+                                                <div class="list-group" id="list-team-notif" role="tablist">
+                                                    {%for notif in notifications%}
+                                                    {% if notif.actor.organisation == user.organisation %}
+                                                    <div class="notification list-group-item {%if notif.unread%}new-notif{%endif%}" data-notif-id="{{notif.id}}">
+                                                        <div class="notif-header" data-toggle="collapse" href="#team-notif-{{notif.id}}" aria-expanded="false" aria-controls="team-notif-{{notif.id}}">
+                                                            <i class="fa fa-fw {%if notif.unread%}fa-circle text-success{%else %}fa-circle-o{%endif%}"></i>
+                                                            <span class="badge pull-right badge-{{notif.level}}">{{notif.timestamp|days_from_date}}</span>
+                                                            <h5>
+                                                                {{notif.actor.first_name}} {{notif.actor.last_name}} -
+                                                                <span class="text-muted" style="font-size:12px">{{notif.verb}}</span>
+                                                            </h5>
+                                                        </div>
+                                                        <div id="team-notif-{{notif.id}}" class="notif-detail collapse text-right" role="tabpanel" aria-labelledby="team-notif-{{notif.id}}" data-parent="#list-team-notif">
+                                                            <p class="text-left">{{notif.description}}</p>
+                                                            <btn class="btn btn-sm btn-success btn-icon btn-notif-team "
+                                                                data-recipient="{{notif.actor.id}}"
+                                                                data-verb="Team Message"
+                                                                data-toggle="modal" data-target="#modalNotif">
+                                                                Reply
+                                                            </btn>
+                                                        </div>
+                                                    </div>
+                                                    {%endif%}
+                                                    {%endfor%}
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane fade" id="tab-sp3d-notif" role="tabpanel" aria-labelledby="SP3D Notifications">
+                                                <div class="list-group" id="list-sp3d-notif" role="tablist">
+                                                    {%for notif in notifications%}
+                                                    {% if notif.actor.organisation.name == "Spare Parts 3D" %}
+                                                    <div class="notification list-group-item {%if notif.unread%}new-notif{%endif%}" data-notif-id="{{notif.id}}">
+                                                        <div class="notif-header" data-toggle="collapse" href="#sp3d-notif-{{notif.id}}" aria-expanded="false" aria-controls="sp3d-notif-{{notif.id}}">
+                                                            <i class="fa fa-fw {%if notif.unread%}fa-circle text-success{%else %}fa-circle-o{%endif%}"></i>
+                                                            <span class="badge pull-right badge-{{notif.level}}">{{notif.timestamp|days_from_date}}</span>
+                                                            <h5>
+                                                                {{notif.actor.first_name}} {{notif.actor.last_name}} -
+                                                                <span class="text-muted" style="font-size:12px">{{notif.verb}}</span>
+                                                            </h5>
+                                                        </div>
+                                                        <div id="sp3d-notif-{{notif.id}}" class="notif-detail collapse text-right" role="tabpanel" aria-labelledby="sp3d-notif-{{notif.id}}" data-parent="#list-sp3d-notif">
+                                                            <p class="text-left">{{notif.description}}</p>
+                                                            <btn class="btn btn-sm btn-success btn-icon btn-notif-team "
+                                                                data-recipient="{{notif.actor.id}}"
+                                                                data-verb="Team Message"
+                                                                data-toggle="modal" data-target="#modalNotif">
+                                                                Reply
+                                                            </btn>
+                                                        </div>
+                                                    </div>
+                                                    {%endif%}
+                                                    {%endfor%}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <br>
-                        <br>
-                        <div class="places-buttons">
-                            <div class="row">
-                                <div class="col-md-9">
-                                    <h5>Notifications Places
-                                        <p class="category">Click to view notifications</p>
-                                    </h5>
-                                </div>
+                    </div>
+                    <div class="col-md-12 col-lg-6">
+                        <div class="card">
+                            <div class="header">
+                                <h4 class="title">Sent</h4>
                             </div>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <button class="btn btn-default btn-block" onclick="demo.showNotification('top','left')">Top Left</button>
-                                </div>
-                                <div class="col-md-3">
-                                    <button class="btn btn-default btn-block" onclick="demo.showNotification('top','center')">Top Center</button>
-                                </div>
-                                <div class="col-md-3">
-                                    <button class="btn btn-default btn-block" onclick="demo.showNotification('top','right')">Top Right</button>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <button class="btn btn-default btn-block" onclick="demo.showNotification('bottom','left')">Bottom Left</button>
-                                </div>
-                                <div class="col-md-3">
-                                    <button class="btn btn-default btn-block" onclick="demo.showNotification('bottom','center')">Bottom Center</button>
-                                </div>
-                                <div class="col-md-3">
-                                    <button class="btn btn-default btn-block" onclick="demo.showNotification('bottom','right')">Bottom Right</button>
+                            <div class="content">
+                                <div class="row">
+                                    <div class="col-md-3 text-center">
+                                        <ul class="nav nav-pills nav-stacked fw-600" style="font-size:14px;">
+                                            <li class="active"><a data-toggle="tab" href="#tab-team-snotif" role="tab" aria-controls="tab-team-snotif" aria-selected="true">Team</a></li>
+                                            <li><a data-toggle="tab" href="#tab-sp3d-snotif" role="tab" aria-controls="tab-sp3d-snotif" aria-selected="false">Spare Parts 3D</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="tab-content notifications-container">
+                                            <div class="tab-pane fade active in" id="tab-team-snotif" role="tabpanel" aria-labelledby="Team Notifications">
+                                                <div class="list-group" id="list-team-snotif" role="tablist">
+                                                    {%for notif in notifications_sent%}
+                                                    {% if notif.recipient.organisation == user.organisation %}
+                                                    <div class="notification list-group-item {%if notif.unread%}new-notif{%endif%}">
+                                                        <div class="notif-header" data-toggle="collapse" href="#team-snotif-{{notif.id}}" aria-expanded="false" aria-controls="team-snotif-{{notif.id}}">
+                                                            <i class="fa fa-fw {%if notif.unread%}fa-circle text-success{%else %}fa-circle-o{%endif%}"></i>
+                                                            <span class="badge pull-right badge-{{notif.level}}">{{notif.timestamp|days_from_date}}</span>
+                                                            <h5>
+                                                                {{notif.recipient.first_name}} {{notif.recipient.last_name}} -
+                                                                <span class="text-muted" style="font-size:12px">{{notif.verb}}</span>
+                                                            </h5>
+                                                        </div>
+                                                        <div id="team-snotif-{{notif.id}}" class="notif-detail collapse text-right" role="tabpanel" aria-labelledby="team-snotif-{{notif.id}}" data-parent="#list-team-notif">
+                                                            <p class="text-left">{{notif.description}}</p>
+                                                            <btn class="btn btn-sm btn-success btn-icon btn-notif-team "
+                                                                data-recipient="{{notif.recipient.id}}"
+                                                                data-verb="Team Message"
+                                                                data-toggle="modal" data-target="#modalNotif">
+                                                                Message
+                                                            </btn>
+                                                        </div>
+                                                    </div>
+                                                    {%endif%}
+                                                    {%endfor%}
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane fade" id="tab-sp3d-snotif" role="tabpanel" aria-labelledby="SP3D Notifications">
+                                                <div class="list-group" id="list-sp3d-snotif" role="tablist">
+                                                    {%for notif in notifications_sent%}
+                                                    {% if notif.recipient.organisation.name == "Spare Parts 3D" %}
+                                                    <div class="notification list-group-item {%if notif.unread%}new-notif{%endif%}">
+                                                        <div class="notif-header" data-toggle="collapse" href="#sp3d-snotif-{{notif.id}}" aria-expanded="false" aria-controls="sp3d-snotif-{{notif.id}}">
+                                                            <i class="fa fa-fw {%if notif.unread%}fa-circle text-success{%else %}fa-circle-o{%endif%}"></i>
+                                                            <span class="badge pull-right badge-{{notif.level}}">{{notif.timestamp|days_from_date}}</span>
+                                                            <h5>
+                                                                {{notif.recipient.first_name}} {{notif.recipient.last_name}} -
+                                                                <span class="text-muted" style="font-size:12px">{{notif.verb}}</span>
+                                                            </h5>
+                                                        </div>
+                                                        <div id="sp3d-snotif-{{notif.id}}" class="notif-detail collapse text-right" role="tabpanel" aria-labelledby="sp3d-snotif-{{notif.id}}" data-parent="#list-sp3d-notif">
+                                                            <p class="text-left">{{notif.description}}</p>
+                                                            <btn class="btn btn-sm btn-success btn-icon btn-notif-team "
+                                                                data-recipient="{{notif.recipient.id}}"
+                                                                data-verb="Team Message"
+                                                                data-toggle="modal" data-target="#modalNotif">
+                                                                Message
+                                                            </btn>
+                                                        </div>
+                                                    </div>
+                                                    {%endif%}
+                                                    {%endfor%}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -88,6 +159,9 @@
                 </div>
             </div>
         </div>
-
-
 {%endblock content%}
+
+{%block extrascript%}
+{%include 'digital/utils/modal-notif.html'%}
+<script src="{% static 'digital/js/notifications.js' %}?dev={% random_int %}"></script>
+{%endblock extrascript%}

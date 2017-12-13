@@ -1,11 +1,11 @@
-
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from digital.models import Part, PartImage, PartBulkFile
 from digital.decorators import postpone
 from django.template.loader import get_template
 from django.core.mail import send_mail, EmailMultiAlternatives, EmailMessage
-from digital.models import Part, PartImage, PartBulkFile, Characteristics, PartType, ApplianceFamily
-from jb.models import CoupleTechnoMaterial, Technology, Material
+from digital.models import Part, PartImage, PartBulkFile, Characteristics, PartType, ApplianceFamily, BulkPartUpload
+from jb.models import CoupleTechnoMaterial, Technology, Material, FinalCard
 from django.db.models import Case, IntegerField, Sum, When, Q, Count
 from django.shortcuts import get_object_or_404
 import tempfile
@@ -170,6 +170,163 @@ def getfiledata(file):
 
 
 
+def upload_bulk_parts(file, user):
+    error_list=[]
+    warning_list=[]
+    fieldnames = ['reference', 'name', 'type', 'appliance_family', 'weight', 'x', 'y', 'z']
+    filename, file_extension = os.path.splitext('%s'%file)
+
+    # check file extension
+    if not file_extension.lower() == '.csv':
+        error_list.append("WRONG FILE EXTENSION")
+        return error_list, warning_list
+
+    # create temporary file
+    temp = tempfile.NamedTemporaryFile(delete = False)
+    for chunk in file.chunks():
+        temp.write(chunk)
+    temp.close()
+
+    # create a instance of Bulk PartUpload
+    bulk_upload = BulkPartUpload(created_by = user)
+    bulk_upload.file = file
+    bulk_upload.save()
+
+    # treat temporary file to populate database
+    with open(temp.name, 'rb+') as csvfile:
+        reader = csv.DictReader(csvfile, fieldnames = fieldnames)
+        for index, row in enumerate(reader, start=1):
+            if index == 1:continue
+            print index
+            if row.get('reference',None):
+                part, error_dic, warning_dic = processPartRow(row, bulk_upload, user)
+                if error_dic:
+                    error_dic["row_index"] = index
+                    error_list.append(error_dic)
+                if warning_dic:
+                    warning_dic["row_index"] = index
+                    warning_list.append(warning_dic)
+
+    bulk_upload.errors = "%s"%error_list
+    bulk_upload.warnings = "%s"%warning_list
+    bulk_upload.save()
+    os.unlink(temp.name)
+    return error_list, warning_list
+
+def processPartRow(row, bulk_upload, user):
+    part= None
+    error_dic={}
+    warning_dic={}
+
+    # extract all row values
+    _reference = row.get('reference',None)
+    _name = row.get('name',None)
+    _appliance_family = row.get('appliance_family',None)
+    _type = row.get('type',None)
+    _weight = row.get('weight',None)
+    _x = row.get('x',None)
+    _y = row.get('y',None)
+    _z = row.get('z',None)
+
+    # check errors on fields
+    # MANDATORY FIELD  - reference
+    if _reference:
+        _reference = _reference.upper()
+    else:
+        error_dic["reference"] = "Part Reference is missing"
+    # MANDATORY FIELD  - name
+    if _name:
+        _name = unicode(_name.decode('latin'))
+    else:
+        error_dic["name"] = "Part Name is missing"
+    #  MANDATORY FIELD  - appliance family
+    if not _appliance_family:
+        error_dic["appliance_family"] = "Appliance Family is missing"
+    #  MANDATORY FIELD  - weight
+    if _weight:
+        try:
+            _weight = float(_weight)
+        except ValueError:
+            error_dic["weight"] = "Part Weight is not a float"
+    else:
+        error_dic["weight"] = "Part Weight is missing"
+    #  OPTIONAL FIELD  - Part type
+    if not _type:
+        warning_dic["type"] = "No Part Type specified"
+    #  OPTIONAL FIELDS  - Dimensions
+    if _x and _y and _z:
+        try:
+            _x = float(_x)
+            _y = float(_y)
+            _z = float(_z)
+        except ValueError:
+            error_dic["x_y_z"] = "Part Dimensions are not floats"
+    else:
+        warning_dic["x_y_z"] = "Part Dimensions are missing"
+
+
+    # if no errors, find or create the part
+    if not error_dic:
+        try:
+            part = Part.objects.get(organisation = user.organisation, reference = _reference)
+        except Part.DoesNotExist:
+            part = Part(created_by = user, organisation=user.organisation, reference=_reference)
+
+        part.bulk_upload = bulk_upload
+        part.name = _name
+        part.weight = _weight
+        if _x and _y and _z:
+            part.length = _x
+            part.width = _y
+            part.height = _z
+
+        temp_type = None
+        if _type and _appliance_family:
+            temp_type = PartType.objects.filter(name__icontains = _type, appliance_family__name__icontains = _appliance_family).first()
+        if not temp_type:
+            type_prediction = part_type_from_name_1(_name, _appliance_family)
+            temp_type = type_prediction.get('part_type', None)
+        part.type = temp_type
+        if not temp_type:
+            warning_dic["part_type"] = "Part Type not found"
+
+        # save part
+        part.save()
+
+        if part.type:
+            if part.type.characteristics:
+                new_charac = part.type.characteristics
+                new_charac.pk = part.characteristics.pk if part.characteristics else None
+                new_charac.part_type = None
+                new_charac.part = part
+                new_charac.save()
+            else:
+                warning_dic["characteristics"] = "Part Type %s - %s - %s has No characteristics attached"%(part.type.id, part.type.name, part.type.appliance_family)
+
+
+
+        # find couple techno_material match
+        list_couple_techno_material, perfect_match, errors, discarded_criterias = findTechnoMaterial(part, fallback_mode=False)
+        if errors:
+            error_dic["find_techno_material"] = errors
+        if perfect_match and list_couple_techno_material:
+            if part.final_card:
+                final_card = part.final_card
+            else:
+                final_card = FinalCard(part = part)
+            final_card.techno_material = list_couple_techno_material.first()
+            final_card.save()
+
+        # refresh instance of part
+        part.refresh_from_db()
+
+    return part, error_dic, warning_dic
+
+
+
+
+
+
 
 
 def part_type_prevision(file):
@@ -180,7 +337,7 @@ def part_type_prevision(file):
     # check file extension
     if not file_extension.lower() == '.csv':
         error_list.append("WRONG FILE EXTENSION")
-        return error_list,
+        return error_list, warning_list
 
     fieldnames = ['name_eng','hierarchy']
 
@@ -202,7 +359,11 @@ def part_type_prevision(file):
             print index
             if row.get('name_eng',None):
                 # yolo = part_type_from_name(row['name_eng'])
-                yolo = part_type_from_name_1(row['name_eng'], row['hierarchy'] )
+                try:
+                    family_code = row['hierarchy'].split('-')[1]
+                except IndexError:
+                    family_code = ""
+                yolo = part_type_from_name_1(row['name_eng'], family_code )
 
                 part_type_name = yolo['part_type'].name if yolo['part_type'] else "Unknown"
                 appliance_family = yolo['appliance_family'].name if yolo['appliance_family'] else "Unknown"
@@ -327,6 +488,17 @@ def RepresentsInt(s):
     except ValueError:
         return False
 
+def RepresentsFloat(s):
+    try:
+        _float = float(s)
+        return _float
+    except ValueError:
+        return False
+
+
+
+
+
 def CleanCSV(dic):
     error={}
     warning={}
@@ -362,7 +534,7 @@ def CleanCSV(dic):
     # check if technology exists
     if dic.get('technology',None):
         try:
-            cleaned_dic['technology'] = Technology.objects.get(name=dic['technology'])
+            cleaned_dic['technology'] = Technology.objects.get(name__iexact=dic['technology'])
         except Technology.DoesNotExist:
             error['technology'] = 'Technology %s does not match a technology in database'%dic['technology']
 
@@ -370,7 +542,7 @@ def CleanCSV(dic):
     # check if material exists
     if dic.get('material', None):
         try:
-            cleaned_dic['material'] = Material.objects.get(name=dic['material'])
+            cleaned_dic['material'] = Material.objects.get(name__iexact=dic['material'])
         except Material.DoesNotExist:
             error['material'] = 'Material %s does not match a material in database'%dic['material']
 
@@ -378,8 +550,11 @@ def CleanCSV(dic):
     # check if part_type exists
     if dic.get('part_type', None) and dic.get('appliance_family', None):
         try:
-            temp_appliance_family = ApplianceFamily.objects.get(name=dic['appliance_family'])
-            cleaned_dic['part_type'] = PartType.objects.get(name=dic['part_type'], appliance_family = temp_appliance_family)
+            print "appliance family:%s"%dic['appliance_family']
+            print "part type:%s"%dic['part_type']
+            temp_appliance_family = ApplianceFamily.objects.get(name__iexact = dic['appliance_family'])
+            print temp_appliance_family
+            cleaned_dic['part_type'] = PartType.objects.get(name = dic['part_type'], appliance_family = temp_appliance_family)
             cleaned_dic['part_type'].keywords = dic['keywords']
             cleaned_dic['part_type'].save()
         except ApplianceFamily.DoesNotExist:
@@ -401,7 +576,11 @@ def CleanCSV(dic):
 
     return error, warning, cleaned_dic
 
-def findTechnoMaterial(part):
+
+
+
+
+def findTechnoMaterial(part, fallback_mode=True):
     errors = []
     list_couple_techno_material = None
     args = []
@@ -412,7 +591,7 @@ def findTechnoMaterial(part):
     # check if part has characteristics attached
     if not part.characteristics:
         errors.append("No prevision Possible, Part has no characteristics attached !")
-        return None, errors, None
+        return list_couple_techno_material, perfect_match, errors, discarded_criterias
 
 
     # set up first filters as args for Q and kwargs for rest
@@ -467,81 +646,78 @@ def findTechnoMaterial(part):
     print "QUERY 1"
     print kwargs
 
-    # 2 query filter if 1 had no match
-    if (not list_couple_techno_material) and ('material__characteristics__min_temp__lte' in kwargs) and ('material__characteristics__max_temp__gte' in kwargs):
-        discarded_criterias['min temp'] = kwargs.pop('material__characteristics__min_temp__lte')
-        discarded_criterias['max temp'] = kwargs.pop('material__characteristics__max_temp__gte')
-        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
-        print "QUERY 2"
-        print kwargs
+    if fallback_mode:
+        # 2 query filter if 1 had no match
+        if (not list_couple_techno_material) and ('material__characteristics__min_temp__lte' in kwargs) and ('material__characteristics__max_temp__gte' in kwargs):
+            discarded_criterias['min temp'] = kwargs.pop('material__characteristics__min_temp__lte')
+            discarded_criterias['max temp'] = kwargs.pop('material__characteristics__max_temp__gte')
+            list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+            print "QUERY 2"
+            print kwargs
 
-    # 3 query filter if 2 had no match
-    if (not list_couple_techno_material) and ('characteristics__is_transparent' in kwargs):
-        discarded_criterias['transparent'] = kwargs.pop('characteristics__is_transparent')
-        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
-        print "QUERY 3"
-        print kwargs
+        # 3 query filter if 2 had no match
+        if (not list_couple_techno_material) and ('characteristics__is_transparent' in kwargs):
+            discarded_criterias['transparent'] = kwargs.pop('characteristics__is_transparent')
+            list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+            print "QUERY 3"
+            print kwargs
 
-    # 4 query filter if 3 had no match
-    if (not list_couple_techno_material) and ('material__characteristics__is_flame_retardant' in kwargs):
-        discarded_criterias['flame retardant'] = kwargs.pop('material__characteristics__is_flame_retardant')
-        if 'material__characteristics__flame_retardancy__in' in kwargs: kwargs.pop('material__characteristics__flame_retardancy__in')
-        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
-        print "QUERY 4"
-        print kwargs
+        # 4 query filter if 3 had no match
+        if (not list_couple_techno_material) and ('material__characteristics__is_flame_retardant' in kwargs):
+            discarded_criterias['flame retardant'] = kwargs.pop('material__characteristics__is_flame_retardant')
+            if 'material__characteristics__flame_retardancy__in' in kwargs: kwargs.pop('material__characteristics__flame_retardancy__in')
+            list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+            print "QUERY 4"
+            print kwargs
 
-    # 5 query filter if 4 had no match
-    if (not list_couple_techno_material) and ('characteristics__is_chemical_resistant' in kwargs):
-        discarded_criterias['chemical resistant'] = kwargs.pop('characteristics__is_chemical_resistant')
-        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
-        print "QUERY 5"
-        print kwargs
+        # 5 query filter if 4 had no match
+        if (not list_couple_techno_material) and ('characteristics__is_chemical_resistant' in kwargs):
+            discarded_criterias['chemical resistant'] = kwargs.pop('characteristics__is_chemical_resistant')
+            list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+            print "QUERY 5"
+            print kwargs
 
-    # 6 query filter if 5 had no match
-    if (not list_couple_techno_material) and ('characteristics__is_water_resistant' in kwargs):
-        discarded_criterias['water resistant'] = kwargs.pop('characteristics__is_water_resistant')
-        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
-        print "QUERY 6"
-        print kwargs
+        # 6 query filter if 5 had no match
+        if (not list_couple_techno_material) and ('characteristics__is_water_resistant' in kwargs):
+            discarded_criterias['water resistant'] = kwargs.pop('characteristics__is_water_resistant')
+            list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+            print "QUERY 6"
+            print kwargs
 
-    # 7 query filter if 6 had no match
-    if (not list_couple_techno_material) and ('characteristics__is_visual' in kwargs):
-        discarded_criterias['visual part'] = kwargs.pop('characteristics__is_visual')
-        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
-        print "QUERY 7"
-        print kwargs
+        # 7 query filter if 6 had no match
+        if (not list_couple_techno_material) and ('characteristics__is_visual' in kwargs):
+            discarded_criterias['visual part'] = kwargs.pop('characteristics__is_visual')
+            list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+            print "QUERY 7"
+            print kwargs
 
-    # 8 query filter if 7 had no match
-    if (not list_couple_techno_material) and ('characteristics__is_food_grade' in kwargs):
-        discarded_criterias['food grade'] = kwargs.pop('characteristics__is_food_grade')
-        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
-        print "QUERY 8"
-        print kwargs
+        # 8 query filter if 7 had no match
+        if (not list_couple_techno_material) and ('characteristics__is_food_grade' in kwargs):
+            discarded_criterias['food grade'] = kwargs.pop('characteristics__is_food_grade')
+            list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+            print "QUERY 8"
+            print kwargs
 
-    # 9 query filter if 8 had no match
-    if (not list_couple_techno_material) and ('characteristics__is_rubbery' in kwargs):
-        discarded_criterias['rubbery'] = kwargs.pop('characteristics__is_rubbery')
-        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
-        print "QUERY 9"
-        print kwargs
+        # 9 query filter if 8 had no match
+        if (not list_couple_techno_material) and ('characteristics__is_rubbery' in kwargs):
+            discarded_criterias['rubbery'] = kwargs.pop('characteristics__is_rubbery')
+            list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+            print "QUERY 9"
+            print kwargs
 
     return list_couple_techno_material, perfect_match, errors, discarded_criterias
 
 
 
 
-def part_type_from_name_1(name, hierarchy):
+def part_type_from_name_1(name, family_code):
     if not name:return None
     result = {'intersection':0, 'intersection_f':0, 'part_type': None, 'appliance_family':None}
     name_vector = text_to_vector(name)
-    try:
-        family_code = hierarchy.split('-')[1]
-    except IndexError:
-        family_code = ""
 
     # match with appliance type first
     if family_code:
-        result['appliance_family'] = ApplianceFamily.objects.filter(name__istartswith = family_code).first()
+        result['appliance_family'] = ApplianceFamily.objects.filter(name__icontains = family_code).first()
     if not result['appliance_family']:
         appliances_f = ApplianceFamily.objects.all()
         for appliance_f in appliances_f:
@@ -553,14 +729,20 @@ def part_type_from_name_1(name, hierarchy):
 
     if result['appliance_family']:
         part_types = PartType.objects.filter(appliance_family = result['appliance_family'])
-    else:
-        part_types = PartType.objects.all()
+        for part_type in part_types:
+            intersection = get_intersection(text_to_vector(part_type.name + part_type.keywords), name_vector)
+            if intersection and intersection > result['intersection']:
+                result['part_type'] = part_type
+                result['intersection'] = intersection
 
-    for part_type in part_types:
-        intersection = get_intersection(text_to_vector(part_type.name + part_type.keywords), name_vector)
-        if intersection and intersection > result['intersection']:
-            result['part_type'] = part_type
-            result['intersection']=intersection
+    # if no match or no appliance family, check in category Other
+    if (not result['appliance_family']) or (not result['part_type']):
+        part_types = PartType.objects.filter(appliance_family__name__iexact = "Other")
+        for part_type in part_types:
+            intersection = get_intersection(text_to_vector(part_type.name + part_type.keywords), name_vector)
+            if intersection and intersection > result['intersection']:
+                result['part_type'] = part_type
+                result['intersection'] = intersection
 
     return result
 

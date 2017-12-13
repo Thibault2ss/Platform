@@ -8,6 +8,7 @@ from django.dispatch.dispatcher import receiver
 from django.conf import settings
 from django.core import serializers
 from storages.backends.s3boto3 import S3Boto3StorageFile
+from datetime import datetime
 # Create your models here.
 
 class Characteristics(models.Model):
@@ -178,12 +179,12 @@ class Environment(models.Model):
 class Part(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True)
+    reference = models.CharField(max_length=300, null = True)
+    name = models.CharField(max_length=200, default = '')
     type = models.ForeignKey('PartType', on_delete=models.SET_NULL, null=True, blank=True)
     characteristics = models.OneToOneField('Characteristics', null=True, blank=True, on_delete = models.SET_NULL, related_name='part_characteristics')
     organisation = models.ForeignKey('users.Organisation', on_delete=models.SET_NULL, null=True)
     appliance = models.ManyToManyField(Appliance, blank=True)
-    reference = models.CharField(max_length=200, null = True, unique = True)
-    name = models.CharField(max_length=200, default = '')
     material = models.ForeignKey('jb.Material', on_delete=models.SET_NULL, null=True, blank=True)
     length = models.FloatField(max_length=10, null=True, blank=True)
     width = models.FloatField(max_length=10, null=True, blank=True)
@@ -194,14 +195,36 @@ class Part(models.Model):
     status = models.ForeignKey('ClientPartStatus', on_delete=models.SET_DEFAULT, default=1)
     final_card = models.OneToOneField('jb.FinalCard', on_delete=models.SET_NULL, null=True, blank=True, related_name = 'material_final_card')
     notify_status_to_client = models.BooleanField("Notify Part Status to Client", default=False, blank=True)
+    bulk_upload = models.ForeignKey('BulkPartUpload', on_delete=models.SET_NULL, null=True, blank=True)
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s" % (self.name,)
+
+    class Meta:
+        unique_together = (('reference', 'organisation'),)
+
+
+def get_bulkpartupload_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    date = datetime.now().strftime("%Y%m%d-%H%M%S")
+    return '{0}/bulk-uploads/upload-{1}.csv'.format(instance.created_by.organisation.name, date)
+
+class BulkPartUpload(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True)
+    file = models.ImageField(storage = PrivateMediaStorage(bucket='sp3d-clients'), upload_to = get_bulkpartupload_path, blank=True)
+    errors = models.TextField(null=True, blank=True)
+    warnings = models.TextField(null=True, blank=True)
+    def __str__(self):
+        return "%s" % (self.id, self.file.url)
+
+    def natural_key(self):
+        return self.file.url
+
 
 def get_image_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
     return '{0}/parts/{1}/images/{2}'.format(instance.part.organisation.name, instance.part.reference, filename)
-
 
 class PartImage(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)

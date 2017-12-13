@@ -1,5 +1,7 @@
 {% load static %}
 {% load digital_filters %}
+{% load notifications_tags %}
+{% notifications_unread as unread_count %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -82,13 +84,7 @@
                         <p>Qualification</p>
                     </a>
                 </li> -->
-                <!-- <li class="{% if page == 'dashboard' %}active{% endif %}">
-                    <a href="/digital/">
-                        <i class="ti-panel"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li> -->
-                <div class="profile-menu collapsed" style="border:0px;display:flex;align-items:center;cursor:pointer;" data-toggle="collapse" href="#profile-menu-collapse">
+                <div class="profile-menu" style="border:0px;display:flex;align-items:center;justify-content:center;">
                     {%if user.profile_thumb%}
                     <div class='user-pic' style="background-image: url({{user.profile_thumb.url}});"></div>
                     {%else%}
@@ -98,38 +94,41 @@
                         <span style="font-weight:700;font-size:1.3rem;color:#fff;">{{user.first_name}}</span><br>
                         <span style="font-weight:500;font-size:1.3rem;color:#fff;opacity:0.8;">{{user.organisation.name}}</span>
                     </div>
-                    <b class="caret" style="margin-left:15px;color:#f1f1f1"></b>
+                    <!-- <b class="caret" style="margin-left:15px;color:#f1f1f1"></b> -->
                 </div>
 
-                <div id="profile-menu-collapse" class="collapse" aria-expanded="false">
+                <!-- <div id="profile-menu-collapse" class="collapse" aria-expanded="false">
                       <li class="sub-menu logout">
                           <a href="javascript:logout()" style="display:block;padding:10px 25px 10px 25px;">
                               <p><i class="fa fa-sign-out"></i>Sign Out</p>
                         </a>
                     </li>
-                </div>
-                <li class="{% if page == 'account' %}active{% endif %}">
-                    <a href="/digital/account/">
-                        <i class="fa fa-user"></i>
-                        <p>Account</p>
-                    </a>
-                </li>
+                </div> -->
                 <!-- <li class="{% if page == 'printers' %}active{% endif %}">
                     <a href="/digital/printers/" style="display:flex;align-items:center;">
                         <img style="height:35px;margin: 0 15px 0 3px;" src="{% static 'digital/img/extruder.png' %}"></i>
                         <p>Printers</p>
                     </a>
                 </li> -->
+                <li class="{% if page == 'dashboard' %}active{% endif %}">
+                    <a href="/digital/">
+                        <i class="fa fa-bar-chart"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
                 <li class="{% if page == 'parts' %}active{% endif %}">
                     <a href="/digital/parts/">
                         <i class="fa fa-cubes"></i>
                         <p>Parts</p>
                     </a>
                 </li>
-                <li class="">
-                    <a href="#">
+                <li class="{% if page == 'notifications' %}active{% endif %}">
+                    <a href="/digital/notifications/">
                         <i class="fa fa-bell"></i>
                         <p>Notifications</p>
+                        {% if unread_count %}
+                        <span class="label label-danger notification-count pull-right" style="font-size:1.1rem;">{{ unread_count }}</span>
+                        {% endif %}
                         <span class="label label-warning pull-right" style="font-size:1.1rem;">soon ...</span>
                     </a>
                 </li>
@@ -138,6 +137,13 @@
                     <a href="#">
                         <i class="fa fa-credit-card"></i>
                         <p>Billing</p>
+                        <span class="label label-warning pull-right" style="font-size:1.1rem;">soon ...</span>
+                    </a>
+                </li>
+                <li class="{% if page == 'analysis' %}active{% endif %}">
+                    <a href="/digital/analysis/">
+                        <i class="fa fa-magic"></i>
+                        <p>Analysis</p>
                         <span class="label label-warning pull-right" style="font-size:1.1rem;">soon ...</span>
                     </a>
                 </li>
@@ -171,12 +177,21 @@
                         <p>Notifications</p>
                     </a>
                 </li> -->
-				<!-- <li class="active-pro">
-                    <a href="#">
-                        <i class="ti-export"></i>
-                        <p>Upload Parts</p>
+
+            </ul>
+            <ul class="nav" style="position:absolute;bottom:0px;width:100%;">
+                <li class="{% if page == 'account' %}active{% endif %}">
+                    <a href="/digital/account/">
+                        <i class="fa fa-user"></i>
+                        <p>Account</p>
                     </a>
-                </li> -->
+                </li>
+				<li class="logout">
+                    <a href="javascript:logout()">
+                        <i class="fa fa-sign-out"></i>
+                        <p>Sign Out</p>
+                    </a>
+                </li>
             </ul>
     	</div>
     </div>

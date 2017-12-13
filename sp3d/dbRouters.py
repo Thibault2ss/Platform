@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class jbRouter(object):
     """
     A router to control all database operations on models in the

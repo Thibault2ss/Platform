@@ -56,8 +56,8 @@ class FinalCard(models.Model):
 
     unit_price = models.FloatField("Unit Price",max_length=20, default = 0.0)
     currency = models.CharField("Currency", max_length=10, choices = CURRENCY_CHOICE, default="USD")
-    lead_time = models.IntegerField("Lead time (days)", default=3)
-    techno_material = models.ForeignKey(CoupleTechnoMaterial, on_delete=models.CASCADE, verbose_name = 'Couple Techno-Material')
+    lead_time = models.IntegerField("Lead time (days)", default=10)
+    techno_material = models.ForeignKey(CoupleTechnoMaterial, on_delete=models.CASCADE, verbose_name = 'Couple Techno-Material', null=True, blank=True)
 
     def __str__(self):
         return "%s" % (self.id,)
@@ -70,6 +70,12 @@ class FinalCard(models.Model):
             'techno_material':self.techno_material.natural_key(),
             'lead_time':self.lead_time
             }
+# save opposite one to one key
+@receiver(post_save, sender=FinalCard)
+def save_reverse_onetoones_finalcard(sender, created, instance, **kwargs):
+    if instance.part:
+        instance.part.final_card = instance
+        instance.part.save()
 
 class Part(models.Model):
 

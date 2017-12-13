@@ -54,10 +54,10 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.linkedin_oauth2',
     'address',
+    'notifications',
     'storages',
 
     'users',
-    'notifications',
     'jb',
     'hub',
     'digital',

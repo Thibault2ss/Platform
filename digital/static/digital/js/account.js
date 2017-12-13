@@ -3,7 +3,7 @@ $(document).ready(function(){
 // INIT MAP
 // initmap for google maps###################################################
     function initMap(lat,lng){
-        var myLatlng = new google.maps.LatLng(lat, lng);
+        var myLatlng = new google.maps.LatLng(lat,lng);
         var mapOptions = {
           zoom: 13,
           center: myLatlng,
@@ -23,7 +23,9 @@ $(document).ready(function(){
     };
     // end init map #########################################################3
     if (!is_admin && (typeof latitude_org !== 'undefined') && (typeof longitude_org !== 'undefined') && (parseFloat(latitude_org)!=='NaN') && (parseFloat(longitude_org)!=='NaN')){
-        initMap(longitude_org, latitude_org);
+        console.log(longitude_org);
+        console.log(latitude_org);
+        initMap(latitude_org, longitude_org);
     };
 // END INIT MAP
 
@@ -346,7 +348,7 @@ $(document).ready(function(){
             var data = new FormData(this);
             // console.log("received");
             $.ajax({
-                url: '/digital/team-notification/',
+                url: '/digital/notifications/team-notification/',
                 data: data,
                 cache: false,
                 contentType: false,

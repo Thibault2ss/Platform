@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.conf.urls import url, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from . import views
@@ -31,9 +32,12 @@ urlpatterns = [
     url(r'^billing/$', views.billing, name=app_name+'billing'),
     url(r'^table/$', views.table, name=app_name+'table'),
     url(r'^notifications/$', views.notifications, name=app_name+'notifications'),
+    url(r'^notifications/mark-as-read/$', views.mark_notif_as_read, name=app_name+'mark_notif_as_read'),
+    url(r'^notifications/team-notification/$', views.team_notification, name=app_name+'team_notification'),
     url(r'^typography/$', views.typography, name=app_name+'typography'),
     url(r'^icons/$', views.icons, name=app_name+'icons'),
     url(r'^maps/$', views.maps, name=app_name+'maps'),
-    url(r'^team-notification/$', views.team_notification, name=app_name+'team_notification'),
+    url(r'^analysis/$', views.analysis, name=app_name+'analysis'),
+    url(r'^analysis/bulk-part-upload/$', views.bulk_parts_upload, name=app_name+'bulk_parts_upload'),
 
 ]
