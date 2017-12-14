@@ -364,7 +364,7 @@ demo = {
         // console.log(parts_plastic);
         var dataPreferences = {
             series:[parts_plastic, parts_metal],
-            labels: [(parts_plastic*100.0)/parts_total + "%", (parts_metal*100.0)/parts_total +'%']
+            labels: [((parts_plastic*100.0)/parts_total).toFixed(0) + "%", ((parts_metal*100.0)/parts_total).toFixed(0) +'%']
         };
 
         var optionsPreferences = {

@@ -6,7 +6,7 @@ from django.template.loader import get_template
 from django.core.mail import send_mail, EmailMultiAlternatives, EmailMessage
 from digital.models import Part, PartImage, PartBulkFile, Characteristics, PartType, ApplianceFamily, BulkPartUpload
 from jb.models import CoupleTechnoMaterial, Technology, Material, FinalCard
-from django.db.models import Case, IntegerField, Sum, When, Q, Count
+from django.db.models import Case, IntegerField, Sum, When, Q, Count, Max
 from django.shortcuts import get_object_or_404
 import tempfile
 from stl import mesh
@@ -104,6 +104,26 @@ def send_email(html_path, context, subject, from_email, to):
     msg.content_subtype = 'html'
     msg.send()
     return True
+
+def getBulkUploadSumUp(organisation):
+    parts_sumup = None
+    parttype_distrib = []
+    appliance_fam_distrib = []
+    techno_material_distrib = []
+    latest_bulk_upload_part = Part.objects.filter(organisation = organisation, bulk_upload__isnull = False).order_by('-id').first()
+    if latest_bulk_upload_part:
+        latest_bulk_upload = latest_bulk_upload_part.bulk_upload
+        parts_sumup = Part.objects.filter(organisation = organisation, bulk_upload = latest_bulk_upload).aggregate(
+            parts_total = Sum(Case(When(~Q(pk=None), then=1),default = 0, output_field=IntegerField())),
+            parts_with_type = Sum(Case(When(type__isnull=False, then=1), default = 0, output_field=IntegerField())),
+            parts_with_final_card = Sum(Case(When(final_card__isnull=False, then=1), default = 0, output_field=IntegerField())),
+        )
+        appliance_fam_distrib =  Part.objects.filter(organisation = organisation, bulk_upload = latest_bulk_upload, type__isnull=False, type__appliance_family__isnull=False).values('type__appliance_family__name').annotate(count=Count('type__appliance_family__name')).order_by('-count')
+        parttype_distrib =  Part.objects.filter(organisation = organisation, bulk_upload = latest_bulk_upload, type__isnull=False).values('type__name').annotate(count=Count('type__name')).order_by('-count')
+        techno_material_distrib =  Part.objects.filter(organisation = organisation, bulk_upload = latest_bulk_upload, final_card__isnull=False, final_card__techno_material__isnull=False).values('final_card__techno_material__technology__name', 'final_card__techno_material__material__name').annotate(count=Count('pk')).order_by('-count')
+
+    return parts_sumup, parttype_distrib, appliance_fam_distrib, techno_material_distrib
+
 
 
 def getPartSumUp(organisation):
@@ -241,7 +261,15 @@ def processPartRow(row, bulk_upload, user):
         error_dic["name"] = "Part Name is missing"
     #  MANDATORY FIELD  - appliance family
     if not _appliance_family:
-        error_dic["appliance_family"] = "Appliance Family is missing"
+        appl_fams = ApplianceFamily.objects.all()
+        for appl_fam in appl_fams:
+            if appl_fam.name.lower() in _name.lower():
+                _appliance_family = appl_fam.name
+                break
+
+    if not _appliance_family:
+        error_dic["appliance_family"] = "Appliance Family is missing and no match was found from name"
+
     #  MANDATORY FIELD  - weight
     if _weight:
         try:
@@ -280,6 +308,7 @@ def processPartRow(row, bulk_upload, user):
             part.width = _y
             part.height = _z
 
+        # find part type
         temp_type = None
         if _type and _appliance_family:
             temp_type = PartType.objects.filter(name__icontains = _type, appliance_family__name__icontains = _appliance_family).first()
@@ -316,6 +345,8 @@ def processPartRow(row, bulk_upload, user):
                 final_card = FinalCard(part = part)
             final_card.techno_material = list_couple_techno_material.first()
             final_card.save()
+        elif part.final_card:
+            part.final_card.delete()
 
         # refresh instance of part
         part.refresh_from_db()
@@ -598,8 +629,20 @@ def findTechnoMaterial(part, fallback_mode=True):
     characs = part.characteristics
     # discriminant criterias:
     kwargs['characteristics__is_rubbery'] = characs.is_rubbery
-    kwargs['characteristics__is_visual'] = characs.is_visual
     kwargs['characteristics__is_transparent'] = characs.is_transparent
+    # non discriminant criterias:
+    kwargs['characteristics__is_visual'] = characs.is_visual
+    kwargs['characteristics__is_water_resistant'] = characs.is_water_resistant
+    kwargs['characteristics__is_chemical_resistant'] = characs.is_chemical_resistant
+    kwargs['material__characteristics__is_flame_retardant'] = characs.is_flame_retardant
+    kwargs['characteristics__is_food_grade'] = characs.is_food_grade
+    if characs.flame_retardancy == 'NA':higher_ret_list = ['NA', 'HB', 'V2', 'V1', 'V0']
+    elif characs.flame_retardancy == 'HB':higher_ret_list = ['HB', 'V2', 'V1', 'V0']
+    elif characs.flame_retardancy == 'V2':higher_ret_list = ['V2', 'V1', 'V0']
+    elif characs.flame_retardancy == 'V1':higher_ret_list = ['V1', 'V0']
+    elif characs.flame_retardancy == 'V0':higher_ret_list = ['V0']
+    kwargs['material__characteristics__flame_retardancy__in'] = higher_ret_list
+
     if part.length and part.width and part.height:
         args.append(
             (Q(technology__max_X__gte=part.length) & Q(technology__max_Y__gte=part.width) & Q(technology__max_Z__gte=part.height)) |
@@ -610,29 +653,31 @@ def findTechnoMaterial(part, fallback_mode=True):
             (Q(technology__max_X__gte=part.height) & Q(technology__max_Y__gte=part.width) & Q(technology__max_Z__gte=part.length))
         )
     # non discriminant criterias:
-    if characs.is_water_resistant:
-        kwargs['characteristics__is_water_resistant'] = characs.is_water_resistant
-    else:
-        discarded_criterias['water resistant'] = characs.is_water_resistant
-    if characs.is_water_resistant:
-        kwargs['characteristics__is_chemical_resistant'] = characs.is_chemical_resistant
-    else:
-        discarded_criterias['chemical resistant'] = characs.is_chemical_resistant
-    if characs.is_flame_retardant:
-        kwargs['material__characteristics__is_flame_retardant'] = characs.is_flame_retardant
-    else:
-        discarded_criterias['flame retardant'] = characs.is_flame_retardant
-    if characs.is_food_grade:
-        kwargs['characteristics__is_food_grade'] = characs.is_food_grade
-    else:
-        discarded_criterias['food grade'] = characs.is_food_grade
-    if characs.is_flame_retardant:
-        if characs.flame_retardancy == 'NA':higher_ret_list = ['NA', 'HB', 'V2', 'V1', 'V0']
-        if characs.flame_retardancy == 'HB':higher_ret_list = ['HB', 'V2', 'V1', 'V0']
-        if characs.flame_retardancy == 'V2':higher_ret_list = ['V2', 'V1', 'V0']
-        if characs.flame_retardancy == 'V1':higher_ret_list = ['V1', 'V0']
-        if characs.flame_retardancy == 'V0':higher_ret_list = ['V0']
-        kwargs['material__characteristics__flame_retardancy__in'] = higher_ret_list
+    # if characs.is_water_resistant:
+    #     kwargs['characteristics__is_water_resistant'] = characs.is_water_resistant
+    # else:
+    #     discarded_criterias['water resistant'] = characs.is_water_resistant
+    # if characs.is_water_resistant:
+    #     kwargs['characteristics__is_chemical_resistant'] = characs.is_chemical_resistant
+    # else:
+    #     discarded_criterias['chemical resistant'] = characs.is_chemical_resistant
+    # if characs.is_flame_retardant:
+    #     kwargs['material__characteristics__is_flame_retardant'] = characs.is_flame_retardant
+    # else:
+    #     discarded_criterias['flame retardant'] = characs.is_flame_retardant
+    # if characs.is_food_grade:
+    #     kwargs['characteristics__is_food_grade'] = characs.is_food_grade
+    # else:
+    #     discarded_criterias['food grade'] = characs.is_food_grade
+    # if characs.is_flame_retardant:
+    #     if characs.flame_retardancy == 'NA':higher_ret_list = ['NA', 'HB', 'V2', 'V1', 'V0']
+    #     if characs.flame_retardancy == 'HB':higher_ret_list = ['HB', 'V2', 'V1', 'V0']
+    #     if characs.flame_retardancy == 'V2':higher_ret_list = ['V2', 'V1', 'V0']
+    #     if characs.flame_retardancy == 'V1':higher_ret_list = ['V1', 'V0']
+    #     if characs.flame_retardancy == 'V0':higher_ret_list = ['V0']
+    #     kwargs['material__characteristics__flame_retardancy__in'] = higher_ret_list
+
+
     # nullable criterias:
     if (characs.min_temp is not None) and (characs.max_temp is not None):
         kwargs['material__characteristics__min_temp__lte'] = characs.min_temp
@@ -645,6 +690,23 @@ def findTechnoMaterial(part, fallback_mode=True):
     if list_couple_techno_material:perfect_match=True
     print "QUERY 1"
     print kwargs
+
+    # if no perfect match remove non discriminant characteristics and query again
+    if not list_couple_techno_material:
+        if not characs.is_visual:
+            discarded_criterias['visual part'] = kwargs.pop('characteristics__is_visual')
+        if not characs.is_water_resistant:
+            discarded_criterias['water resistant'] = kwargs.pop('characteristics__is_water_resistant')
+        if not characs.is_water_resistant:
+            discarded_criterias['chemical resistant'] = kwargs.pop('characteristics__is_chemical_resistant')
+        if not characs.is_flame_retardant:
+            discarded_criterias['flame retardant'] = kwargs.pop('material__characteristics__is_flame_retardant')
+        if not characs.is_food_grade:
+            discarded_criterias['food grade'] = kwargs.pop('characteristics__is_food_grade')
+        list_couple_techno_material = CoupleTechnoMaterial.objects.filter(*args, **kwargs)
+        if list_couple_techno_material:perfect_match=True
+        print "QUERY 2"
+        print kwargs
 
     if fallback_mode:
         # 2 query filter if 1 had no match

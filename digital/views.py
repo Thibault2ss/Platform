@@ -11,19 +11,19 @@ from digital.forms import PartBulkFileForm, PartForm, CharacteristicsForm, PartI
 from users.forms import ProfilePicForm, OrganisationForm, ProfileForm, OrganisationLogoForm
 from jb.forms import FinalCardForm
 from django.core.files.uploadedfile import UploadedFile
-from digital.utils import upload_bulk_parts, getPartsClean, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial, part_type_from_name, part_type_prevision, getApplianceFamilyDistribution
+from digital.utils import upload_bulk_parts, getPartsClean, getBulkUploadSumUp, send_email, getPartSumUp, getfiledata, translate_matrix, findTechnoMaterial, part_type_from_name, part_type_prevision, getApplianceFamilyDistribution
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
 from notifications.signals import notify
 from notifications.models import Notification
-import locale
-import sys
-print(str(locale.getlocale()))
-print(str(locale.getdefaultlocale()))
-print(str(sys.getfilesystemencoding()))
-print(str(sys.getdefaultencoding()))
-print(str(sys.getdefaultencoding()))
+# import locale
+# import sys
+# print(str(locale.getlocale()))
+# print(str(locale.getdefaultlocale()))
+# print(str(sys.getfilesystemencoding()))
+# print(str(sys.getdefaultencoding()))
+# print(str(sys.getdefaultencoding()))
 
 from digital.models import Part, PartImage, PartBulkFile, ClientPartStatus, PartEvent, Characteristics, PartType
 from users.models import CustomUser
@@ -95,8 +95,17 @@ def billing(request):
     return render(request, 'digital/billing.html', context)
 @login_required
 def analysis(request):
+    parts_sumup, parttype_distrib, appliance_fam_distrib, techno_material_distrib = getBulkUploadSumUp(request.user.organisation)
+    # print parts_sumup
+    # print parttype_distrib
+    # print appliance_fam_distrib
+    # print techno_material_distrib
     context = {
         'page':"analysis",
+        'parts_sumup':parts_sumup,
+        'parttype_distrib':json.dumps(list(parttype_distrib)),
+        'appliance_fam_distrib':json.dumps(list(appliance_fam_distrib)),
+        'techno_material_distrib':json.dumps(list(techno_material_distrib)),
     }
     return render(request, 'digital/analysis.html', context)
 @login_required
