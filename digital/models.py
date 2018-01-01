@@ -11,6 +11,22 @@ from storages.backends.s3boto3 import S3Boto3StorageFile
 from datetime import datetime
 # Create your models here.
 
+class FinancialCard(models.Model):
+    part = models.OneToOneField('digital.Part', null=True, blank=True, on_delete=models.CASCADE, related_name='part_financial_card')
+    stock = models.IntegerField(default=0)
+    selling_price = models.FloatField("Selling price (in US$)", null=True, blank=True)
+    selling_volumes = models.IntegerField("Yearly Selling Volumes", null=True, blank=True)
+    
+    def __str__(self):
+        return "Finalncial card %s" % (self.id,)
+
+# save opposite one to one key
+@receiver(post_save, sender = FinancialCard)
+def save_reverse_onetoone_financialcard(sender, created, instance, **kwargs):
+    if instance.part:
+        instance.part.financial_card = instance
+        instance.part.save()
+
 class Characteristics(models.Model):
     COLOR_CHOICES = (("NA", "n/a"),("GREEN", "Green"),("WHITE", "White"),("BLACK", "Black"), ("GREY", "Grey"), ("SILVER", "Silver"))
     FLAME_RETARDANT_CHOICES = (("NA", "n/a"),("HB", "HB"),("V0", "V0"),("V1", "V1"),("V2", "V2"))
@@ -183,6 +199,7 @@ class Part(models.Model):
     name = models.CharField(max_length=200, default = '')
     type = models.ForeignKey('PartType', on_delete=models.SET_NULL, null=True, blank=True)
     characteristics = models.OneToOneField('Characteristics', null=True, blank=True, on_delete = models.SET_NULL, related_name='part_characteristics')
+    financial_card = models.OneToOneField('FinancialCard', null=True, blank=True, on_delete = models.SET_NULL, related_name='part_financial_card')
     organisation = models.ForeignKey('users.Organisation', on_delete=models.SET_NULL, null=True)
     appliance = models.ManyToManyField(Appliance, blank=True)
     material = models.ForeignKey('jb.Material', on_delete=models.SET_NULL, null=True, blank=True)

@@ -7,22 +7,14 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12 col-lg-6">
-                        <div class="card">
+                        <div class="card" id="card_printability_analysis">
                             <div class="header">
-                                <h4 class="title">Printability Prediction</h4>
+                                <h4 class="title">Printability Prediction
+                                    <button class="btn btn-success" data-toggle="modal" data-target="#modalPrintabilityPrediction" style="float:right;margin-top:-8px;">Start</button>
+                                </h4>
                             </div>
                             <div class="content">
                                 <div class="wait-screen"><img src="{%static 'digital/gif/loading.gif'%}"></img></div>
-                                <div class="row">
-                                    <div class="col-md-12 text-center">
-                                        <form id="form_printability_analysis" method="post" enctype="multipart/form-data">
-                                            {%csrf_token%}
-                                            <input style="display:inline-block;max-width:240px" class="form-control" type="file" name="file" accept=".csv">
-                                            <button class="btn" type="submit">Submit</button>
-                                        </form>
-                                    </div>
-                                </div>
-                                <hr>
                                 <div class="row text-center">
                                     <div class="col-md-4">
                                         <p>Total Parts: <b>{{parts_sumup.parts_total}}</b></p>
@@ -50,11 +42,14 @@
                         </div>
                     </div>
                     <div class="col-md-12 col-lg-6">
-                        <div class="card">
+                        <div class="card" id="card_financial_analysis">
                             <div class="header">
-                                <h4 class="title">Financial Analysis</h4>
+                                <h4 class="title">Financial Analysis
+                                    <button class="btn btn-success" data-toggle="modal" data-target="#modalFinancialPrediction" style="float:right;margin-top:-8px;">Start</button>
+                                </h4>
                             </div>
                             <div class="content">
+                                <div class="wait-screen"><img src="{%static 'digital/gif/loading.gif'%}"></img></div>
                                 <div class="row">
                                 </div>
                             </div>
@@ -67,6 +62,8 @@
 
 {%block extrascript%}
 {%include 'digital/utils/modal-notif.html'%}
+{%include 'digital/utils/modal-printability-prediction.html'%}
+{%include 'digital/utils/modal-financial-prediction.html'%}
 <script type="text/javascript">
     var parts_with_type = {{parts_sumup.parts_with_type}};
     var parts_with_final_card = {{parts_sumup.parts_with_final_card}};

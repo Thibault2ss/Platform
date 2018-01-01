@@ -9,7 +9,9 @@ $(document).ready(function(){
 
 
 // LAZY LOAD OF PICTURES
-var myLazyLoad = new LazyLoad();
+var myLazyLoad = new LazyLoad({
+    container: document.getElementById('main-panel')
+});
 
 
 // REMOVE CAROUSEL AUTO SLIDE#####################################

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.contrib import admin
 
 # Register your models here.
-from .models import Characteristics, PartType, ApplianceFamily, Appliance, Part, PartImage, PartBulkFile, Grade, Environment, ClientPartStatus
+from .models import Characteristics, PartType, ApplianceFamily, Appliance, Part, PartImage, PartBulkFile, Grade, Environment, ClientPartStatus, FinancialCard
 from jb.models import FinalCard
 
 class FinalCard_Inline(admin.TabularInline):
@@ -16,6 +16,11 @@ class Characteristics_Inline(admin.TabularInline):
     model = Characteristics
     fields = ['is_visual', 'is_transparent','is_rubbery', 'is_water_resistant', 'is_chemical_resistant','is_flame_retardant','flame_retardancy', 'is_food_grade','min_temp', 'max_temp', 'temp_unit', 'color']
     list_display = ('id','is_visual', 'is_transparent','is_rubbery','is_water_resistant', 'is_chemical_resistant','is_flame_retardant','is_food_grade','flame_retardancy')
+
+class FinancialCard_Inline(admin.TabularInline):
+    model = FinancialCard
+    fields = ['stock', 'selling_price','selling_volumes']
+    list_display = ('id','stock', 'selling_price','selling_volumes')
 
 # Register your models here.
 @admin.register(PartType)
@@ -79,7 +84,7 @@ class Part_Admin(admin.ModelAdmin):
         ('Dimensions & Weight', {'fields': ('material','length', 'width', 'height','dimension_unit', 'weight','weight_unit')}),
         ('Final Card', {'fields': ('final_card',)}),
     )
-    inlines=[PartImage_Inline, PartBulkFile_Inline, Characteristics_Inline, FinalCard_Inline]
+    inlines=[PartImage_Inline, PartBulkFile_Inline, Characteristics_Inline, FinancialCard_Inline, FinalCard_Inline]
 
 
 # @admin.register(PartImage)

@@ -5,10 +5,57 @@ $(document).ready(function(){
         $("#form_printability_analysis").submit(function(event){
             event.preventDefault();
             var $form = $(this);
-            var $wait_screen = $(this).closest(".card").find(".wait-screen");
+            $form.closest(".modal").modal('hide');
+            var $wait_screen = $("#card_printability_analysis").find(".wait-screen");
             var data = new FormData(this);
             $.ajax({
                 url: '/digital/analysis/bulk-part-upload/',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST', // For jQuery < 1.9
+                beforeSend:function(XMLHttpRequest, settings){
+                    $wait_screen.css("display", "flex");
+                },
+                success: function(data){
+                    console.log(data);
+                    if (data.success){
+                        $wait_screen.css("background-color", "rgba(170, 255, 203, 0.7)");
+                        setTimeout(function(){location.reload();}, 1000);
+                    }else{
+                        $wait_screen.css("background-color", "rgba(255, 207, 207,0.7)");
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    console.log("Status: " + textStatus); console.log("Error: " + errorThrown);
+                    $wait_screen.css("background-color", "rgba(255, 207, 207,0.7)");
+                },
+                complete:function(jqXHR, textStatus){
+                    setTimeout(function(){
+                        $wait_screen.css("background-color", "rgba(255, 255, 255,0.7)");
+                        $wait_screen.css("display", "none");
+                    },2000);
+                },
+            });
+        });
+
+    // END UPLOAD CSV PRINTABILITY PREDICTION################################################
+
+
+
+
+
+    // UPLOAD CSV FINANCIAL PREDICTION################################################
+        $("#form_financial_analysis").submit(function(event){
+            event.preventDefault();
+            var $form = $(this);
+            $form.closest(".modal").modal('hide');
+            var $wait_screen = $("#card_financial_analysis").find(".wait-screen");
+            var data = new FormData(this);
+            $.ajax({
+                url: '/digital/analysis/bulk-part-upload-financial/',
                 data: data,
                 cache: false,
                 contentType: false,
