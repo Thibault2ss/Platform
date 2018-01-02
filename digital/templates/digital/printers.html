@@ -1,0 +1,116 @@
+{% extends 'digital/base.html' %}
+{% load static %}
+{% block extrahead %}
+{% endblock extrahead %}
+{%block content%}
+<div class="content" style="position:relative;">
+    <div class="container-fluid">
+        <div class="row" style="margin-bottom:20px;">
+            <div class="col-lg-12">
+
+                    <button class="btn btn-info btn-fill btn-wd">Add Printer</button>
+                    <div class="icon-big text-center" style="float:right;cursor:pointer;font-size:2rem;">
+                        <i class="ti-plus"></i>
+                    </div>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="header" data-toggle="collapse" href="#printer-1" aria-expanded="false" aria-controls="printer" style="cursor:pointer;display:flex;align-items:center;padding:20px 20px 20px 20px;">
+                        <img src="{% static 'digital/img/extruder.png' %}" style="height:40px;display:inline-block;margin-right:20px;"></img>
+                        <h4 class="title printer-name" style="display:inline-block;">Makerbot 1</h4>
+                    </div>
+                    <div class="content" style="padding:0px 15px 0px 15px;">
+                        <div class="collapse" id="printer-1">
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Printer Name</label>
+                                            <input type="text" class="form-control border-input" placeholder="Username" value="Makerbot 1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label for="">Location</label>
+                                            <select class="form-control border-input" name="location">
+                                                <option>Ofice LA 1</option>
+                                                <option>Office SF</option>
+                                                <option>Office Singapore</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="exampleInputEmail1">IP address</label>
+                                            <input type="text" class="form-control border-input" placeholder="Email" value="192.168.0.2">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="">Type</label>
+                                            <select class="form-control border-input" name="type">
+                                                <option>FDM</option>
+                                                <option>SLA</option>
+                                                <option>SLA</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="">Brand</label>
+                                            <select class="form-control border-input" name="brand">
+                                                <option>Ultimaker 2+</option>
+                                                <option>Form 2</option>
+                                                <option>Zortrax M200</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="">GCode Flavor</label>
+                                            <select class="form-control border-input" name="gcode-flavor">
+                                                <option>MakerBot</option>
+                                                <option>RepRap</option>
+                                                <option>Ultimaker2</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Notes</label>
+                                            <textarea rows="5" class="form-control border-input" placeholder="Here can be your description" value="Mike">Oh so, your weak rhyme
+    You doubt I'll bother, reading into it
+    I'll probably won't, left to my own devices
+    But that's the difference in our opinions.</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center" style="margin-bottom:15px">
+                                    <button type="submit" class="btn btn-info btn-fill btn-wd">Update Printer</button>
+                                </div>
+                                <div class="clearfix"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{%endblock content%}
+
+{%block extrascript%}
+<script src="{% static 'digital/js/printers.js' %}"></script>
+{%endblock extrascript%}

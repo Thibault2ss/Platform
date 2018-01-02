@@ -1,0 +1,55 @@
+{% extends "account/base.html" %}
+{% load tz %}
+{% load static %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}SP3D Auth{% endblock %}
+{% block extra_head %}
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/css/iziModal.min.css" />
+<link rel="stylesheet" href="{% static 'account/css/animate.min.css'%}" />
+<link rel="stylesheet" href="{% static 'account/css/login.css'%}" />
+{% endblock %}
+
+
+{% block content %}
+
+<!-- #####################add error variable -->
+<script>var has_signin_error = true;var has_signup_error = true;</script>
+<!-- ######################################### -->
+
+<div class="wrapper">
+    <div class="container">
+
+        <!-- <div class="subcontainer"> -->
+            <h1>Sorry, we couldn't fing the page you're looking for :(</h1>
+            <h2></h2>
+        <div class="subcontainer">
+        </div>
+    </div>
+
+    <div id="social-signup-modal">
+    </div>
+
+    <ul class="bg-bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script>
+<script src="{% static 'account/js/login.js'%}"></script>
+
+{% endblock %}

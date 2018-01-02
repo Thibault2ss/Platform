@@ -1,0 +1,243 @@
+<!-- Navigation Bar -->
+{% load notifications_tags %}
+{% notifications_unread as unread_count %}
+{% block navbar %}
+  <nav class="navbar navbar-fixed-top navbar-default " >
+    {% if part %}
+    <a class="navbar-brand" href="http://localhost:5000/local/{{part.id}}">
+    {% else %}
+    <a class="navbar-brand" href="http://localhost:5000/parts">
+    {%endif%}
+    <img src="/static/jb/icons/sp3d.png"  height="35" alt="">
+    </a>
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"></a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="/parts">Parts</a></li>
+            <li><a href="/jb/prints">Print Log</a></li>
+            <li><a href="/jb/orders/?status=1">Orders</a></li>
+            <li><a href="/jb/network/">Network</a></li>
+            <!-- <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Orders <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="/jb/orders/?status=1,2">Open Orders</a></li>
+                <li><a href="/jb/orders/?status=3">Closed Orders</a></li>
+              </ul>
+            </li> -->
+          </ul>
+
+
+          <ul class="nav navbar-nav navbar-right top-nav">
+              <!-- parts engineering status -->
+                {% if part %}
+                    {% with part.id|stringformat:"s" as part_id %}
+                        {% with "/jb/part-detail/"|add:part_id as part_detail_path %}
+                            {% if request.path == part_detail_path %}
+                            <!-- we checked that we are on a part detail page -->
+                            <li class="dropdown dropdwon-status">
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" >
+                                  {% for status in status_eng_list %}
+                                  {% if status.id == part.status_eng %}
+                                  <span class="label label-{{status.id}}">{{status.name}}</span>
+                                  {% endif %}
+                                  {% endfor %}
+                                  <span class="caret"></span>
+                              </a>
+                              {% if permission %}
+                              <ul class="dropdown-menu" style="text-align:center; width: 50px">
+                                  {% for status in status_eng_list %}
+                                  <li><a class="change-status-eng" id="{{part.id}}-{{status.id}}" href="#" role="button"><span class="label label-{{status.id}}">{{status.name}}</span></a></li>
+                                  {% endfor %}
+                              </ul>
+                              {% endif %}
+                            </li>
+                            <!-- get the username of the one who checked out -->
+                                {% if part.checked_out %}
+                                    {%for user in users%}
+                                        {%if user.id == part.checked_out_by%}
+                                            <li><a>Checked out by {{user.first_name}}</a></li>
+                                        {%endif%}
+                                    {%endfor%}
+                                {%endif%}
+
+                            {%endif%}
+                        {%endwith%}
+                    {%endwith%}
+                {% endif %}
+
+                <!-- order status -->
+                {% if order %}
+                    {% with order.id|stringformat:"s" as order_id %}
+                        {% with "/jb/orders/order-detail/"|add:order_id|add:"/" as order_detail_path %}
+                            {% if request.path == order_detail_path %}
+
+                            <!-- we checked that we are on a order detail page -->
+                            <li class="dropdown dropdwon-status">
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" >
+
+                                  {%for status in status_ord_list%}
+                                  {%if status.id == order.status_ord%}
+                                  <span class="label label-ord-status-{{status.id}}">{{status.name}}</span>
+                                  {%endif%}
+                                  {% endfor %}
+
+
+                                  <span class="caret"></span>
+                              </a>
+
+                              <!-- get the username of the one who closed -->
+                              {% if order.status_ord == 3 %}
+                                  {%for user in users%}
+                                      {%if user.id == order.closed_by%}
+                                          <li><a>Closed by {{user.username}}</a></li>
+                                      {%endif%}
+                                  {%endfor%}
+                              {%endif%}
+
+                              {% if permission == 1 %}
+                              <ul class="dropdown-menu" style="text-align:center; min-width:50px; width: 110px !important">
+                                  {%for status in status_ord_list%}
+                                  {%if status.id != order.status_ord%}
+                                  <li><a class="change-status-order" id="{{order.id}}-{{status.id}}" href="#" role="button"><span class="label label-ord-status-{{status.id}}">{{status.name}}</span></a></li>
+                                  {%endif%}
+                                  {%endfor%}
+                              </ul>
+                              {% endif %}
+
+                            </li>
+
+
+                            {%endif%}
+                        {%endwith%}
+                    {%endwith%}
+                {% endif %}
+
+
+
+
+                <!-- <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope" style="font-size:1.5em"></i> <b class="caret"></b></a>
+                  <ul class="dropdown-menu message-dropdown">
+                      <li class="message-preview">
+                          <a href="#">
+                              <div class="media">
+                                  <span class="pull-left">
+                                      <img class="media-object" src="http://placehold.it/50x50" alt="">
+                                  </span>
+                                  <div class="media-body">
+                                      <h5 class="media-heading"><strong>John Smith</strong>
+                                      </h5>
+                                      <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
+                                      <p>Lorem ipsum dolor sit amet, consectetur...</p>
+                                  </div>
+                              </div>
+                          </a>
+                      </li>
+                      <li class="message-preview">
+                          <a href="#">
+                              <div class="media">
+                                  <span class="pull-left">
+                                      <img class="media-object" src="http://placehold.it/50x50" alt="">
+                                  </span>
+                                  <div class="media-body">
+                                      <h5 class="media-heading"><strong>John Smith</strong>
+                                      </h5>
+                                      <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
+                                      <p>Lorem ipsum dolor sit amet, consectetur...</p>
+                                  </div>
+                              </div>
+                          </a>
+                      </li>
+                      <li class="message-preview">
+                          <a href="#">
+                              <div class="media">
+                                  <span class="pull-left">
+                                      <img class="media-object" src="http://placehold.it/50x50" alt="">
+                                  </span>
+                                  <div class="media-body">
+                                      <h5 class="media-heading"><strong>John Smith</strong>
+                                      </h5>
+                                      <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
+                                      <p>Lorem ipsum dolor sit amet, consectetur...</p>
+                                  </div>
+                              </div>
+                          </a>
+                      </li>
+                      <li class="message-footer">
+                          <a href="#">Read All New Messages</a>
+                      </li>
+                  </ul>
+                </li> -->
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                      <i class="fa fa-bell" style="font-size:1.5em"></i>
+                      {% if unread_count %}
+                      <span class="label label-danger notification-count">{{ unread_count }}</span>
+
+                      {% endif %}
+                      <b class="caret"></b></a>
+
+                  <ul class="dropdown-menu alert-dropdown live_notify_list" style="width:400px">
+                      <li id="template-notif" class="notif-item" style="display:none">
+                          <a href="#" style="position:relative;">
+                              <div class="media">
+                                  <span class="pull-left">
+                                      <i class="fa fa-circle" style="color:#1d9d74"></i>
+                                  </span>
+                                  <div class="media-body">
+                                      <h5 class="media-heading" style="position:relative">
+                                          <strong class="notif-title">Title</strong>
+                                      </h5>
+                                      <p class="small text-muted"><i class="fa fa-clock-o"></i> <span class="notif-date">How long ago</span> | <i class="fa fa-car"></i> Order <span class="notif-order-id"></span></p>
+                                      <p class="notif-description">Small or big description depending on the case...</p>
+
+                                  </div>
+                              </div>
+                              <i class="fa fa-check-circle-o pull-right notif-read-check"></i>
+                          </a>
+                      </li>
+                  </ul>
+                </li>
+
+            {% if user.is_authenticated %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user" style="font-size:1.5em"></i> {{user.username}} <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="/jb/test-notif/"><i class="fa fa-fw fa-user"></i> Profile</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{% url 'account_logout' %}"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+            {%else%}
+                <li><a href="/login">Log in</a></li>
+            {% endif%}
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+  </nav>
+
+
+
+{% endblock navbar %}

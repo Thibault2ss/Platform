@@ -1,0 +1,442 @@
+{% extends 'digital/base.html' %}
+{% load static %}
+{% load digital_filters %}
+{% load users_filters %}
+{% block extrahead %}
+<link href="{% static 'digital/css/slick.css' %}?dev={% random_int %}" rel="stylesheet" />
+<link href="{% static 'digital/css/slick-theme.css' %}?dev={% random_int %}" rel="stylesheet" />
+{% endblock extrahead %}
+{% block navbar_toggle%}
+{% endblock %}
+{% block navbar_right %}
+{% endblock %}
+{%block content%}
+<div id="partsCarousel" class="carousel slide" data-interval="false" style="height:100%;">
+    <div class="carousel-inner" style="height:100%;overflow-y:scroll;">
+        <div class="item active" id="partsCarousel-slide1">
+            <div class="content" style="position:relative;">
+                <div class="container-fluid">
+                    <div class="row" style="text-align:center;margin-bottom:20px;">
+                        <div class="col-lg-12">
+                            <button class="btn btn-status-filter btn-info {%if id_status == ''%}btn-fill{%endif%}" value=""><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_total}}</span> All</button>
+                            <button class="btn btn-status-filter btn-success {%if id_status == '1'%}btn-fill{%endif%}" value="1"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_new}}</span> New</button>
+                            <button class="btn btn-status-filter btn-warning {%if id_status == '2'%}btn-fill{%endif%}" value="2"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_pending_indus}}</span> Pending</button>
+                            <button class="btn btn-status-filter btn-danger {%if id_status == '3'%}btn-fill{%endif%}" value="3"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_disqualified}}</span> Disqualified</button>
+                            <button class="btn btn-status-filter btn-success {%if id_status == '4'%}btn-fill{%endif%}" value="4"><span style="font-weight:bold;margin-right:10px;">{{parts_sumup.parts_industrialized}}</span> Digitalized</button>
+                            <!-- <button class="btn btn-default" data-toggle="modal" data-target="#modalNewPart">+</button> -->
+                        </div>
+                    </div>
+                    {% if user.email == 'thibault.de-saint-sernin@sp3d.co'%}
+                    <div class="row" style="text-align:center;margin-bottom:20px;">
+                        <div class="col-lg-12">
+                            <form id="form_solution_matrix" action="/digital/upload-solution-matrix/" method="post" enctype="multipart/form-data">
+                                {%csrf_token%}
+                                <p><input type="file" name="file"></p>
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                    {%endif%}
+                    <div class="row" style="margin-bottom:10px;display:flex;justify-content:flex-end;align-items:center;">
+                        <!-- <div class="col-lg-12" style='text-align:right;'> -->
+                            <form class="form-part-search" action="" method="get" enctype="multipart/form-data">
+                                {%csrf_token%}
+                                <div class="input-group" style='max-width:250px;margin:0;'>
+                                    <input type='text' class='form-control part-search' name="search" placeholder="Search Part" value='{{search_string}}'>
+                                        <span class="btn-reset-search ti-close" {%if not search_string%}style='display:none'{%endif%}></span>
+
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-primary btn-search-part" type="submit">
+                                            <span class="ti-search"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            {% if user|has_perm:'add_part' or user.is_admin %}
+                            <div class="button-add-part" data-toggle="modal" data-target="#modalNewPart"><i class="ti-plus"></i></div>
+                            {% endif %}
+                        <!-- </div> -->
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card">
+                                <div class="content">
+                                    <ul class="list-unstyled">
+                                        {% for part in parts %}
+                                        <li class="part-row" href="#partsCarousel" style="padding:5px 0px;"
+                                            data-part="{{part|model_to_dict}}"
+                                            data-part-id="{{part.id}}"
+                                            data-part-images="{{part.images|url_list}}"
+                                            data-part-bulk-files="{{part.bulk_files|dict_list}}"
+                                            data-slide="next">
+                                            <div class="row">
+                                                <div class="col-xs-9" style="display:flex;align-items:center;">
+                                                    <div class="part-thumb-image" style="margin-right:20px;height:70px;width:70px;">
+                                                        <img data-src="{%if part.images %}{{part.images.0.thumbnail.url}}{%else%}{% static 'digital/img/cubes.png' %}{%endif%}" alt="" class="img-circle img-no-padding img-responsive" style="height:100%;width:100%">
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-muted"><small>name: </small></span>{{part.name}}<br>
+                                                        <span class="text-muted"><small>ref: </small></span>{{part.reference}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-xs-3 text-right">
+                                                    <btn class="btn btn-sm btn-info btn-icon"><i class="fa ti-printer"></i></btn>
+                                                    <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {%endfor%}
+                                        {%if not parts%}<li>No part to Display in this category</li>{%endif%}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 text-center" style="display:flex;justify-content:center;align-items:center;">
+                            <ul class="pagination">
+                                {% for page in pagination_range%}
+                                <li><a class="pagination-link {% if page|add:'0' == page_number|add:'0' %}active{%endif%}" data-page="{{page}}" href="">{{page}}</a></li>
+                                {%endfor%}
+                            </ul>
+
+                            <select id="number-per-page" class='form-control' style="cursor:pointer;margin-left:20px;display:inline-block;max-width:60px;height:33px;padding:7px 7px;">
+                                <option value='20' selected>20</option>
+                                <option value='50' {%if nb_per_page == '50' %}selected{%endif%}>50</option>
+                                <option value='100' {%if nb_per_page == '100' %}selected{%endif%}>100</option>
+                            </select>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="item" id="partsCarousel-slide2">
+            <div class="button-back" href="#partsCarousel" data-slide="prev" style='display:none'>
+                <i class="ti-arrow-left"></i>
+            </div>
+            <div class="content" id="part-detail-panel" data-part-id="" style="position:relative;">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-xs-12" id="canvas-container">
+                                    <div id="stl-canvas" class="stl-canvas" style="display:flex;align-items:center;margin-bottom:15px;position:relative;">
+                                        <button id="stl-demo" class="btn btn-warning btn-fill btn-wd" style="margin-left:23%;font-weight:900;">LOAD STL</button>
+                                        <img id="stl-loading" style='display:none;width:100%;' src="{%static 'digital/gif/loading.gif'%}">
+                                        <div class="progressBar" style="position:absolute;bottom:20px;">
+                                            <div class="progressBar-inner"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12">
+                                    <form enctype="multipart/form-data" action="" method="post" id="image_form" class="dropzone">
+                                        {%csrf_token%}
+                                        {%comment%}{{PartImageForm.as_p}}{%endcomment%}
+                                        <input type="hidden" class="id_part" name="part" required="">
+                                        <div class="progressBar">
+                                            <div class="progressBar-inner"></div>
+                                        </div>
+                                        <!-- <input type="submit" value="Save" name="_save"> -->
+                                        <div class="dz-default dz-message"><span></span></div>
+                                        <div id="imageCarousel" style="margin-bottom:15px;">
+                                            <!-- <img src="https://news.nationalgeographic.com/content/dam/news/photos/000/755/75552.ngsversion.1422285553360.adapt.1900.1.jpg" alt="Los Angeles">
+                                            <img src="https://static.pexels.com/photos/54632/cat-animal-eyes-grey-54632.jpeg" alt="Chicago">
+                                            <img src="https://www.rd.com/wp-content/uploads/sites/2/2016/02/06-train-cat-shake-hands.jpg" alt="New York"> -->
+                                        </div>
+                                    </form>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-12 text-center" style="margin-bottom:20px;">
+                                    <button class="btn btn-default btn-fill btn-wd disabled" style="font-weight:900;opacity:0;cursor:auto;">empty</button>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        {%if user.is_admin%}
+                                        <i class="ti-pencil allow-inputs" style="color:#000;font-size:2.2rem;cursor:pointer;"></i>
+                                        {%endif%}
+                                        <i class="card-top-icon ti-settings"></i>
+                                        <div class="content">
+                                            <form enctype="multipart/form-data" action="" method="post" id="update_part_form">
+                                                {%csrf_token%}
+                                                <div class="row" style="margin-bottom:10px;">
+                                                    <div class="col-xs-12">
+                                                        <span class="label status" data-status-id="1" style="font-size:100%;float:right;"><span></span></span>
+                                                        <span class="text-muted" style="font-size:70%;">Reference</span>
+                                                        {{formPart.reference|attr:"id:id_reference_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        <span class="text-muted" style="font-size:70%;">Name</span>
+                                                        {{formPart.name|attr:"id:id_name_1"|add_class:"form-control"|attr:"disabled"}}
+                                                    </div>
+                                                </div>
+                                                <div class="row subcategory" data-toggle="collapse" href="#details-attached">
+                                                    <h5><i class="ti-arrow-right"></i>Details</h5>
+                                                </div>
+                                                <div id="details-attached" class="row collapse" aria-expanded="false" style="margin-bottom:10px;">
+                                                    <div class="col-xs-12 col-sm-12">
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;">Type</span>
+                                                            {{formPart.type|attr:"id:id_type_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;">Fit Appliances</span>
+                                                            {{formPart.appliance|attr:"id:id_appliance_1"|add_class:"form-control"|attr:"disabled"|attr:"value:1,2"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;">Material</span>
+                                                            {{formPart.material|attr:"id:id_material_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;display:block;">L x W x H:</span>
+                                                            {{formPart.length|attr:"id:id_length_1"|add_class:"form-control dim-input"|attr:"placeholder:l"|attr:"disabled"}}x
+                                                            {{formPart.width|attr:"id:id_width_1"|add_class:"form-control dim-input"|attr:"placeholder:w"|attr:"disabled"}}x
+                                                            {{formPart.height|attr:"id:id_height_1"|add_class:"form-control dim-input"|attr:"placeholder:h"|attr:"disabled"}}
+                                                            {{formPart.dimension_unit|attr:"id:id_dimension_unit_1"|add_class:"form-control dim-input unit-input"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;display:block;">Weight</span>
+                                                            {{formPart.weight|attr:"id:id_weight_1"|add_class:"form-control dim-input"|attr:"placeholder:weight"|attr:"disabled"}}
+                                                            {{formPart.weight_unit|attr:"id:id_weight_unit_1"|add_class:"form-control dim-input unit-input"|attr:"disabled"}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row subcategory" data-toggle="collapse" href="#characteristics-attached">
+                                                    <h5><i class="ti-arrow-right"></i>Characteristics</h5>
+                                                </div>
+                                                <div id ="characteristics-attached" class="row collapse" aria-expanded="false">
+                                                    <div class="col-xs-12 col-sm-12">
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;">Color</span>
+                                                            {{ formCharacteristics.color|attr:"id:id_color_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_visual|attr:"id:id_is_visual_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_visual_1">Visual Part</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_transparent|attr:"id:id_is_transparent_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_transparent_1">Transparent</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_water_resistant|attr:"id:id_is_water_resistant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_water_resistant_1">Water Resistant</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_chemical_resistant|attr:"id:id_is_chemical_resistant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_chemical_resistant_1">Chemical Resistant</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_flame_retardant|attr:"id:id_is_flame_retardant_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_flame_retardant_1">Flame Retardant</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_food_grade|attr:"id:id_is_food_grade_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_food_grade_1">Food Grade</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{formCharacteristics.is_rubbery|attr:"id:id_is_rubbery_1"|add_class:"styled-checkbox"|attr:"disabled"}}
+                                                            <label for="id_is_rubbery_1">Rubbery Like</label>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;display:block;">Operating Temperature Range</span>
+                                                            {{formCharacteristics.min_temp|attr:"id:id_min_temp_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                            {{formCharacteristics.max_temp|attr:"id:id_max_temp_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                            {{formCharacteristics.temp_unit|attr:"id:id_temp_unit_1"|add_class:"form-control temp-dim-input"|attr:"disabled"}}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="text-muted" style="font-size:70%;display:block;">Flame Retardancy Level</span>
+                                                            {{formCharacteristics.flame_retardancy|attr:"id:id_flame_retardancy_1"|add_class:"form-control"|attr:"disabled"}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {%if user.is_admin%}
+                                                <div class="row">
+                                                    <div class="col-sm-12 text-center">
+                                                         <input type="submit" class="btn btn-success" disabled value="Save" name="_save">
+                                                    </div>
+                                                </div>
+                                                {%endif%}
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12" id="final-card">
+                                    <div class="card">
+                                        {%if user.is_admin%}
+                                        <i class="ti-pencil allow-inputs" style="color:#000;font-size:2.2rem;cursor:pointer;"></i>
+                                        {%endif%}
+                                        <i class="card-top-icon ti-check" style="color:#35b26d"></i>
+                                        <div class="content">
+                                            <form enctype="multipart/form-data" action="" method="post" id="final_card_form">
+                                                {%csrf_token%}
+                                                <div class="row" style="margin-bottom:10px;">
+                                                    <div class="col-sm-6">
+                                                        {%comment%}{{formFinalCard.as_p}}{%endcomment%}
+
+                                                        <span class="text-muted" style="font-size:70%;display:block;">Unit Cost</span>
+                                                        {{formFinalCard.unit_price|add_class:"form-control price-input-1"|attr:"disabled"}}
+                                                        {{formFinalCard.currency|add_class:"form-control price-input-2"|attr:"disabled"}}
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <span class="text-muted" style="font-size:70%;display:block;">Lead Time</span>
+                                                        {{formFinalCard.lead_time|add_class:"form-control lead-time-input"|attr:"disabled"}} <span style="color:#000;font-weight:900;">days</span>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <span class="text-muted" style="font-size:70%;">Process - Material</span>
+                                                        {{formFinalCard.techno_material|add_class:"form-control"|attr:"disabled"}}
+                                                    </div>
+                                                    {%if user.is_admin%}
+                                                    <div class="col-sm-12 text-center">
+                                                         <input type="submit" class="btn btn-success" disabled value="Save" name="_save">
+                                                    </div>
+                                                    {%endif%}
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-12 text-center" style="margin-bottom:20px;">
+                                    {% if user.is_admin %}
+                                        <div class="dropdown dropdwon-status">
+                                            <button class="btn btn-default dropdown-toggle btn-fill btn-wd status"  data-status-id="" data-toggle="dropdown" style="font-weight:900;"><span class="caret" style="margin-left:15px;"></span></button>
+                                              <ul class="dropdown-menu" style="text-align:center; width: 50px">
+                                                  {% for status in clientPartStatuses %}
+                                                  <li><a class="button-change-status" data-status-id="{{status.id}}" href="#" role="button"></a></li>
+                                                  {% endfor %}
+                                              </ul>
+                                        </div>
+                                    {% else %}
+                                        <button id="button-action-1" class="btn btn-default btn-fill btn-wd disabled" data-status-id="" style="font-weight:900;"></button>
+                                    {% endif %}
+                                        <button id="button-get-best-solution" class="btn btn-success btn-fill btn-wd " style="font-weight:900;">Get Solution</button>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <i class="card-top-icon ti-calendar"></i>
+                                        <div id="timeline-card" class="content">
+                                            <div class="row equal-height">
+                                                <div class="col-xs-4 timeline-date">
+                                                    <span class="text-muted" style="font-size:80%;">12 Dec 2017</span>
+                                                </div>
+                                                <div class="col-xs-1 timeline-circles no-padding">
+                                                    <div class="border-right"><i class="fa fa-circle-o"></i></div>
+                                                    <div class="border-right"></div>
+                                                </div>
+                                                <div class="col-xs-8 timeline-description">
+                                                    <div><span class="label label-default" style="font-size:100%">Created</span></div>
+                                                    <div>fefewfwef</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12">
+                                    <form enctype="multipart/form-data" action="" method="post" id="partbulkfile_form" class="dropzone">
+                                        {%csrf_token%}
+                                        {%comment%}{{formPartBulkFile}}{%endcomment%}
+                                        <input type="hidden" class="id_part" name="part" required="">
+                                        <input type="hidden" name="type" required="" value="BULK">
+                                        <!-- <input type="submit" value="Save" name="_save"> -->
+                                        <div class="dz-default dz-message"><span></span></div>
+                                        <div class="card">
+                                            <i class="card-top-icon ti-link"></i>
+                                            <i class="remove-icon allow-remove ti-close"></i>
+                                            <i class="card-plus-icon ti-plus"></i>
+
+                                            <div class="content" style="overflow:hidden;">
+                                                <div class="row text-center">
+                                                    <h5>Bulk Files</h5>
+                                                    <div class="progressBar">
+                                                        <div class="progressBar-inner"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="file-list" class="row">
+                                                    <!-- <div class='file-row' data-id=""><a href='' target='_blank'>
+                                                        <i class='ti-download'></i></href>test bulk file</a>
+                                                        <div class="remove-file remove-icon"><i class="ti-close"></i></div>
+                                                    </div> -->
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-xs-12">
+                                    <form enctype="multipart/form-data" action="" method="post" id="part3dfile_form" class="dropzone">
+                                        {%csrf_token%}
+                                        {%comment%}{{formPartBulkFile}}{%endcomment%}
+                                        <input type="hidden" name="part" class="id_part" required="">
+                                        <input type="hidden" name="type" required="" value="3D">
+                                        <!-- <input type="submit" value="Save" name="_save"> -->
+                                        <div class="dz-default dz-message"><span></span></div>
+                                        <div class="card">
+                                            <i class="card-top-icon ti-link"></i>
+                                            <i class="remove-icon allow-remove ti-close"></i>
+                                            <i class="card-plus-icon ti-plus"></i>
+
+                                            <div class="content" style="overflow:hidden;">
+                                                <div class="row text-center">
+                                                    <h5>3D Files</h5>
+                                                    <div class="progressBar">
+                                                        <div class="progressBar-inner"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="file-list" class="row">
+                                                    <!-- <div class='file-row' data-id=""><a href='' target='_blank'>
+                                                        <i class='ti-download'></i></href>test bulk file</a>
+                                                        <btn class="btn btn-sm btn-warning btn-icon btn-3d-view" data-stl=""><i class="fa fa-cube"></i></btn>
+                                                        <div class="remove-file remove-icon"><i class="ti-close"></i></div>
+                                                    </div> -->
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{%endblock content%}
+
+{%block extrascript%}
+{% if user.is_admin %}
+<button class="btn btn-warning dropdown-toggle btn-fill btn-wd recap-mail-button" style="font-weight:900;position:fixed;bottom:20px;right:100px;z-index:10;">Recap Mail</button>
+{% endif %}
+{%include 'digital/utils/modal-new-part.html'%}
+<script src="{% static 'digital/js/three/three.min.js' %}"></script>
+<script src="{% static 'digital/js/three/loaders/STLLoader1.js' %}"></script>
+<script src="{% static 'digital/js/three/Detector.js' %}"></script>
+<script src="{% static 'digital/js/three/libs/stats.min.js' %}"></script>
+<script src="{% static 'digital/js/three/libs/TrackballControls.js' %}"></script>
+<script src="{% static 'digital/js/slick.min.js' %}?dev={% random_int %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-lazyload/8.5.2/lazyload.min.js"></script>
+<!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;sensor=false"></script> -->
+
+<script>
+    $(document).ready(function(){
+        $('#partsCarousel').carousel({
+            interval: false
+        });
+        $('#imageCarousel').carousel({
+            interval: false
+        });
+    });
+</script>
+<script src="{% static 'digital/js/parts.js' %}?dev={% random_int %}"></script>
+{%endblock extrascript%}

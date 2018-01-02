@@ -1,0 +1,133 @@
+{% extends "account/base.html" %}
+{% load tz %}
+{% load static %}
+{% load i18n %}
+{% load users_filters %}
+{% load account socialaccount %}
+
+{% block head_title %}SP3D Auth{% endblock %}
+{% block extra_head %}
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/css/iziModal.min.css" />
+<link rel="stylesheet" href="{% static 'account/css/animate.min.css'%}" />
+<link rel="stylesheet" href="{% static 'account/css/login.css'%}?dev={% random_int %}" />
+<link rel="stylesheet" href="{% static 'account/css/checkbox.css'%}" />
+{% endblock %}
+
+
+{% block content %}
+
+<!-- #####################add error variable -->
+<!-- initialize variables -->
+<script>var has_signin_error = false;var has_signup_error = false;</script>
+<!-- errors on signin -->
+{%if form.non_field_errors%}<script>var has_signup_error = true</script>{%endif%}
+{% for field in form %}
+    {%if field.errors%}
+    <script>var has_signup_error = true</script>
+    {%endif%}
+{%endfor%}
+
+<!-- ######################################### -->
+
+<div class="wrapper">
+    <div class="container">
+        <ul id="particles-container" class="bg-bubbles">
+            <!-- <li></li> -->
+        </ul>
+        <!-- <div class="subcontainer"> -->
+            <h1>Welcome to <span class="fw-300"></span></h1>
+            <div id="logoDrawingAnimation" style="max-width:500px;margin-left:auto;margin-right:auto;">
+                {% include 'account/svg/spareparts3d-1.svg' %}
+            </div>
+            <h2>
+                <span class="toggle-form" data-toggle-form="login_form">Login</span>
+                <span class="toggle-form" data-toggle-form="signup_form">Sign Up</span>
+            </h2>
+        <!-- </div> -->
+
+        {%comment%}
+        {% get_providers as socialaccount_providers %}
+
+            {% if socialaccount_providers %}
+            <div class="socialaccount_ballot">
+                {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+            </div>
+
+
+            {% include "socialaccount/snippets/login_extra.html" %}
+
+            {% else %}
+            <p>{% blocktrans %}If you have not created an account yet, then please
+            <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
+            {% endif %}
+            {%endcomment%}
+
+
+<!-- FORM LOGIN -->
+    <div class="subcontainer">
+        <form class="login" id="login_form" method="POST" action="{% url 'account_login' %}">
+
+
+        </form>
+
+<!-- FORM SIGNUP -->
+        <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+            <a href="{% provider_login_url 'linkedin_oauth2' process='login' %}" class="social-signin-button">
+                <i class="fa fa-linkedin"></i>Signup with LinkedIn
+            </a>
+            <div>or</div>
+            <div class="usertype-button" data-usertype = "CLIENT">Client</div>
+            <div class="usertype-button" data-usertype = "HUB">Hub</div>
+            <div class="signup-step2">
+                <div class="errors">
+                    {%for error in form.non_field_errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                    {%for error in form.first_name.errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                    {%for error in form.last_name.errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                    {%for error in form.email.errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                    {%for error in form.password.errors %}
+                    <div class="error">{{error}}</div>
+                    {%endfor%}
+                </div>
+                {{form.first_name}}
+                {{form.last_name}}
+                {{form.email}}
+                {{form.password1}}
+                {{form.password2}}
+                <input type="radio" style="display:none" name="usertype" value="CLIENT" required="" id="id_usertype_0">
+                <input type="radio" style="display:none" name="usertype" value="HUB" required="" id="id_usertype_1">
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                <button type="submit">{% trans "Sign Up" %}</button>
+            </div>
+        </form>
+
+
+    </div>
+    </div>
+
+    <div id="social-signup-modal">
+    </div>
+
+
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script> -->
+<script src="{% static 'account/js/particles.min.js'%}"></script>
+<script src="{% static 'account/js/anime.min.js'%}"></script>
+<script src="{% static 'account/js/login.js'%}?dev={% random_int %}"></script>
+
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends 'hub/base.html' %}
+{% load static %}
+{% block extrahead %}
+{% endblock extrahead %}
+{%block content%}
+<div id="ordersCarousel" class="carousel slide" data-ride="carousel" style="height: calc(100% - 74px);">
+    <div class="carousel-inner" style="height:100%">
+        <div class="item active">
+            <div class="content" style="position:relative;">
+                <div class="container-fluid">
+                    <div class="row" style="text-align:center;margin-bottom:20px;">
+                        <div class="col-lg-12">
+                            <button class="btn btn-order-class btn-danger btn-fill" data-toggle="tab" href="#panel-orders-new"><span style="font-weight:bold;margin-right:10px;">3</span> New</button>
+                            <button class="btn btn-order-class btn-warning" data-toggle="tab" href="#panel-orders-pending"><span style="font-weight:bold;margin-right:10px;">10</span> Pending</button>
+                            <button class="btn btn-order-class btn-info" data-toggle="tab" href="#panel-orders-produced"><span style="font-weight:bold;margin-right:10px;">2</span> Produced</button>
+                            <button class="btn btn-order-class btn-success " data-toggle="tab" href="#panel-orders-shipped"><span style="font-weight:bold;margin-right:10px;">5</span> Shipped</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="tab-content">
+            			        <div class="tab-pane active" id="panel-orders-new">
+                                    <div class="card">
+                                        <div class="content">
+                                            <ul class="list-unstyled team-members">
+                                                <li class="part-row" href="#ordersCarousel" data-slide="next">
+                                                    <div class="row">
+                                                        <div class="col-xs-4" style="display:flex;align-items:center;">
+                                                            <div class="avatar" style="margin-right:20px;">
+                                                                <img src="{% static 'hub/img/stl/stl1.jpg' %}" alt="Circle Image" class="img-circle img-no-padding img-responsive">
+                                                            </div>
+                                                            <strong>1</strong>&nbsp;Cam Part
+                                                        </div>
+                                                        <div class="col-xs-5">
+                                                            Proteo
+                                                            <br>
+                                                            <span class="text-muted"><small>Offline</small></span>
+                                                        </div>
+
+                                                        <div class="col-xs-3 text-right">
+                                                            <btn class="btn btn-sm btn-info btn-icon"><i class="fa ti-printer"></i></btn>
+                                                            <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="part-row" href="#ordersCarousel" data-slide="next">
+                                                    <div class="row">
+                                                        <div class="col-xs-4" style="display:flex;align-items:center;">
+                                                            <div class="avatar" style="margin-right:20px;">
+                                                                <img src="{% static 'hub/img/stl/stl2.jpg' %}" alt="Circle Image" class="img-circle img-no-padding img-responsive">
+                                                            </div>
+                                                            <strong>4</strong>&nbsp; Motor bearing
+                                                        </div>
+                                                        <div class="col-xs-5">
+                                                            SP3D
+                                                            <br>
+                                                            <span class="text-success"><small>Available</small></span>
+                                                        </div>
+
+                                                        <div class="col-xs-3 text-right">
+                                                            <btn class="btn btn-sm btn-info btn-icon"><i class="fa ti-printer"></i></btn>
+                                                            <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="part-row" href="#ordersCarousel" data-slide="next">
+                                                    <div class="row">
+                                                        <div class="col-xs-4" style="display:flex;align-items:center;">
+                                                            <div class="avatar" style="margin-right:20px;">
+                                                                <img src="{% static 'hub/img/stl/stl3.jpg' %}" alt="Circle Image" class="img-circle img-no-padding img-responsive">
+                                                            </div>
+                                                            <strong>10</strong>&nbsp; Hinge
+                                                        </div>
+                                                        <div class="col-xs-5">
+                                                            Flume Mfg.
+                                                            <br>
+                                                            <span class="text-danger"><small>Busy</small></span>
+                                                        </div>
+
+                                                        <div class="col-xs-3 text-right">
+                                                            <btn class="btn btn-sm btn-info btn-icon"><i class="fa ti-printer"></i></btn>
+                                                            <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="panel-orders-pending">
+                                    <div class="card">
+                                        <div class="content">
+                                            test2
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="panel-orders-produced">
+                                    <div class="card">
+                                        <div class="content">
+                                            test3
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="panel-orders-shipped">
+                                    <div class="card">
+                                        <div class="content">
+                                            test4
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="button-back" href="#ordersCarousel" data-slide="prev">
+                <i class="ti-arrow-left"></i>
+            </div>
+            <div class="content" style="position:relative;">
+                <div class="container-fluid">
+                    <div class="row" style="margin-bottom:20px;">
+                        <div class="col-xs-4 text-center">
+                            <span class="label label-default" style="font-size:100%">Received</span><div><small>10 Sept 2017</small></div>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <span class="label label-info" style="font-size:100%">Produced</span><div><small>13 Sept 2017</small></div>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <span class="text-muted" style="font-size:100%">Shipped</span><div><small></small></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" id="canvas-container">
+                            <div id="stl-canvas" class="stl-canvas"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <i class="fa fa-info-circle" style="font-size:3.5rem;position:absolute;top:-17px;left:-12px"></i>
+                                <div class="content">
+                                    <div class="row text-center" style="margin-bottom:20px;">
+                                        <div class="col-sm-4 col-xs-12">
+                                            <span class="text-muted">Id:</span> TDG-1254
+                                        </div>
+                                        <div class="col-sm-4 col-xs-12">
+                                            <span class="text-muted">Client:</span> Sodexo
+                                        </div>
+                                        <div class="col-sm-4 col-xs-12 text-danger">
+                                            <span class="text-muted">Type:</span> Express
+                                        </div>
+                                    </div>
+                                    <div class="row text-center" style="margin-bottom:20px;">
+                                        <div class="col-sm-6 col-xs-12" style="">
+                                            <div class="text-muted">Shipping: </div>
+                                            <div style="margin-left:15px;">
+                                                91C Lavender Street<br>Singapore, 984523<br>SINGAPORE
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-xs-12">
+                                                <btn class="btn btn-sm btn-info btn-icon"><i class="fa ti-printer"></i></btn>
+                                                <btn class="btn btn-sm btn-success btn-icon"><i class="fa fa-envelope"></i></btn>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <i class="fa fa-truck" style="font-size:3.5rem;position:absolute;top:-17px;right:8px;color#3c3c3c;"></i>
+                                <div class="content">
+                                    <div class="row" style="padding:15px 15px 15px 15px;margin:0;border-bottom:solid #F1EAE0 1px;font-size:1.5rem;">
+                                        <div class="col-sm-4 col-xs-12">
+                                            <span class="text-muted" style="float:left;font-size:70%;">Carrier</span><br>
+                                            <div style="margin-left:15px;">Fedex</div>
+                                        </div>
+                                        <div class="col-sm-8 col-xs-12">
+                                            <span class="text-muted" style="float:left;font-size:70%;">Tracking Number</span><br>
+                                            <div style="margin-left:15px;">SPKDS-5511654665444sswsws647</div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="padding:15px 15px 15px 15px;margin:0;font-size:1.5rem;">
+                                        <div class="col-sm-8 col-xs-12" style="">
+                                            <div class="text-muted" style="float:left;font-size:70%;">Estimated delivery time </div><br>
+                                            <div style="margin-left:15px;">Friday, November 14 2017<br>14:18:00</div>
+                                        </div>
+                                        <div class="col-sm-4 col-xs-12">
+                                            <span class="text-muted" style="float:left;font-size:70%;">Cost</span><br>
+                                            <div style="margin-left:15px;">2.5$</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{%endblock content%}
+
+{%block extrascript%}
+<script src="{% static 'hub/js/three/three.min.js' %}"></script>
+<script src="{% static 'hub/js/three/loaders/STLLoader1.js' %}"></script>
+<script src="{% static 'hub/js/three/Detector.js' %}"></script>
+<script src="{% static 'hub/js/three/libs/stats.min.js' %}"></script>
+<script src="{% static 'hub/js/three/libs/TrackballControls.js' %}"></script>
+<script src="{% static 'hub/js/orders.js' %}"></script>
+{%endblock extrascript%}

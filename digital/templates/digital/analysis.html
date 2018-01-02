@@ -1,0 +1,76 @@
+{%extends 'digital/base.html'%}
+{% load static %}
+{% load digital_filters %}
+{%block content%}
+
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12 col-lg-6">
+                        <div class="card" id="card_printability_analysis">
+                            <div class="header">
+                                <h4 class="title">Printability Prediction
+                                    <button class="btn btn-success" data-toggle="modal" data-target="#modalPrintabilityPrediction" style="float:right;margin-top:-8px;">Start</button>
+                                </h4>
+                            </div>
+                            <div class="content">
+                                <div class="wait-screen"><img src="{%static 'digital/gif/loading.gif'%}"></img></div>
+                                <div class="row text-center">
+                                    <div class="col-md-4">
+                                        <p>Total Parts: <b>{{parts_sumup.parts_total}}</b></p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p>Identified: <b>{{parts_sumup.parts_with_type}}</b></p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p>Parts Printable: <b>{{parts_sumup.parts_with_final_card}}</b></p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <h5 class="text-center">Types:</h5>
+                                    <div id="partTypeBarChart" class="ct-chart"></div>
+                                </div>
+                                <div class="row">
+                                    <h5 class="text-center">Appliances:</h5>
+                                    <div id="ApplianceFamilyPieChart" class="ct-chart"></div>
+                                </div>
+                                <div class="row">
+                                    <h5 class="text-center">Solutions:</h5>
+                                    <div id="TechnoMaterialDistrib" class="ct-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-6">
+                        <div class="card" id="card_financial_analysis">
+                            <div class="header">
+                                <h4 class="title">Financial Analysis
+                                    <button class="btn btn-success" data-toggle="modal" data-target="#modalFinancialPrediction" style="float:right;margin-top:-8px;">Start</button>
+                                </h4>
+                            </div>
+                            <div class="content">
+                                <div class="wait-screen"><img src="{%static 'digital/gif/loading.gif'%}"></img></div>
+                                <div class="row">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{%endblock content%}
+
+{%block extrascript%}
+{%include 'digital/utils/modal-notif.html'%}
+{%include 'digital/utils/modal-printability-prediction.html'%}
+{%include 'digital/utils/modal-financial-prediction.html'%}
+<script type="text/javascript">
+    var parts_with_type = {{parts_sumup.parts_with_type}};
+    var parts_with_final_card = {{parts_sumup.parts_with_final_card}};
+    var total_parts = {{parts_sumup.parts_total}};
+    var appliance_fam_distrib={{appliance_fam_distrib|safe}};
+    var parttype_distrib={{parttype_distrib|safe}};
+    var techno_material_distrib={{techno_material_distrib|safe}};
+</script>
+<script src="{% static 'digital/js/analysis.js' %}?dev={% random_int %}"></script>
+{%endblock extrascript%}
